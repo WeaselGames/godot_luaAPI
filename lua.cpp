@@ -2,6 +2,7 @@
 #include "lua.h"
 
 Lua::Lua(){
+  // Createing lua state instance
   state = luaL_newstate();
   luaL_openlibs(state);
 
@@ -9,19 +10,22 @@ Lua::Lua(){
 }
 
 Lua::~Lua(){
+  // Destroying lua state instance
   lua_close(state);
 }
 
+// Bind C++ functions to GDScript
 void Lua::_bind_methods(){
-  ClassDB::bind_method(D_METHOD("run", "code"), &Lua::run);
-  ClassDB::bind_method("execute", &Lua::execute);
-  ClassDB::bind_method("load",&Lua::load);
-  ClassDB::bind_method("pushVariant",&Lua::pushGlobalVariant);
+  ClassDB::bind_method(D_METHOD("doFile", "file"), &Lua::doFile);
+  ClassDB::bind_method(D_METHOD("doString", "code"), &Lua::doString);
+  ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
   ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
 }
 
+//TODO: Add support for function aurguments
 void Lua::exposeFunction(Object *instance, String function, String name){
   
+  // Createing lamda function so we can capture the object instanse and call the GDScript method. Or in theory other scripting languages?
   auto f = [](lua_State* state) -> int{
     const Object *instance2 = (const Object*) lua_topointer(state, lua_upvalueindex(1));
     const char *function2 = (const char*) lua_tostring(state, lua_upvalueindex(2));
@@ -31,84 +35,49 @@ void Lua::exposeFunction(Object *instance, String function, String name){
     return 0;
   };
 
+  // Pushing the object instnace to the stack to be retrived when the function is called
   lua_pushlightuserdata(state, instance);
+
+  // You will see this style of casting a lot as it is the best way I was able to find to conver from Godot's String class to a const cahr *
   std::wstring temp = function.c_str();
   const char *func = std::string ( temp.begin(), temp.end() ).c_str();
 
   std::wstring ntemp = name.c_str();
   const char *fname = std::string ( ntemp.begin(), ntemp.end() ).c_str();
 
+  // Pushing the script function name string to the stack to br retrived when called
   lua_pushstring(state, func);
+  // Pushing the actual lambda function to the stack
   lua_pushcclosure(state, f, 2);
+  // Setting the global name for the function in lua
   lua_setglobal(state, fname);
   
 }
 
-bool Lua::load(String fileName) {
-    _File file;
+// doFile() will just load the file's text and call doString()
+Variant Lua::doFile(String fileName){
+  _File file;
 
-    file.open(fileName,_File::ModeFlags::READ);
+  file.open(fileName,_File::ModeFlags::READ);
+  String code = file.get_as_text();
+  file.close();
 
-    String text = file.get_as_text();
-    Vector<String> lines = text.split("\n");
-    std::map<String,String> allFunctions;
-    String inFunction = "";
-    String functionBegin = "function";
-    String functionEnd = "end";
-
-    for (int i = 0; i < lines.size(); i++) {
-        String line = lines[i];
-        if (inFunction == "") {
-            if (line.begins_with(functionBegin)) {
-
-                int endPos = line.find("(");
-                String name = line.substr(functionBegin.length(),endPos-functionBegin.length()).strip_edges();               
-                allFunctions.insert(std::pair<String,String>(name,line+"\n"));
-                inFunction = name;
-            }
-        } else {
-            allFunctions[inFunction]+=(line+"\n");
-            if (line == functionEnd) {
-                inFunction = "";
-            }
-        }
-    }
-
-    for(std::pair<String,String> function : allFunctions) {
-      std::wstring luaCode = function.second.c_str();
-
-        if (luaL_loadstring(state, std::string( luaCode.begin(), luaCode.end() ).c_str()) || (lua_pcall(state, 0, 0 , 0))) {
-            print_line("Error: script not loaded (" + function.first + ")");
-            state = 0;
-            return false;
-        }
-    }
-    file.close();
-    return true;
+  return doString(code);
 }
 
-Variant Lua::execute(String name, Array array) {
-    std::wstring luaCode =  name.c_str();
-    lua_getglobal(state, std::string( luaCode.begin(), luaCode.end() ).c_str());
-    for (int i = 0; i < array.size(); i++) {
-        Variant var = array[i];
-        pushVariant(var);
-    }
+// Execute a lua script string and return the error string if any and null if not
+Variant Lua::doString(String code){
+  std::wstring luaCode = code.c_str();
 
-    lua_pcall(state, array.size(), LUA_MULTRET, 0);
-    int numReturns = lua_gettop(state);
-
-    if (numReturns) {
-        Array results;
-        for(int i = 0; i < numReturns; i++) {
-            results.append(popVariant());
-        }
-        return results;
-    } else {
-        return Variant();
-    }
+  int result = luaL_dostring(state, std::string( luaCode.begin(), luaCode.end() ).c_str());
+  if(result != LUA_OK){
+    return lua_tostring(state, -1);
+  }else{
+    return Variant();
+  }
 }
 
+// Push a GD Variant to the lua stack and return false if type is not supported.
 bool Lua::pushVariant(Variant var) {
     std::wstring str;
     switch (var.get_type())
@@ -204,6 +173,7 @@ bool Lua::pushVariant(Variant var) {
     return true;
 }
 
+// Call pushVarient() and set it to a global name
 bool Lua::pushGlobalVariant(Variant var, String name) {
     if (pushVariant(var)) {
        std::wstring str = name.c_str();
@@ -213,12 +183,14 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
     return false;
 }
 
+// Pop the value at the top of the stack and return getVarient()
 Variant Lua::popVariant() {
     Variant result = getVariant();
     lua_pop(state, 1);
     return result;
 }
 
+// get a value at the given index and return as a variant
 Variant Lua::getVariant(int index) {
     Variant result;
     int type = lua_type(state, index);
@@ -263,25 +235,6 @@ Variant Lua::getVariant(int index) {
     return result;
 }
 
-void Lua::run(String code) {
-
-  int result;
-
-  std::wstring luaCode = code.c_str();
-  result = luaL_loadstring(state, std::string( luaCode.begin(), luaCode.end() ).c_str());
-
-  if ( result != LUA_OK ) {
-    print_line("Rip1!");
-    return;
-  }
-
-  result = lua_pcall(state, 0, LUA_MULTRET, 0);
-
-  if ( result != LUA_OK ) {
-    print_line("Rip!2");
-    return;
-  }
-}
 
 // Lua functions
 
