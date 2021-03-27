@@ -18,7 +18,7 @@ public:
   Lua();
   ~Lua();
   
-  void exposeFunction(Object *p_instance, String function, String name);
+  void exposeFunction(Object *instance, String function, String name);
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);

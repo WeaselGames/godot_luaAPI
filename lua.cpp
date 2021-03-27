@@ -22,21 +22,36 @@ void Lua::_bind_methods(){
   ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
 }
 
-//TODO: Add support for function aurguments
+// expose a GDScript function to lua
 void Lua::exposeFunction(Object *instance, String function, String name){
   
   // Createing lamda function so we can capture the object instanse and call the GDScript method. Or in theory other scripting languages?
-  auto f = [](lua_State* state) -> int{
-    const Object *instance2 = (const Object*) lua_topointer(state, lua_upvalueindex(1));
-    const char *function2 = (const char*) lua_tostring(state, lua_upvalueindex(2));
-    ScriptInstance *scriptInstance = instance2->get_script_instance();
-    scriptInstance->call(function2);
+  auto f = [](lua_State* L) -> int{
+    const Object *instance2 = (const Object*) lua_topointer(L, lua_upvalueindex(1));
+    class Lua *obj = (class Lua*) lua_topointer(L, lua_upvalueindex(2));
+    const char *function2 = lua_tostring(L, lua_upvalueindex(3));
 
+    Variant arg1 = obj->getVariant(1);
+    Variant arg2 = obj->getVariant(2);
+    Variant arg3 = obj->getVariant(3);
+    Variant arg4 = obj->getVariant(4);
+    Variant arg5 = obj->getVariant(5);
+
+    ScriptInstance *scriptInstance = instance2->get_script_instance();
+    Variant returned = scriptInstance->call(function2, arg1, arg2, arg3, arg4, arg5);
+
+    if (returned.get_type() != Variant::Type::NIL){
+      obj->pushVariant(returned);
+      return 1;
+    }
     return 0;
   };
 
   // Pushing the object instnace to the stack to be retrived when the function is called
   lua_pushlightuserdata(state, instance);
+
+  // Pushing the referance of the class
+  lua_pushlightuserdata(state, this);
 
   // You will see this style of casting a lot as it is the best way I was able to find to conver from Godot's String class to a const cahr *
   std::wstring temp = function.c_str();
@@ -47,8 +62,9 @@ void Lua::exposeFunction(Object *instance, String function, String name){
 
   // Pushing the script function name string to the stack to br retrived when called
   lua_pushstring(state, func);
+
   // Pushing the actual lambda function to the stack
-  lua_pushcclosure(state, f, 2);
+  lua_pushcclosure(state, f, 3);
   // Setting the global name for the function in lua
   lua_setglobal(state, fname);
   
