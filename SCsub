@@ -1,0 +1,8 @@
+Import('env')
+
+env_lua = env.Clone()
+env_lua.add_source_files(env.modules_sources, "*.cpp") #this will add all the cpp files
+env_lua.Append(CPPPATH=["#modules/lua/luasrc/src"])
+
+env.Append(LIBPATH=['#modules/lua/luasrc/src'])
+env.Append(LIBS=['liblua'])

@@ -1,0 +1,7 @@
+*.o
+*.a
+*.so
+*.lib
+*.dll
+
+__pycache__/
