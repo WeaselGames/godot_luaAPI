@@ -20,7 +20,7 @@ Features
 - Run lua directly from a string or a text file.
 - Push any Variant as a global.
 - Expose GDScript functions to lua with a return value and up to 5 arguments.
-- By default the lua print function is set to print to the GDEditor console. This can be changed by exposing your own custom function.
+- By default the lua print function is set to print to the GDEditor console. This can be changed by exposing your own print function as it will overwrite the existing one.
 
 Compiling
 ------------
