@@ -99,4 +99,5 @@ func _ready():
 Contributing And Feature Requests
 ---------------
 All contributions are welcome, if you would like to contribute submit a PR.
-Additionally if you do not have the time and or knowledge you can create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=)
+<br />
+Additionally if you do not have the time and or the knowledge you can create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=)
