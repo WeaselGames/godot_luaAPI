@@ -1,6 +1,8 @@
 
 #include "lua.h"
 
+#include <thread>
+
 Lua::Lua(){
   // Createing lua state instance
   state = luaL_newstate();
@@ -16,8 +18,8 @@ Lua::~Lua(){
 
 // Bind C++ functions to GDScript
 void Lua::_bind_methods(){
-  ClassDB::bind_method(D_METHOD("doFile", "file"), &Lua::doFile);
-  ClassDB::bind_method(D_METHOD("doString", "code"), &Lua::doString);
+  ClassDB::bind_method(D_METHOD("doFile", "NodeObject", "File", "Callback=String()"), &Lua::doFile);
+  ClassDB::bind_method(D_METHOD("doString", "NodeObject", "Code", "Callback=String()"), &Lua::doString);
   ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
   ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
 }
@@ -71,26 +73,32 @@ void Lua::exposeFunction(Object *instance, String function, String name){
 }
 
 // doFile() will just load the file's text and call doString()
-Variant Lua::doFile(String fileName){
+void Lua::doFile(Object *instance, String fileName, String callback){
   _File file;
 
   file.open(fileName,_File::ModeFlags::READ);
   String code = file.get_as_text();
   file.close();
 
-  return doString(code);
+  doString(instance, code, callback);
 }
 
-// Execute a lua script string and return the error string if any and null if not
-Variant Lua::doString(String code){
-  std::wstring luaCode = code.c_str();
+// Run lua string in a thread
+void Lua::doString(Object *instance, String code, String callback){
+    std::thread (runLua, instance, code, callback, state).detach();
+}
 
-  int result = luaL_dostring(state, std::string( luaCode.begin(), luaCode.end() ).c_str());
-  if(result != LUA_OK){
-    return lua_tostring(state, -1);
-  }else{
-    return Variant();
-  }
+// Execute a lua script string and call the passed callBack function with the error as the aurgument if an error occures
+void Lua::runLua(Object *instance, String code, String callback, lua_State *L){
+    std::wstring luaCode = code.c_str();
+
+    int result = luaL_dostring(L, std::string( luaCode.begin(), luaCode.end() ).c_str());
+    if(result != LUA_OK){
+        if (callback != String()){
+            ScriptInstance *scriptInstance = instance->get_script_instance();
+            scriptInstance->call(callback, lua_tostring(L, -1));
+        }
+    }
 }
 
 // Push a GD Variant to the lua stack and return false if type is not supported.

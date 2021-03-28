@@ -15,6 +15,8 @@ This is a Godot engine module that adds lua support via GDScript. Importantly th
 
 While the original purpose of this module was for my own use I understand more may find it useful. If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
 
+Currently every time lua executes code it will run in its own detached thread. This means in order to capture errors from lua you must provide a call back function. The reason for this is so a lua thread can execute holding calls without freezing the entire game.
+
 Features
 --------------------------------
 - Run lua directly from a string or a text file.
@@ -42,7 +44,8 @@ extends Node2D
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doString("for i=1,10,1 do print('Hello lua!') end")
+	# The third option is to pass a error call back function. passing String() like this will disregard it
+	lua.doString(self, "for i=1,10,1 do print('Hello lua!') end", String())
 ```
 <br />
 
@@ -53,7 +56,7 @@ extends Node2D
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doFile("user://luaFile.lua")
+	lua.doFile(self, "user://luaFile.lua", String())
 ```
 <br />
 
@@ -66,7 +69,7 @@ var test = "Hello lua!"
 
 func _ready():
 	lua.pushVariant(test, "str")
-	lua.doString("print(str)")
+	lua.doString(self, "print(str)", String())
 ```
 <br />
 
@@ -81,7 +84,7 @@ func luaAdd(a, b):
 
 func _ready():
 	lua.exposeFunction(self, "luaAdd", "add")
-	lua.doString("print(add(2, 4))")
+	lua.doString(self, "print(add(2, 4))", String())
 ```
 <br />
 
@@ -91,10 +94,11 @@ extends Node2D
 
 onready var lua = Lua.new()
 
+func luaCallBack(err):
+	print(err)
+
 func _ready():
-	var err = lua.doString("print(This wont work)")
-	if err != null:
-		print(err)
+	lua.doString(self, "print(This wont work)", "luaCallBack")
 ```
 Contributing And Feature Requests
 ---------------

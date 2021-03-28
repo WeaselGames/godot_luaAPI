@@ -19,12 +19,13 @@ public:
   ~Lua();
   
   void exposeFunction(Object *instance, String function, String name);
+  static void runLua(Object *instance, String code, String callback, lua_State *L);
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);
 
-  Variant doFile(String fileName);
-  Variant doString(String code);
+  void doFile(Object *instance, String fileName, String callback = String());
+  void doString(Object *instance, String code, String callback = String());
   Variant popVariant();
   Variant getVariant(int index = -1);
     
