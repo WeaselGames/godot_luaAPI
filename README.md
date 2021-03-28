@@ -24,7 +24,7 @@ Features
 
 Compiling
 ------------
-  To use this module you will need to compile the Godot engine from source. Please note this module was written for ***Godot Version 3.2.3***
+  To use this module you will need to compile the Godot engine from source. Please note this module was written for **Godot Version 3.2.3**
 - Start by cloning the Godot 3.2.3 [source](https://github.com/godotengine/godot/tree/3.2.3-stable) with this command `git clone https://github.com/godotengine/godot -b 3.2.3-stable`
 
  - Next clone this repository into the module folder inside the Godot source code.
