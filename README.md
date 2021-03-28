@@ -29,7 +29,7 @@ Compiling
 
  - Next clone this repository into the module folder inside the Godot source code.
 
-- Then, go into the lua/luasrc folder with your terminal and Run `make [linux|windows|macos] test`. 
+- Then, go into the lua/luasrc folder with your terminal and Run `make [linux|macosx|mingw] test`. 
   - Please note as of now the build has only been tested on Linux. If you are on windows you will need to download the [mingw](https://sourceforge.net/projects/mingw/) tools.
 - After you have finished building the lua source code you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
