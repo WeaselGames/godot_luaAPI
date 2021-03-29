@@ -19,13 +19,15 @@ public:
   ~Lua();
   
   void exposeFunction(Object *instance, String function, String name);
+  void doFile(Object *instance, String fileName, String callback = String());
+  void doString(Object *instance, String code, String callback = String());
+  void setThreaded(bool thread);
+
   static void runLua(Object *instance, String code, String callback, lua_State *L);
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);
-
-  void doFile(Object *instance, String fileName, String callback = String());
-  void doString(Object *instance, String code, String callback = String());
+  
   Variant popVariant();
   Variant getVariant(int index = -1);
     
@@ -35,6 +37,7 @@ public:
 
 private:
   lua_State *state;
+  bool threaded;
 };
 
 #endif

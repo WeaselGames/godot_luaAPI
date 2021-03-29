@@ -15,7 +15,13 @@ This is a Godot engine module that adds lua support via GDScript. Importantly th
 
 While the original purpose of this module was for my own use I understand more may find it useful. If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
 
-Currently every time lua executes code it will run in its own detached thread. This means in order to capture errors from lua you must provide a call back function. The reason for this is so a lua thread can execute holding calls without freezing the entire game.
+By default lua executes on its own detached thread. If thread saftey is required you can either use mutex locks or disable threading.
+
+**Default lua libs loaded**
+- base
+- math
+- string
+- table
 
 Features
 --------------------------------
@@ -99,6 +105,19 @@ func luaCallBack(err):
 
 func _ready():
 	lua.doString(self, "print(This wont work)", "luaCallBack")
+```
+<br />
+
+**Disable threading:**
+```
+extends Node2D
+
+onready var lua = Lua.new()
+
+
+func _ready():
+	lua.setThreaded(false)
+	lua.doString(self, "while true do print("The entire game will freeze") end", String())
 ```
 Contributing And Feature Requests
 ---------------

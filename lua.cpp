@@ -6,7 +6,11 @@
 Lua::Lua(){
   // Createing lua state instance
   state = luaL_newstate();
-  luaL_openlibs(state);
+  threaded = true;
+  luaopen_base(state);
+  luaopen_math(state);
+  luaopen_string(state);
+  luaopen_table(state);
 
   lua_register(state, "print", luaPrint);
 }
@@ -18,10 +22,11 @@ Lua::~Lua(){
 
 // Bind C++ functions to GDScript
 void Lua::_bind_methods(){
-  ClassDB::bind_method(D_METHOD("doFile", "NodeObject", "File", "Callback=String()"), &Lua::doFile);
-  ClassDB::bind_method(D_METHOD("doString", "NodeObject", "Code", "Callback=String()"), &Lua::doString);
-  ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
-  ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
+    ClassDB::bind_method(D_METHOD("setThreaded", "bool"),&Lua::setThreaded);
+    ClassDB::bind_method(D_METHOD("doFile", "NodeObject", "File", "Callback=String()"), &Lua::doFile);
+    ClassDB::bind_method(D_METHOD("doString", "NodeObject", "Code", "Callback=String()"), &Lua::doString);
+    ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
 }
 
 // expose a GDScript function to lua
@@ -72,6 +77,10 @@ void Lua::exposeFunction(Object *instance, String function, String name){
   
 }
 
+void Lua::setThreaded(bool thread){
+    threaded = thread;
+}
+
 // doFile() will just load the file's text and call doString()
 void Lua::doFile(Object *instance, String fileName, String callback){
   _File file;
@@ -85,7 +94,11 @@ void Lua::doFile(Object *instance, String fileName, String callback){
 
 // Run lua string in a thread
 void Lua::doString(Object *instance, String code, String callback){
-    std::thread (runLua, instance, code, callback, state).detach();
+    if(threaded){
+        std::thread (runLua, instance, code, callback, state).detach();
+    }else{
+        runLua(instance, code, callback, state);
+    }
 }
 
 // Execute a lua script string and call the passed callBack function with the error as the aurgument if an error occures
