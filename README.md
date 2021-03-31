@@ -4,8 +4,9 @@
 ===============
 **Table of contents:**
   * [About](#about)
-  * [Compiling](#compiling)
   * [Features](#features)
+  * [TODO](#todo)
+  * [Compiling](#compiling)
   * [Examples](#examples)
   * [Contributing And Feature Requests](#contributing-and-feature-requests)
 
@@ -30,16 +31,19 @@ Features
 - Expose GDScript functions to lua with a return value and up to 5 arguments.
 - By default the lua print function is set to print to the GDEditor console. This can be changed by exposing your own print function as it will overwrite the existing one.
 
+TODO
+-----
+- Add support to kill individual lua threads.
+- Add option to load specific lua librarys.
+
 Compiling
 ------------
   To use this module you will need to compile the Godot engine from source. Please note this module was written for **Godot Version 3.2.3**
 - Start by cloning the Godot 3.2.3 [source](https://github.com/godotengine/godot/tree/3.2.3-stable) with this command `git clone https://github.com/godotengine/godot -b 3.2.3-stable`
 
- - Next clone this repository into the module folder inside the Godot source code.
+- Next clone this repository into the module folder inside the Godot source code.
 
-- Then, go into the lua/luasrc folder with your terminal and Run `make [linux|macosx|mingw] test`. 
-  - Please note as of now the build has only been tested on Linux.
-- After you have finished building the lua source code you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
+- Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
 Examples
 ------------
@@ -118,6 +122,19 @@ onready var lua = Lua.new()
 func _ready():
 	lua.setThreaded(false)
 	lua.doString(self, "while true do print("The entire game will freeze") end", String())
+```
+<br />
+
+**Kill all lua threads:**
+```
+extends Node2D
+
+onready var lua = Lua.new()
+
+
+func _ready():
+	lua.doString(self, "while true do pass end", String())
+	lua.killAll()
 ```
 Contributing And Feature Requests
 ---------------

@@ -1,27 +1,27 @@
 
 #include "lua.h"
 
-#include <thread>
-
 Lua::Lua(){
-  // Createing lua state instance
-  state = luaL_newstate();
-  threaded = true;
-  luaopen_base(state);
-  luaopen_math(state);
-  luaopen_string(state);
-  luaopen_table(state);
-
-  lua_register(state, "print", luaPrint);
+    // Createing lua state instance
+    state = luaL_newstate();
+    threaded = true;
+    luaopen_base(state);
+    luaopen_math(state);
+    luaopen_string(state);
+    luaopen_table(state);
+    lua_sethook(state, &LineHook, LUA_MASKLINE, 0);
+    lua_register(state, "print", luaPrint);
 }
 
 Lua::~Lua(){
-  // Destroying lua state instance
-  lua_close(state);
+    // Destroying lua state instance
+    lua_close(state);
 }
 
+static bool shouldKill = false;
 // Bind C++ functions to GDScript
 void Lua::_bind_methods(){
+    ClassDB::bind_method(D_METHOD("killAll"),&Lua::killAll);
     ClassDB::bind_method(D_METHOD("setThreaded", "bool"),&Lua::setThreaded);
     ClassDB::bind_method(D_METHOD("doFile", "NodeObject", "File", "Callback=String()"), &Lua::doFile);
     ClassDB::bind_method(D_METHOD("doString", "NodeObject", "Code", "Callback=String()"), &Lua::doString);
@@ -92,10 +92,24 @@ void Lua::doFile(Object *instance, String fileName, String callback){
   doString(instance, code, callback);
 }
 
-// Run lua string in a thread
+// kill all active threads
+void Lua::killAll(){
+    //TODO: Create a method to kill individual threads
+    shouldKill = true;
+}
+
+// Called every line of lua that is ran
+void Lua::LineHook(lua_State *L, lua_Debug *ar){
+    if(shouldKill){
+        luaL_error(L, "Execution terminated");
+        shouldKill = false;
+    }
+}
+
+// Run lua string in a thread if threading is enabled
 void Lua::doString(Object *instance, String code, String callback){
     if(threaded){
-        std::thread (runLua, instance, code, callback, state).detach();
+        std::thread(runLua, instance, code, callback, state).detach();
     }else{
         runLua(instance, code, callback, state);
     }

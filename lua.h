@@ -7,6 +7,7 @@
 #include <lua.hpp>
 #include <map>
 #include <string>
+#include <thread>
 
 class Lua : public Reference {
   GDCLASS(Lua, Reference);
@@ -22,6 +23,7 @@ public:
   void doFile(Object *instance, String fileName, String callback = String());
   void doString(Object *instance, String code, String callback = String());
   void setThreaded(bool thread);
+  void killAll();
 
   static void runLua(Object *instance, String code, String callback, lua_State *L);
 
@@ -33,6 +35,7 @@ public:
     
 
   // Lua functions
+  static void LineHook(lua_State *L, lua_Debug *ar);
   static int luaPrint(lua_State* state);
 
 private:

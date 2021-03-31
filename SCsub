@@ -2,7 +2,12 @@ Import('env')
 
 env_lua = env.Clone()
 env_lua.add_source_files(env.modules_sources, "*.cpp") #this will add all the cpp files
-env_lua.Append(CPPPATH=["#modules/lua/luasrc/src"])
+env_lua.Append(CPPPATH=["#modules/lua/luasrc/include"])
 
-env.Append(LIBPATH=['#modules/lua/luasrc/src'])
+if env['platform'] == "x11":
+    env.Append(LIBPATH=['#modules/lua/luasrc/libs/linux'])
+elif env['platform'] == "windows":
+    env.Append(LIBPATH=['#modules/lua/luasrc/libs/windows'])
+elif env['platform'] == "osx":
+    env.Append(LIBPATH=['#modules/lua/luasrc/libs/macos'])
 env.Append(LIBS=['liblua'])
