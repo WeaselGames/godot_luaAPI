@@ -18,6 +18,8 @@ While the original purpose of this module was for my own use I understand more m
 
 By default lua executes on its own detached thread. If thread saftey is required you can either use mutex locks or disable threading.
 
+To use you can either [Compile from source](#compiling) or if you are on windows or linux you can download one of the pre built binarays from th [releas](https://github.com/Trey2k/lua/releases) page.
+
 **Default lua libs loaded**
 - base
 - math
@@ -38,7 +40,7 @@ TODO
 
 Compiling
 ------------
-  To use this module you will need to compile the Godot engine from source. Please note this module was written for **Godot Version 3.2.3**
+  Please note this module was written for **Godot Version 3.2.3**
 - Start by cloning the Godot 3.2.3 [source](https://github.com/godotengine/godot/tree/3.2.3-stable) with this command `git clone https://github.com/godotengine/godot -b 3.2.3-stable`
 
 - Next clone this repository into the module folder inside the Godot source code.
