@@ -27,6 +27,7 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("doString", "NodeObject", "Code", "Callback=String()"), &Lua::doString);
     ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
+    ClassDB::bind_method(D_METHOD("callFunction", "NodeObject", "LuaFunctionName", "Args"), &Lua::callFunction);
 }
 
 // expose a GDScript function to lua
@@ -75,6 +76,23 @@ void Lua::exposeFunction(Object *instance, String function, String name){
   // Setting the global name for the function in lua
   lua_setglobal(state, fname);
   
+}
+
+// call a Lua function from GDScript
+void Lua::callFunction(Object *instance, String name, Array args) {
+    std::wstring temp = name.c_str();
+    std::string fname(temp.begin(), temp.end());
+
+    // put global function name on stack
+    lua_getglobal(state, fname.c_str());
+
+    // push args
+    for (int i = 0; i < args.size(); ++i) {
+        pushVariant(args[i]);
+    }
+
+    // call function (for now, lua functions cannot return values to gdscript)
+    lua_call(state, args.size(), 0);
 }
 
 void Lua::setThreaded(bool thread){
