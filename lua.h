@@ -20,6 +20,7 @@ public:
   ~Lua();
   
   void exposeFunction(Object *instance, String function, String name);
+  void callFunction(Object *instance, String name, Array args);
   void doFile(Object *instance, String fileName, String callback = String());
   void doString(Object *instance, String code, String callback = String());
   void setThreaded(bool thread);

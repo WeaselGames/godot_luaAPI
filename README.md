@@ -31,6 +31,7 @@ Features
 - Run lua directly from a string or a text file.
 - Push any Variant as a global.
 - Expose GDScript functions to lua with a return value and up to 5 arguments.
+- Call lua functions from GDScript.
 - By default the lua print function is set to print to the GDEditor console. This can be changed by exposing your own print function as it will overwrite the existing one.
 
 TODO
@@ -97,6 +98,18 @@ func luaAdd(a, b):
 func _ready():
 	lua.exposeFunction(self, "luaAdd", "add")
 	lua.doString(self, "print(add(2, 4))", String())
+```
+<br />
+
+**Calling a lua function from GDScript:**
+```
+extends Node2D
+
+onready var lua = Lua.new()
+
+func _ready():
+	lua.doFile(self, "user://luaFile.lua", String())
+	lua.callFunction(self, "set_colours", ["red", "blue"])
 ```
 <br />
 
