@@ -60,20 +60,20 @@ void Lua::exposeFunction(Object *instance, String function, String name){
   // Pushing the referance of the class
   lua_pushlightuserdata(state, this);
 
-  // You will see this style of casting a lot as it is the best way I was able to find to conver from Godot's String class to a const cahr *
+  // Convert lua and gdscript function names from wstring to string for lua's usage
   std::wstring temp = function.c_str();
-  const char *func = std::string ( temp.begin(), temp.end() ).c_str();
+  std::string func(temp.begin(), temp.end());
 
-  std::wstring ntemp = name.c_str();
-  const char *fname = std::string ( ntemp.begin(), ntemp.end() ).c_str();
+  temp = name.c_str();
+  std::string fname(temp.begin(), temp.end());
 
   // Pushing the script function name string to the stack to br retrived when called
-  lua_pushstring(state, func);
+  lua_pushstring(state, func.c_str());
 
   // Pushing the actual lambda function to the stack
   lua_pushcclosure(state, f, 3);
   // Setting the global name for the function in lua
-  lua_setglobal(state, fname);
+  lua_setglobal(state, fname.c_str());
   
 }
 
