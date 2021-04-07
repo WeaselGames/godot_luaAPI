@@ -27,10 +27,17 @@ Lua::Lua(){
 	// Createing lua state instance
 	state = luaL_newstate();
 	threaded = true;
-	luaopen_base(state);
-	luaopen_math(state);
-	luaopen_string(state);
-	luaopen_table(state);
+	
+	// loading base libs
+    	luaL_requiref(state, "", luaopen_base, 1);
+   	lua_pop(state, 1);
+    	luaL_requiref(state, LUA_TABLIBNAME, luaopen_table, 1);
+    	lua_pop(state, 1);
+    	luaL_requiref(state, LUA_STRLIBNAME, luaopen_string, 1);
+    	lua_pop(state, 1);
+    	luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
+    	lua_pop(state, 1);
+	
 	lua_sethook(state, &LineHook, LUA_MASKLINE, 0);
 	lua_register(state, "print", luaPrint);
 
