@@ -2,4 +2,5 @@ def can_build(env, platform):
         return True
 
 def configure(env):
-    pass
+        if env.msvc:
+                env.Append(LINKFLAGS='liblua.lib')

@@ -10,4 +10,6 @@ elif env['platform'] == "windows":
     env.Append(LIBPATH=['#modules/lua/luasrc/libs/windows'])
 elif env['platform'] == "osx":
     env.Append(LIBPATH=['#modules/lua/luasrc/libs/macos'])
-env.Append(LIBS=['liblua'])
+
+if not env.msvc:
+    env.Append(LIBS=['liblua'])
