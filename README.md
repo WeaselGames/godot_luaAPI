@@ -33,11 +33,21 @@ Features
 - Expose GDScript functions to lua with a return value and up to 5 arguments.
 - Call lua functions from GDScript.
 - By default the lua print function is set to print to the GDEditor console. This can be changed by exposing your own print function as it will overwrite the existing one.
+- Basic types are passed as userdata (currently: Vector2, Vector3 and Color) with a useful metatable. This means you can do things like:  
+```lua
+local v1 = Vector2(1,2)
+local v2 = Vector2(100,100)
+print( v2.x ) -- "100"
+print( v1+v2 ) -- "(101,102)"
+change_my_sprite_color( Color(1,0,0,1) ) -- if "change_my_sprite_color" was exposed, in GDScript it will receive a Color variant.
+```
 
 TODO
 -----
 - Add support to kill individual lua threads.
 - Add option to load specific lua librarys.
+- Methods for userdata types, i.e. `.length()` for Vector2
+- Object type passed as userdata? This probably should be optional. User should be careful with reference being freed
 
 Compiling
 ------------
