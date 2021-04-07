@@ -5,7 +5,6 @@
 #include "core/bind/core_bind.h"
 
 #include <lua.hpp>
-#include <map>
 #include <string>
 #include <thread>
 
@@ -42,6 +41,13 @@ public:
 private:
   lua_State *state;
   bool threaded;
+
+private:
+  void exposeConstructors( lua_State*ls );
+  void createVector2Metatable( lua_State* ls );
+  void createVector3Metatable( lua_State* ls );
+  void createColorMetatable( lua_State* ls );
+
 };
 
 #endif
