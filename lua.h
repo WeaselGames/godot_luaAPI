@@ -18,8 +18,9 @@ public:
   Lua();
   ~Lua();
   
-  void exposeFunction(Object *instance, String function, String name);
-  void callFunction(Object *instance, String name, Array args);
+  void exposeFunction(Object *instance, String function, String name );
+  void callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
+  bool luaFunctionExists(String function_name);
   void doFile(Object *instance, String fileName, String callback = String());
   void doString(Object *instance, String code, String callback = String());
   void setThreaded(bool thread);

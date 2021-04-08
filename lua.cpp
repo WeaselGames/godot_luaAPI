@@ -66,11 +66,12 @@ static bool shouldKill = false;
 void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("killAll"),&Lua::killAll);
     ClassDB::bind_method(D_METHOD("setThreaded", "bool"),&Lua::setThreaded);
-    ClassDB::bind_method(D_METHOD("doFile", "NodeObject", "File", "Callback=String()"), &Lua::doFile);
-    ClassDB::bind_method(D_METHOD("doString", "NodeObject", "Code", "Callback=String()"), &Lua::doString);
+    ClassDB::bind_method(D_METHOD("doFile", "CallbackCaller", "File", "Callback"), &Lua::doFile);
+    ClassDB::bind_method(D_METHOD("doString", "CallbackCaller", "Code", "Callback"), &Lua::doString);
     ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
-    ClassDB::bind_method(D_METHOD("callFunction", "NodeObject", "LuaFunctionName", "Args"), &Lua::callFunction);
+    ClassDB::bind_method(D_METHOD("callFunction","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("luaFunctionExists","LuaFunctionName"), &Lua::luaFunctionExists);
 }
 
 // expose a GDScript function to lua
@@ -121,20 +122,57 @@ void Lua::exposeFunction(Object *instance, String function, String name){
 }
 
 // call a Lua function from GDScript
-void Lua::callFunction(Object *instance, String name, Array args) {
-    std::wstring temp = name.c_str();
-    std::string fname(temp.begin(), temp.end());
-
+void Lua::callFunction( String function_name, Array args , bool protected_call , Object* callback_caller , String callback ) {
+    
     // put global function name on stack
-    lua_getglobal(state, fname.c_str());
+    lua_getglobal(state, function_name.ascii().get_data() );
 
     // push args
     for (int i = 0; i < args.size(); ++i) {
         pushVariant(args[i]);
     }
 
-    // call function (for now, lua functions cannot return values to gdscript)
-    lua_call(state, args.size(), 0);
+    if( protected_call ){
+        int ret = lua_pcall(state,args.size(), 0 , 0 );
+        if( ret != LUA_OK ){
+
+            // Default error handling:
+            if( callback_caller == nullptr || callback == String() ){
+                String msg = vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name);
+                switch( ret ){
+                    case LUA_ERRRUN:
+                        msg += "[LUA_ERRNUN - runtime error ] ";
+                        break;
+                    case LUA_ERRMEM:
+                        msg += "[LUA_ERRMEM - memory allocation error ] ";
+                        break;
+                    case LUA_ERRERR:
+                        msg += "[LUA_ERRERR - error while handling another error ] ";
+                        break;
+                    case LUA_ERRGCMM:
+                        msg += "[LUA_ERRGCM - error while running garbage collection ] ";
+                        break;
+                    default: break;
+                }
+                msg += lua_tostring(state,-1);
+                print_error( msg );
+            } 
+            
+            // Custom error handling:
+            else {
+                ScriptInstance *scriptInstance = callback_caller->get_script_instance();
+                scriptInstance->call(callback, String(lua_tostring(state,-1)) );
+            }
+        }
+    } else {
+        lua_call(state,args.size(), 0 );
+    }
+}
+
+bool Lua::luaFunctionExists(String function_name){
+    int type = lua_getglobal( state , function_name.ascii().get_data() );
+    lua_pop(state,1);
+    return type == LUA_TFUNCTION;
 }
 
 void Lua::setThreaded(bool thread){
@@ -301,10 +339,12 @@ Variant Lua::getVariant(int index) {
         case LUA_TTABLE:
         {
             Dictionary dict;
-            for (lua_pushnil(state); lua_next(state, index-1); lua_pop(state, 1)) {
+            lua_pushnil(state);  /* first key */
+            while (lua_next( state , (index<0)?(index-1):(index)  ) != 0) {
                 Variant key = getVariant(-2);
                 Variant value = getVariant(-1);
                 dict[key] = value;
+                lua_pop(state, 1);
             }
             result = dict;
             break;
