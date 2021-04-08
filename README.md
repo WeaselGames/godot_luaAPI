@@ -67,8 +67,7 @@ extends Node2D
 onready var lua = Lua.new()
 
 func _ready():
-	# The third option is to pass a error call back function. passing String() like this will disregard it
-	lua.doString(self, "for i=1,10,1 do print('Hello lua!') end", String())
+	lua.doString("for i=1,10,1 do print('Hello lua!') end")
 ```
 <br />
 
@@ -79,7 +78,7 @@ extends Node2D
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doFile(self, "user://luaFile.lua", String())
+	lua.doFile("user://luaFile.lua")
 ```
 <br />
 
@@ -92,7 +91,7 @@ var test = "Hello lua!"
 
 func _ready():
 	lua.pushVariant(test, "str")
-	lua.doString(self, "print(str)", String())
+	lua.doString("print(str)")
 ```
 <br />
 
@@ -107,7 +106,7 @@ func luaAdd(a, b):
 
 func _ready():
 	lua.exposeFunction(self, "luaAdd", "add")
-	lua.doString(self, "print(add(2, 4))", String())
+	lua.doString("print(add(2, 4))")
 ```
 <br />
 
@@ -118,8 +117,9 @@ extends Node2D
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doFile(self, "user://luaFile.lua", String())
-	lua.callFunction(self, "set_colours", ["red", "blue"])
+	lua.doFile("user://luaFile.lua")
+	if( lua.luaFunctionExists("set_colours") ):
+		lua.callFunction( "set_colours", ["red", "blue"])
 ```
 <br />
 
@@ -133,7 +133,7 @@ func luaCallBack(err):
 	print(err)
 
 func _ready():
-	lua.doString(self, "print(This wont work)", "luaCallBack")
+	lua.doString("print(This wont work)", true , self, "luaCallBack")
 ```
 <br />
 
@@ -146,7 +146,7 @@ onready var lua = Lua.new()
 
 func _ready():
 	lua.setThreaded(false)
-	lua.doString(self, "while true do print("The entire game will freeze") end", String())
+	lua.doString("while true do print("The entire game will freeze") end" )
 ```
 <br />
 
@@ -158,7 +158,7 @@ onready var lua = Lua.new()
 
 
 func _ready():
-	lua.doString(self, "while true do pass end", String())
+	lua.doString("while true do pass end")
 	lua.killAll()
 ```
 Contributing And Feature Requests

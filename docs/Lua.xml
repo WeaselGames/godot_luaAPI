@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="Lua" inherits="Reference" version="3.2">
+	<brief_description>
+	</brief_description>
+	<description>
+		It is recommended to always use [code]ProtectedCall=true[/code], otherwise the engine will crash if a error happens. [code]CallbackCaller[/code] and [code]Callback[/code] can be defined to handle the error message instead printing them to the console. 
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="callFunction">
+			<return type="void">
+			</return>
+			<argument index="0" name="LuaFunctionName" type="String">
+			</argument>
+			<argument index="1" name="Args" type="Array">
+			</argument>
+			<argument index="2" name="ProtectedCall" type="bool" default="true">
+			</argument>
+			<argument index="3" name="CallbackCaller" type="Object" default="null">
+			</argument>
+			<argument index="4" name="Callback" type="String" default="&quot;&quot;">
+			</argument>
+			<description>
+				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with [code]doFile()[/code] or [code]doString()[/code].
+				You may want to check if the function actually exists with [code]luaFunctionExists(LuaFunctionName)[/code].
+				Currently, getting returned values from this function is not available. 
+			</description>
+		</method>
+		<method name="doFile">
+			<return type="void">
+			</return>
+			<argument index="0" name="File" type="String">
+			</argument>
+			<argument index="1" name="ProtectedCall" type="bool" default="true">
+			</argument>
+			<argument index="2" name="CallbackCaller" type="Object" default="null">
+			</argument>
+			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
+			</argument>
+			<description>
+				Loads a file as a string and calls [code]doString[/code] with it.
+			</description>
+		</method>
+		<method name="doString">
+			<return type="void">
+			</return>
+			<argument index="0" name="Code" type="String">
+			</argument>
+			<argument index="1" name="ProtectedCall" type="bool" default="true">
+			</argument>
+			<argument index="2" name="CallbackCaller" type="Object" default="null">
+			</argument>
+			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
+			</argument>
+			<description>
+				Executes [code]Code[/code] as a piece of Lua code.
+			</description>
+		</method>
+		<method name="exposeFunction">
+			<return type="void">
+			</return>
+			<argument index="0" name="NodeObject" type="Object">
+			</argument>
+			<argument index="1" name="GDFunction" type="String">
+			</argument>
+			<argument index="2" name="LuaFunctionName" type="String">
+			</argument>
+			<description>
+				Defines a lua function with name [code]LuaFunctionName[/code]. When Lua code calls it, it will call the [code]GDFunction[/code] method of [code]NodeObject[/code], so make sure the object still exists at this moment.
+			</description>
+		</method>
+		<method name="killAll">
+			<return type="void">
+			</return>
+			<description>
+				Kills all current lua threads in execution.
+			</description>
+		</method>
+		<method name="luaFunctionExists">
+			<return type="bool">
+			</return>
+			<argument index="0" name="LuaFunctionName" type="String">
+			</argument>
+			<description>
+				Returns [code]true[/code] only if [code]LuaFunctionName[/code] is defined in current Lua's state as a function.
+			</description>
+		</method>
+		<method name="pushVariant">
+			<return type="bool">
+			</return>
+			<argument index="0" name="var" type="Variant">
+			</argument>
+			<argument index="1" name="arg1" type="String">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="setThreaded">
+			<return type="void">
+			</return>
+			<argument index="0" name="bool" type="bool">
+			</argument>
+			<description>
+				Set the Lua calls to run on a separated thread. !!! Thread mode is the default !!! 
+			</description>
+		</method>
+	</methods>
+	<constants>
+	</constants>
+</class>
