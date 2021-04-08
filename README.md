@@ -119,7 +119,8 @@ onready var lua = Lua.new()
 
 func _ready():
 	lua.doFile(self, "user://luaFile.lua", String())
-	lua.callFunction(self, "set_colours", ["red", "blue"])
+	if( lua.luaFunctionExists("set_colours") ):
+		lua.callFunction( "set_colours", ["red", "blue"])
 ```
 <br />
 
