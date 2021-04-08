@@ -29,14 +29,14 @@ Lua::Lua(){
 	threaded = true;
 	
 	// loading base libs
-    	luaL_requiref(state, "", luaopen_base, 1);
+    luaL_requiref(state, "", luaopen_base, 1);
    	lua_pop(state, 1);
-    	luaL_requiref(state, LUA_TABLIBNAME, luaopen_table, 1);
-    	lua_pop(state, 1);
-    	luaL_requiref(state, LUA_STRLIBNAME, luaopen_string, 1);
-    	lua_pop(state, 1);
-    	luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
-    	lua_pop(state, 1);
+    luaL_requiref(state, LUA_TABLIBNAME, luaopen_table, 1);
+    lua_pop(state, 1);
+    luaL_requiref(state, LUA_STRLIBNAME, luaopen_string, 1);
+    lua_pop(state, 1);
+    luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
+    lua_pop(state, 1);
 	
 	lua_sethook(state, &LineHook, LUA_MASKLINE, 0);
 	lua_register(state, "print", luaPrint);
@@ -47,12 +47,12 @@ Lua::Lua(){
 	lua_rawset( state , LUA_REGISTRYINDEX );
 
 	// Creating basic types metatables and saving them in registry
-	createVector2Metatable(state); // "mt_Vector2"
-	createVector3Metatable(state); // "mt_Vector3"
-	createColorMetatable(state); // "mt_Color"
+	createVector2Metatable(); // "mt_Vector2"
+	createVector3Metatable(); // "mt_Vector3"
+	createColorMetatable(); // "mt_Color"
 
 	// Exposing basic types constructors
-	exposeConstructors(state);
+	exposeConstructors();
 	
 }
 
@@ -66,8 +66,8 @@ static bool shouldKill = false;
 void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("killAll"),&Lua::killAll);
     ClassDB::bind_method(D_METHOD("setThreaded", "bool"),&Lua::setThreaded);
-    ClassDB::bind_method(D_METHOD("doFile", "CallbackCaller", "File", "Callback"), &Lua::doFile);
-    ClassDB::bind_method(D_METHOD("doString", "CallbackCaller", "Code", "Callback"), &Lua::doString);
+    ClassDB::bind_method(D_METHOD("doFile", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("doString", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("callFunction","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
@@ -138,24 +138,8 @@ void Lua::callFunction( String function_name, Array args , bool protected_call ,
 
             // Default error handling:
             if( callback_caller == nullptr || callback == String() ){
-                String msg = vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name);
-                switch( ret ){
-                    case LUA_ERRRUN:
-                        msg += "[LUA_ERRNUN - runtime error ] ";
-                        break;
-                    case LUA_ERRMEM:
-                        msg += "[LUA_ERRMEM - memory allocation error ] ";
-                        break;
-                    case LUA_ERRERR:
-                        msg += "[LUA_ERRERR - error while handling another error ] ";
-                        break;
-                    case LUA_ERRGCMM:
-                        msg += "[LUA_ERRGCM - error while running garbage collection ] ";
-                        break;
-                    default: break;
-                }
-                msg += lua_tostring(state,-1);
-                print_error( msg );
+                print_error( vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name) );
+                handleError( state , ret );
             } 
             
             // Custom error handling:
@@ -180,14 +164,14 @@ void Lua::setThreaded(bool thread){
 }
 
 // doFile() will just load the file's text and call doString()
-void Lua::doFile(Object *instance, String fileName, String callback){
+void Lua::doFile( String fileName, bool protected_call , Object* callback_caller , String callback ){
   _File file;
 
   file.open(fileName,_File::ModeFlags::READ);
   String code = file.get_as_text();
   file.close();
 
-  doString(instance, code, callback);
+  doString(code, protected_call , callback_caller , callback);
 }
 
 // kill all active threads
@@ -205,25 +189,41 @@ void Lua::LineHook(lua_State *L, lua_Debug *ar){
 }
 
 // Run lua string in a thread if threading is enabled
-void Lua::doString(Object *instance, String code, String callback){
+void Lua::doString( String code, bool protected_call , Object* callback_caller , String callback ){
     if(threaded){
-        std::thread(runLua, instance, code, callback, state).detach();
+        std::thread(runLua, state , code , protected_call , callback_caller , callback ).detach();
     }else{
-        runLua(instance, code, callback, state);
+        runLua( state , code , protected_call , callback_caller , callback );
     }
 }
 
-// Execute a lua script string and call the passed callBack function with the error as the aurgument if an error occures
-void Lua::runLua(Object *instance, String code, String callback, lua_State *L){
-    std::wstring luaCode = code.c_str();
+// Execute a lua script string and , if protected_call, call the passed callBack function with the error as the aurgument if an error occurees
+void Lua::runLua( lua_State *L , String code, bool protected_call , Object* callback_caller , String callback ){
+    
+    if( protected_call ){
+        
+        int ret = luaL_dostring( L , code.ascii().get_data() );
+        if( ret != LUA_OK ){
 
-    int result = luaL_dostring(L, std::string( luaCode.begin(), luaCode.end() ).c_str());
-    if(result != LUA_OK){
-        if (callback != String()){
-            ScriptInstance *scriptInstance = instance->get_script_instance();
-            scriptInstance->call(callback, lua_tostring(L, -1));
+            // Default error handling:
+            if( callback_caller == nullptr || callback == String() ){
+                handleError( L , ret );
+            } 
+            
+            // Custom error handling:
+            else {
+                ScriptInstance *scriptInstance = callback_caller->get_script_instance();
+                scriptInstance->call(callback, String(lua_tostring(L,-1)) );
+            }
         }
+    } 
+
+    // Call not protected (crashes and exit the program if error!)
+    else {
+        luaL_loadstring(L, code.ascii().get_data() ) ;
+        lua_call(L, 0 /* nargs */ , 0 /* nresults */ ) ;
     }
+
 }
 
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
@@ -302,7 +302,7 @@ bool Lua::pushVariant(Variant var) {
     return true;
 }
 
-// Call pushVarient() and set it to a global name
+// Call pushVariant() and set it to a global name
 bool Lua::pushGlobalVariant(Variant var, String name) {
     if (pushVariant(var)) {
        std::wstring str = name.c_str();
@@ -356,7 +356,7 @@ Variant Lua::getVariant(int index) {
 }
 
 
-void Lua::exposeConstructors( lua_State* state ){
+void Lua::exposeConstructors( ){
 	
 	lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
@@ -395,8 +395,8 @@ void Lua::exposeConstructors( lua_State* state ){
 }
 
 // Create metatable for Vector2 and saves it at LUA_REGISTRYINDEX with name "mt_Vector2"
-void Lua::createVector2Metatable( lua_State* state ){
-  luaL_newmetatable( state , "mt_Vector2" );
+void Lua::createVector2Metatable( ){
+    luaL_newmetatable( state , "mt_Vector2" );
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
 		lua->pushVariant( arg1.get( arg2 ) );
@@ -447,13 +447,13 @@ void Lua::createVector2Metatable( lua_State* state ){
 		}
 	});
 
-  lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state,1); // Stack is now unmodified
 }
 
 // Create metatable for Vector3 and saves it at LUA_REGISTRYINDEX with name "mt_Vector3"
-void Lua::createVector3Metatable( lua_State* state ){
+void Lua::createVector3Metatable( ){
 
-  luaL_newmetatable( state , "mt_Vector3" );
+    luaL_newmetatable( state , "mt_Vector3" );
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
 		lua->pushVariant( arg1.get( arg2 ) );
@@ -504,13 +504,13 @@ void Lua::createVector3Metatable( lua_State* state ){
 		}
 	});
 
-  lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state,1); // Stack is now unmodified
 }
 
-// Create metatable for Vector3 and saves it at LUA_REGISTRYINDEX with name "mt_Vector3"
-void Lua::createColorMetatable( lua_State* state ){
+// Create metatable for Color and saves it at LUA_REGISTRYINDEX with name "mt_Color"
+void Lua::createColorMetatable( ){
 
-  luaL_newmetatable( state , "mt_Color" );
+    luaL_newmetatable( state , "mt_Color" );
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
 		lua->pushVariant( arg1.get( arg2 ) );
@@ -561,7 +561,30 @@ void Lua::createColorMetatable( lua_State* state ){
 		}
 	});
 
-  lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state,1); // Stack is now unmodified
+}
+
+// Assumes there is a error in the top of the stack. Pops it.
+void Lua::handleError( lua_State* L , int lua_error ){
+    String msg;
+    switch( lua_error ){
+        case LUA_ERRRUN:
+            msg += "[LUA_ERRNUN - runtime error ] ";
+            break;
+        case LUA_ERRMEM:
+            msg += "[LUA_ERRMEM - memory allocation error ] ";
+            break;
+        case LUA_ERRERR:
+            msg += "[LUA_ERRERR - error while handling another error ] ";
+            break;
+        case LUA_ERRGCMM:
+            msg += "[LUA_ERRGCM - error while running garbage collection ] ";
+            break;
+        default: break;
+    }
+    msg += lua_tostring(L,-1);
+    print_error( msg );
+    lua_pop(L,1);
 }
 
 // Lua functions

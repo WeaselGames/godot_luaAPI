@@ -21,12 +21,12 @@ public:
   void exposeFunction(Object *instance, String function, String name );
   void callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   bool luaFunctionExists(String function_name);
-  void doFile(Object *instance, String fileName, String callback = String());
-  void doString(Object *instance, String code, String callback = String());
+  void doFile( String fileName, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
+  void doString( String code, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void setThreaded(bool thread);
   void killAll();
 
-  static void runLua(Object *instance, String code, String callback, lua_State *L);
+  static void runLua( lua_State *L , String code, bool protected_call , Object* CallbackCaller , String callback );
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);
@@ -44,10 +44,12 @@ private:
   bool threaded;
 
 private:
-  void exposeConstructors( lua_State*ls );
-  void createVector2Metatable( lua_State* ls );
-  void createVector3Metatable( lua_State* ls );
-  void createColorMetatable( lua_State* ls );
+  void exposeConstructors(  );
+  void createVector2Metatable(  );
+  void createVector3Metatable(  );
+  void createColorMetatable(  );
+
+  static void handleError( lua_State *L , int lua_error );
 
 };
 
