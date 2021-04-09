@@ -39,7 +39,7 @@
 			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
 			</argument>
 			<description>
-				Loads a file as a string and calls [code]doString[/code] with it.
+				Loads a files content as a string and calls [code]doString[/code] with it.
 			</description>
 		</method>
 		<method name="doString">
@@ -102,7 +102,7 @@
 			<argument index="0" name="bool" type="bool">
 			</argument>
 			<description>
-				Set the Lua calls to run on a separated thread. !!! Thread mode is the default !!! 
+				Set weather Lua runs on a seperate thread. Default is false
 			</description>
 		</method>
 	</methods>

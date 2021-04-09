@@ -16,9 +16,9 @@ This is a Godot engine module that adds lua support via GDScript. Importantly th
 
 While the original purpose of this module was for my own use I understand more may find it useful. If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
 
-By default lua executes on its own detached thread. If thread saftey is required you can either use mutex locks or disable threading.
+By default threaded is disabled, however please keep in mind if you plan on using threading the Lua object should be a global to prevent it form being destroyed before a thread finishes executing.
 
-To use you can either [Compile from source](#compiling) or if you are on windows or linux you can download one of the pre built binarays from th [releas](https://github.com/Trey2k/lua/releases) page.
+To use you can either [Compile from source](#compiling) or if you are on windows or linux you can download one of the pre built binarays from the [releas](https://github.com/Trey2k/lua/releases) page.
 
 **Default lua libs loaded**
 - base
@@ -137,7 +137,7 @@ func _ready():
 ```
 <br />
 
-**Disable threading:**
+**Enable threading:**
 ```
 extends Node2D
 
@@ -145,8 +145,8 @@ onready var lua = Lua.new()
 
 
 func _ready():
-	lua.setThreaded(false)
-	lua.doString("while true do print("The entire game will freeze") end" )
+	lua.setThreaded(true)
+	lua.doString("while true do print("The game will not freeze") end" )
 ```
 <br />
 

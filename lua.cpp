@@ -26,7 +26,8 @@ lua_settable(lua_state,metatable_index-2);
 Lua::Lua(){
 	// Createing lua state instance
 	state = luaL_newstate();
-	threaded = true;
+    // threaded is false by default
+	threaded = false;
 	
 	// loading base libs
     luaL_requiref(state, "", luaopen_base, 1);
@@ -57,6 +58,11 @@ Lua::Lua(){
 }
 
 Lua::~Lua(){
+    // Warning users about object destruction if code is currently being executed see https://github.com/Trey2k/lua/issues/9
+    if (executing){
+        print_line("WARNING! Lua object is being destroyed while code is currently being executed.");
+    }
+    
     // Destroying lua state instance
     lua_close(state);
 }
@@ -191,15 +197,15 @@ void Lua::LineHook(lua_State *L, lua_Debug *ar){
 // Run lua string in a thread if threading is enabled
 void Lua::doString( String code, bool protected_call , Object* callback_caller , String callback ){
     if(threaded){
-        std::thread(runLua, state , code , protected_call , callback_caller , callback ).detach();
+        std::thread(runLua, state , code , protected_call , callback_caller , callback , &executing ).detach();
     }else{
-        runLua( state , code , protected_call , callback_caller , callback );
+        runLua( state , code , protected_call , callback_caller , callback , &executing );
     }
 }
 
 // Execute a lua script string and , if protected_call, call the passed callBack function with the error as the aurgument if an error occurees
-void Lua::runLua( lua_State *L , String code, bool protected_call , Object* callback_caller , String callback ){
-    
+void Lua::runLua( lua_State *L , String code, bool protected_call , Object* callback_caller , String callback, bool *executing ){
+    *executing = true;
     if( protected_call ){
         
         int ret = luaL_dostring( L , code.ascii().get_data() );
@@ -223,6 +229,8 @@ void Lua::runLua( lua_State *L , String code, bool protected_call , Object* call
         luaL_loadstring(L, code.ascii().get_data() ) ;
         lua_call(L, 0 /* nargs */ , 0 /* nresults */ ) ;
     }
+
+    *executing = false;
 
 }
 

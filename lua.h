@@ -7,6 +7,7 @@
 #include <lua.hpp>
 #include <string>
 #include <thread>
+#include <mutex>
 
 class Lua : public Reference {
   GDCLASS(Lua, Reference);
@@ -26,7 +27,7 @@ public:
   void setThreaded(bool thread);
   void killAll();
 
-  static void runLua( lua_State *L , String code, bool protected_call , Object* CallbackCaller , String callback );
+  static void runLua( lua_State *L , String code, bool protected_call , Object* CallbackCaller , String callback, bool *executing );
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);
@@ -42,6 +43,7 @@ public:
 private:
   lua_State *state;
   bool threaded;
+  bool executing;
 
 private:
   void exposeConstructors(  );
