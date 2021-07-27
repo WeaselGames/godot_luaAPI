@@ -117,7 +117,7 @@ extends Node2D
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doFile("user://luaFile.lua")
+	lua.do_file("user://luaFile.lua")
 	if( lua.lua_function_exists("set_colours") ):
 		lua.call_function( "set_colours", ["red", "blue"])
 ```
