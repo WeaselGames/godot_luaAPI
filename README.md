@@ -61,42 +61,42 @@ Compiling
 Examples
 ------------
 **Running lua from a string:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doString("for i=1,10,1 do print('Hello lua!') end")
+	lua.do_string("for i=1,10,1 do print('Hello lua!') end")
 ```
 <br />
 
 **Running lua from a file:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
 
 func _ready():
-	lua.doFile("user://luaFile.lua")
+	lua.do_file("user://luaFile.lua")
 ```
 <br />
 
 **Pushing a Variant as a global:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
 var test = "Hello lua!"
 
 func _ready():
-	lua.pushVariant(test, "str")
-	lua.doString("print(str)")
+	lua.push_variant(test, "str")
+	lua.do_string("print(str)")
 ```
 <br />
 
 **Exposing a GDScript function to lua:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
@@ -105,26 +105,26 @@ func luaAdd(a, b):
 	return a + b
 
 func _ready():
-	lua.exposeFunction(self, "luaAdd", "add")
-	lua.doString("print(add(2, 4))")
+	lua.expose_function(self, "luaAdd", "add")
+	lua.do_string("print(add(2, 4))")
 ```
 <br />
 
 **Calling a lua function from GDScript:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
 
 func _ready():
 	lua.doFile("user://luaFile.lua")
-	if( lua.luaFunctionExists("set_colours") ):
-		lua.callFunction( "set_colours", ["red", "blue"])
+	if( lua.lua_function_exists("set_colours") ):
+		lua.call_function( "set_colours", ["red", "blue"])
 ```
 <br />
 
 **Capturing lua errors:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
@@ -133,33 +133,33 @@ func luaCallBack(err):
 	print(err)
 
 func _ready():
-	lua.doString("print(This wont work)", true , self, "luaCallBack")
+	lua.do_string("print(This wont work)", true , self, "luaCallBack")
 ```
 <br />
 
 **Enable threading:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
 
 
 func _ready():
-	lua.setThreaded(true)
-	lua.doString("while true do print("The game will not freeze") end" )
+	lua.set_threaded(true)
+	lua.do_string("while true do print("The game will not freeze") end" )
 ```
 <br />
 
 **Kill all lua threads:**
-```
+```gdscript
 extends Node2D
 
 onready var lua = Lua.new()
 
 
 func _ready():
-	lua.doString("while true do pass end")
-	lua.killAll()
+	lua.do_string("while true do pass end")
+	lua.kill_all()
 ```
 Contributing And Feature Requests
 ---------------

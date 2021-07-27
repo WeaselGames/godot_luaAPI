@@ -70,14 +70,14 @@ Lua::~Lua(){
 static bool shouldKill = false;
 // Bind C++ functions to GDScript
 void Lua::_bind_methods(){
-    ClassDB::bind_method(D_METHOD("killAll"),&Lua::killAll);
-    ClassDB::bind_method(D_METHOD("setThreaded", "bool"),&Lua::setThreaded);
-    ClassDB::bind_method(D_METHOD("doFile", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
-    ClassDB::bind_method(D_METHOD("doString", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
-    ClassDB::bind_method(D_METHOD("pushVariant", "var"),&Lua::pushGlobalVariant);
-    ClassDB::bind_method(D_METHOD("exposeFunction", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
-    ClassDB::bind_method(D_METHOD("callFunction","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
-    ClassDB::bind_method(D_METHOD("luaFunctionExists","LuaFunctionName"), &Lua::luaFunctionExists);
+    ClassDB::bind_method(D_METHOD("kill_all"),&Lua::killAll);
+    ClassDB::bind_method(D_METHOD("set_threaded", "bool"),&Lua::setThreaded);
+    ClassDB::bind_method(D_METHOD("do_file", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("do_string", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("push_variant", "var"),&Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("expose_function", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
+    ClassDB::bind_method(D_METHOD("call_function","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
 }
 
 // expose a GDScript function to lua
@@ -584,9 +584,6 @@ void Lua::handleError( lua_State* L , int lua_error ){
             break;
         case LUA_ERRERR:
             msg += "[LUA_ERRERR - error while handling another error ] ";
-            break;
-        case LUA_ERRGCMM:
-            msg += "[LUA_ERRGCM - error while running garbage collection ] ";
             break;
         default: break;
     }
