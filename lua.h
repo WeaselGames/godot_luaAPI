@@ -4,7 +4,7 @@
 #include "core/reference.h"
 #include "core/bind/core_bind.h"
 
-#include <lua.hpp>
+#include "luasrc/lua.hpp"
 #include <string>
 #include <thread>
 #include <mutex>

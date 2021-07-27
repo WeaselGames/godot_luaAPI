@@ -8,7 +8,7 @@
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="callFunction">
+		<method name="call_function">
 			<return type="void">
 			</return>
 			<argument index="0" name="LuaFunctionName" type="String">
@@ -27,7 +27,7 @@
 				Currently, getting returned values from this function is not available. 
 			</description>
 		</method>
-		<method name="doFile">
+		<method name="do_file">
 			<return type="void">
 			</return>
 			<argument index="0" name="File" type="String">
@@ -42,7 +42,7 @@
 				Loads a files content as a string and calls [code]doString[/code] with it.
 			</description>
 		</method>
-		<method name="doString">
+		<method name="do_string">
 			<return type="void">
 			</return>
 			<argument index="0" name="Code" type="String">
@@ -57,7 +57,7 @@
 				Executes [code]Code[/code] as a piece of Lua code.
 			</description>
 		</method>
-		<method name="exposeFunction">
+		<method name="expose_function">
 			<return type="void">
 			</return>
 			<argument index="0" name="NodeObject" type="Object">
@@ -70,14 +70,14 @@
 				Defines a lua function with name [code]LuaFunctionName[/code]. When Lua code calls it, it will call the [code]GDFunction[/code] method of [code]NodeObject[/code], so make sure the object still exists at this moment.
 			</description>
 		</method>
-		<method name="killAll">
+		<method name="kill_all">
 			<return type="void">
 			</return>
 			<description>
 				Kills all current lua threads in execution.
 			</description>
 		</method>
-		<method name="luaFunctionExists">
+		<method name="lua_function_exists">
 			<return type="bool">
 			</return>
 			<argument index="0" name="LuaFunctionName" type="String">
@@ -86,7 +86,7 @@
 				Returns [code]true[/code] only if [code]LuaFunctionName[/code] is defined in current Lua's state as a function.
 			</description>
 		</method>
-		<method name="pushVariant">
+		<method name="push_variant">
 			<return type="bool">
 			</return>
 			<argument index="0" name="var" type="Variant">
@@ -96,7 +96,7 @@
 			<description>
 			</description>
 		</method>
-		<method name="setThreaded">
+		<method name="set_threaded">
 			<return type="void">
 			</return>
 			<argument index="0" name="bool" type="bool">
