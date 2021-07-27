@@ -1,15 +1,19 @@
-Import('env')
+#!/usr/bin/env python
 
-env_lua = env.Clone()
-env_lua.add_source_files(env.modules_sources, "*.cpp") #this will add all the cpp files
-env_lua.Append(CPPPATH=["#modules/lua/luasrc/include"])
+Import("env")
+Import('env_modules')
 
-if env['platform'] == "x11":
-    env.Append(LIBPATH=['#modules/lua/luasrc/libs/linux'])
-elif env['platform'] == "windows":
-    env.Append(LIBPATH=['#modules/lua/luasrc/libs/windows'])
-elif env['platform'] == "osx":
-    env.Append(LIBPATH=['#modules/lua/luasrc/libs/macos'])
+env_lua = env_modules.Clone()
 
 if not env.msvc:
-    env.Append(LIBS=['liblua'])
+    CXXFLAGS='-std=c++17'
+else:
+    CXXFLAGS='/std:c++17'
+
+env_lua['CXXFLAGS'] = [CXXFLAGS]
+
+Export('env_lua')
+
+SConscript('luasrc/SCsub')
+
+env_lua.add_source_files(env.modules_sources,'*.cpp')
