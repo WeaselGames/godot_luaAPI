@@ -31,7 +31,7 @@ public:
   bool pushGlobalVariant(Variant var, String name);
   bool luaFunctionExists(String function_name);
   
-  Variant popVariant();
+  Variant pullVariant(String name);
   Variant getVariant(int index = -1);
   Variant callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
     

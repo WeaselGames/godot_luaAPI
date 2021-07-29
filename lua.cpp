@@ -1,7 +1,5 @@
 
 #include "lua.h"
-#include <iostream>   // std::cout
-#include <string>     // std::string, std::to_strin
 
 
 // These 2 macros helps us in constructing general metamethods.
@@ -76,7 +74,8 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("set_threaded", "bool"),&Lua::setThreaded);
     ClassDB::bind_method(D_METHOD("do_file", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("do_string", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
-    ClassDB::bind_method(D_METHOD("push_variant", "var"),&Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("pull_variant", "Name"),&Lua::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_function", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("call_function","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
@@ -320,13 +319,15 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
     return false;
 }
 
-// Pop the value at the top of the stack and return getVarient()
-Variant Lua::popVariant() {
-    Variant result = getVariant();
-    lua_pop(state, 1);
-    return result;
+// Pull a global variant from Lua to GDScript
+Variant Lua::pullVariant(String name){
+    int type = lua_getglobal(state, name.ascii().get_data());
+    if (type != LUA_TFUNCTION){
+        return getVariant(1);
+    }else{
+        return Variant{};
+    }
 }
-
 // get a value at the given index and return as a variant
 Variant Lua::getVariant(int index) {
     Variant result;

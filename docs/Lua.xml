@@ -91,10 +91,19 @@
 			</return>
 			<argument index="0" name="var" type="Variant">
 			</argument>
-			<argument index="1" name="arg1" type="String">
+			<argument index="1" name="Name" type="String">
 			</argument>
 			<description>
-			Will push a copy of a Variant to lua.
+			Will push a copy of a Variant to lua as a global.
+			</description>
+		</method>
+		<method name="pull_variant">
+			<return type="Variant">
+			</return>
+			<argument index="0" name="Name" type="String">
+			</argument>
+			<description>
+			Will pull a copy of a glboal Variant from lua to GDScript.
 			</description>
 		</method>
 		<method name="set_threaded">
