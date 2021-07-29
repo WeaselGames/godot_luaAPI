@@ -1,5 +1,7 @@
 
 #include "lua.h"
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::to_strin
 
 
 // These 2 macros helps us in constructing general metamethods.
@@ -110,26 +112,20 @@ void Lua::exposeFunction(Object *instance, String function, String name){
   // Pushing the referance of the class
   lua_pushlightuserdata(state, this);
 
-  // Convert lua and gdscript function names from wstring to string for lua's usage
-  std::wstring temp = function.c_str();
-  std::string func(temp.begin(), temp.end());
-
-  temp = name.c_str();
-  std::string fname(temp.begin(), temp.end());
-
   // Pushing the script function name string to the stack to br retrived when called
-  lua_pushstring(state, func.c_str());
+  lua_pushstring(state, function.ascii().get_data());
 
   // Pushing the actual lambda function to the stack
   lua_pushcclosure(state, f, 3);
   // Setting the global name for the function in lua
-  lua_setglobal(state, fname.c_str());
+  lua_setglobal(state, name.ascii().get_data());
   
 }
 
 // call a Lua function from GDScript
-void Lua::callFunction( String function_name, Array args , bool protected_call , Object* callback_caller , String callback ) {
-    
+Variant Lua::callFunction( String function_name, Array args , bool protected_call , Object* callback_caller , String callback ) {
+    Variant toReturn;
+    int stack_size = lua_gettop(state);
     // put global function name on stack
     lua_getglobal(state, function_name.ascii().get_data() );
 
@@ -139,7 +135,7 @@ void Lua::callFunction( String function_name, Array args , bool protected_call ,
     }
 
     if( protected_call ){
-        int ret = lua_pcall(state,args.size(), 0 , 0 );
+        int ret = lua_pcall(state,args.size(), 1 , 0 );
         if( ret != LUA_OK ){
 
             // Default error handling:
@@ -154,9 +150,13 @@ void Lua::callFunction( String function_name, Array args , bool protected_call ,
                 scriptInstance->call(callback, String(lua_tostring(state,-1)) );
             }
         }
+        toReturn = getVariant(1);
+
     } else {
-        lua_call(state,args.size(), 0 );
+        lua_call(state,args.size(), 1 );
+        toReturn = getVariant(1);
     }
+    return toReturn;
 }
 
 bool Lua::luaFunctionExists(String function_name){
