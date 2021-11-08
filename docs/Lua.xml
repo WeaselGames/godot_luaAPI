@@ -9,7 +9,7 @@
 	</tutorials>
 	<methods>
 		<method name="call_function">
-			<return type="void">
+			<return type="Variant">
 			</return>
 			<argument index="0" name="LuaFunctionName" type="String">
 			</argument>
@@ -22,9 +22,9 @@
 			<argument index="4" name="Callback" type="String" default="&quot;&quot;">
 			</argument>
 			<description>
-				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with [code]doFile()[/code] or [code]doString()[/code].
-				You may want to check if the function actually exists with [code]luaFunctionExists(LuaFunctionName)[/code].
-				Currently, getting returned values from this function is not available. 
+				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with [code]do_file()[/code] or [code]do_string()[/code].
+				You may want to check if the function actually exists with [code]lua_function_exists(LuaFunctionName)[/code].
+				This function supports 1 return value from lua. It will be returned as a variant and if lua returns no value it will be null. 
 			</description>
 		</method>
 		<method name="do_file">
@@ -39,7 +39,7 @@
 			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
 			</argument>
 			<description>
-				Loads a files content as a string and calls [code]doString[/code] with it.
+				Loads a files content as a string and calls [code]do_string[/code] with it.
 			</description>
 		</method>
 		<method name="do_string">
@@ -91,9 +91,19 @@
 			</return>
 			<argument index="0" name="var" type="Variant">
 			</argument>
-			<argument index="1" name="arg1" type="String">
+			<argument index="1" name="Name" type="String">
 			</argument>
 			<description>
+			Will push a copy of a Variant to lua as a global.
+			</description>
+		</method>
+		<method name="pull_variant">
+			<return type="Variant">
+			</return>
+			<argument index="0" name="Name" type="String">
+			</argument>
+			<description>
+			Will pull a copy of a glboal Variant from lua to GDScript.
 			</description>
 		</method>
 		<method name="set_threaded">

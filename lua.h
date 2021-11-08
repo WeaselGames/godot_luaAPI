@@ -20,8 +20,6 @@ public:
   ~Lua();
   
   void exposeFunction(Object *instance, String function, String name );
-  void callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
-  bool luaFunctionExists(String function_name);
   void doFile( String fileName, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void doString( String code, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void setThreaded(bool thread);
@@ -31,9 +29,11 @@ public:
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);
+  bool luaFunctionExists(String function_name);
   
-  Variant popVariant();
+  Variant pullVariant(String name);
   Variant getVariant(int index = -1);
+  Variant callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
     
 
   // Lua functions

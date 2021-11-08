@@ -74,7 +74,8 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("set_threaded", "bool"),&Lua::setThreaded);
     ClassDB::bind_method(D_METHOD("do_file", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("do_string", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
-    ClassDB::bind_method(D_METHOD("push_variant", "var"),&Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("pull_variant", "Name"),&Lua::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_function", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("call_function","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
@@ -110,26 +111,20 @@ void Lua::exposeFunction(Object *instance, String function, String name){
   // Pushing the referance of the class
   lua_pushlightuserdata(state, this);
 
-  // Convert lua and gdscript function names from wstring to string for lua's usage
-  std::wstring temp = function.c_str();
-  std::string func(temp.begin(), temp.end());
-
-  temp = name.c_str();
-  std::string fname(temp.begin(), temp.end());
-
   // Pushing the script function name string to the stack to br retrived when called
-  lua_pushstring(state, func.c_str());
+  lua_pushstring(state, function.ascii().get_data());
 
   // Pushing the actual lambda function to the stack
   lua_pushcclosure(state, f, 3);
   // Setting the global name for the function in lua
-  lua_setglobal(state, fname.c_str());
+  lua_setglobal(state, name.ascii().get_data());
   
 }
 
 // call a Lua function from GDScript
-void Lua::callFunction( String function_name, Array args , bool protected_call , Object* callback_caller , String callback ) {
-    
+Variant Lua::callFunction( String function_name, Array args , bool protected_call , Object* callback_caller , String callback ) {
+    Variant toReturn;
+    int stack_size = lua_gettop(state);
     // put global function name on stack
     lua_getglobal(state, function_name.ascii().get_data() );
 
@@ -139,7 +134,7 @@ void Lua::callFunction( String function_name, Array args , bool protected_call ,
     }
 
     if( protected_call ){
-        int ret = lua_pcall(state,args.size(), 0 , 0 );
+        int ret = lua_pcall(state,args.size(), 1 , 0 );
         if( ret != LUA_OK ){
 
             // Default error handling:
@@ -154,9 +149,15 @@ void Lua::callFunction( String function_name, Array args , bool protected_call ,
                 scriptInstance->call(callback, String(lua_tostring(state,-1)) );
             }
         }
+        toReturn = getVariant(1);
+        lua_pop(state, 1);
+
     } else {
-        lua_call(state,args.size(), 0 );
+        lua_call(state,args.size(), 1 );
+        toReturn = getVariant(1);
+        lua_pop(state, 1);
     }
+    return toReturn;
 }
 
 bool Lua::luaFunctionExists(String function_name){
@@ -320,13 +321,13 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
     return false;
 }
 
-// Pop the value at the top of the stack and return getVarient()
-Variant Lua::popVariant() {
-    Variant result = getVariant();
+// Pull a global variant from Lua to GDScript
+Variant Lua::pullVariant(String name){
+    int type = lua_getglobal(state, name.ascii().get_data());
+    Variant val = getVariant(1);
     lua_pop(state, 1);
-    return result;
+    return val;
 }
-
 // get a value at the given index and return as a variant
 Variant Lua::getVariant(int index) {
     Variant result;
