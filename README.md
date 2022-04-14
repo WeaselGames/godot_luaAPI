@@ -12,11 +12,11 @@
 
 About
 -------
-This is a Godot engine module that adds lua support via GDScript. Importantly this is **NOT** meant to be a replacment for GDScript. The main purpose of this module is to add runtime execution of code for tasks such as modding or in game scripting. 
+This is a Godot engine module that adds lua support via GDScript. Importantly this is **NOT** meant to be a replacement for GDScript. The main purpose of this module is to add runtime execution of code for tasks such as modding or in game scripting. 
 
 While the original purpose of this module was for my own use I understand more may find it useful. If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
 
-By default threaded is disabled, however please keep in mind if you plan on using threading the Lua object should be a global to prevent it form being destroyed before a thread finishes executing.
+By default, threaded is disabled, however please keep in mind if you plan on using threading the Lua object should be a global to prevent it from being destroyed before a thread finishes executing.
 
 To use you can either [Compile from source](#compiling) or if you are on windows or linux you can download one of the pre built binarays from the [releas](https://github.com/Trey2k/lua/releases) page.
 
@@ -51,10 +51,10 @@ TODO
 
 Compiling
 ------------
-  Please note this module was written for **Godot Version 3.2.3**
-- Start by cloning the Godot 3.2.3 [source](https://github.com/godotengine/godot/tree/3.2.3-stable) with this command `git clone https://github.com/godotengine/godot -b 3.2.3-stable`
+Godot version 3.4.4-stable is confirmed to be working.
+- Start by cloning the Godot 3.4.4-stable [source](https://github.com/godotengine/godot/tree/3.4.4-stable) with this command `git clone https://github.com/godotengine/godot -b 3.4.4-stable`
 
-- Next clone this repository into the module folder inside the Godot source code.
+- Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/Trey2k/lua`
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
