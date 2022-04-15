@@ -81,6 +81,10 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
 }
 
+lua_State* Lua::getState() {
+    return state;
+}
+
 // expose a GDScript function to lua
 void Lua::exposeFunction(Object *instance, String function, String name){
   
@@ -314,8 +318,7 @@ bool Lua::pushVariant(Variant var) {
 // Call pushVariant() and set it to a global name
 bool Lua::pushGlobalVariant(Variant var, String name) {
     if (pushVariant(var)) {
-       std::wstring str = name.c_str();
-        lua_setglobal(state,std::string( str.begin(), str.end() ).c_str());
+        lua_setglobal(state,name.ascii().get_data());
         return true;
     }
     return false;
@@ -328,6 +331,7 @@ Variant Lua::pullVariant(String name){
     lua_pop(state, 1);
     return val;
 }
+
 // get a value at the given index and return as a variant
 Variant Lua::getVariant(int index) {
     Variant result;

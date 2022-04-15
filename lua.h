@@ -34,6 +34,9 @@ public:
   Variant pullVariant(String name);
   Variant getVariant(int index = -1);
   Variant callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
+
+  lua_State* getState();
+
     
 
   // Lua functions
