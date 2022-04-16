@@ -1,7 +1,6 @@
 
 #include "lua.h"
 
-
 // These 2 macros helps us in constructing general metamethods.
 // We can use "lua" as a "Lua" pointer and arg1, arg2, ..., arg5 as Variants objects
 // Check examples in createVector2Metatable
@@ -76,50 +75,68 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("do_string", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"),&Lua::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_function", "NodeObject", "GDFunction", "LuaFunctionName"),&Lua::exposeFunction);
+    ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"),&Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("call_function","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
 }
 
+// Returns lua state
 lua_State* Lua::getState() {
     return state;
 }
 
-// expose a GDScript function to lua
-void Lua::exposeFunction(Object *instance, String function, String name){
-  
-  // Createing lamda function so we can capture the object instanse and call the GDScript method. Or in theory other scripting languages?
-  auto f = [](lua_State* L) -> int{
-    const Object *instance2 = (const Object*) lua_topointer(L, lua_upvalueindex(1));
-    class Lua *obj = (class Lua*) lua_topointer(L, lua_upvalueindex(2));
-    const char *function2 = lua_tostring(L, lua_upvalueindex(3));
+// Get one of the callables exposed to lua via its index.
+Callable Lua::getCallable(int index){
+    if (index <= callables.size()) {
+        return callables.get(index);
+    }
+    return Callable();
+}
 
+
+// The function used when lua calls a exposed function
+int Lua::luaExposedFuncCall(lua_State *state) {
+    class Lua *obj = (class Lua*) lua_topointer(state, lua_upvalueindex(1));
+    int callIndex = lua_tointeger(state, lua_upvalueindex(2));
+    int argc = lua_gettop(state);
     Variant arg1 = obj->getVariant(1);
     Variant arg2 = obj->getVariant(2);
     Variant arg3 = obj->getVariant(3);
     Variant arg4 = obj->getVariant(4);
     Variant arg5 = obj->getVariant(5);
-
-    ScriptInstance *scriptInstance = instance2->get_script_instance();
-    Variant returned = scriptInstance->call(function2, arg1, arg2, arg3, arg4, arg5);
+    Callable func = obj->getCallable(callIndex);
+    const Variant* args[5] = {
+        &arg1,
+        &arg2,
+        &arg3,
+        &arg4,
+        &arg5,
+    };
+    Variant returned;
+    Callable::CallError error;
+    func.call(args, argc, returned, error);
+   if (error.error != error.CALL_OK) {
+       // TODO: Better error handling
+       print_error("Error during function call");
+   }
 
     // Always returns something. If script instance doesn't returns anything, it will returns a NIL value anyway
     obj->pushVariant(returned);
     return 1;
 
-  };
+}
 
-  // Pushing the object instnace to the stack to be retrived when the function is called
-  lua_pushlightuserdata(state, instance);
+// expose a Callable to lua
+void Lua::exposeFunction(Callable func, String name){
+   callables.push_back(func);
 
   // Pushing the referance of the class
   lua_pushlightuserdata(state, this);
 
-  // Pushing the script function name string to the stack to br retrived when called
-  lua_pushstring(state, function.ascii().get_data());
+  // Pushing the callables index
+  lua_pushinteger(state, callables.size()-1);
 
-  // Pushing the actual lambda function to the stack
-  lua_pushcclosure(state, f, 3);
+  lua_pushcclosure(state, Lua::luaExposedFuncCall, 2);
   // Setting the global name for the function in lua
   lua_setglobal(state, name.ascii().get_data());
   

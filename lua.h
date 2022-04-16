@@ -3,11 +3,13 @@
 
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#include "modules/gdscript/gdscript_lambda_callable.h"
 
 #include "luasrc/lua.hpp"
 #include <string>
 #include <thread>
 #include <mutex>
+#include <map>
 
 class Lua : public RefCounted {
   GDCLASS(Lua, RefCounted);
@@ -19,11 +21,13 @@ public:
   Lua();
   ~Lua();
   
-  void exposeFunction(Object *instance, String function, String name );
+  void exposeFunction(Callable func, String name);
   void doFile( String fileName, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void doString( String code, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void setThreaded(bool thread);
   void killAll();
+
+  Callable getCallable(int index);
 
   static void runLua( lua_State *L , String code, bool protected_call , Object* CallbackCaller , String callback, bool *executing );
 
@@ -42,11 +46,15 @@ public:
   // Lua functions
   static void LineHook(lua_State *L, lua_Debug *ar);
   static int luaPrint(lua_State* state);
+  static int luaExposedFuncCall(lua_State* state);
+
+  std::map<const char*, const Callable> exposedFuncs;
 
 private:
   lua_State *state;
   bool threaded;
   bool executing;
+  Vector<Callable> callables;
 
 private:
   void exposeConstructors(  );
