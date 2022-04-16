@@ -25,8 +25,6 @@ public:
   void setThreaded(bool thread);
   void killAll();
 
-  Callable getCallable(int index);
-
   static void runLua( lua_State *L , String code, bool protected_call , Object* CallbackCaller , String callback, bool *executing );
 
   bool pushVariant(Variant var);
@@ -37,16 +35,13 @@ public:
   Variant getVariant(int index = -1);
   Variant callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
 
+  Callable getCallable(int index);
   lua_State* getState();
-
-    
 
   // Lua functions
   static void LineHook(lua_State *L, lua_Debug *ar);
   static int luaPrint(lua_State* state);
   static int luaExposedFuncCall(lua_State* state);
-
-  std::map<const char*, const Callable> exposedFuncs;
 
 private:
   lua_State *state;
