@@ -1,16 +1,16 @@
 #ifndef LUA_H
 #define LUA_H
 
-#include "core/reference.h"
-#include "core/bind/core_bind.h"
+#include "core/object/ref_counted.h"
+#include "core/core_bind.h"
 
 #include "luasrc/lua.hpp"
 #include <string>
 #include <thread>
 #include <mutex>
 
-class Lua : public Reference {
-  GDCLASS(Lua, Reference);
+class Lua : public RefCounted {
+  GDCLASS(Lua, RefCounted);
 
 protected:
   static void _bind_methods();

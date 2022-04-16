@@ -43,7 +43,7 @@ void LuaDrawNode::unhandled_key_input(const Ref<InputEvent> &event){
         return;
     }
     Array args = Array();
-    args.append((int)inputKey->get_scancode());
+    args.append((int)inputKey->get_keycode());
     args.append((int)inputKey->get_modifiers_mask());
     instance->callFunction("_input", args, protectedCall, callbackObj, callbackFunc);
 }
@@ -145,17 +145,13 @@ void LuaDrawNode::bindDrawRect() {
         Color arg3 = obj->getVariant(3);
         bool arg4 =true;
         float arg5 = 1.0F;
-        bool arg6 = false;
         if (argc > 3) {
             arg4 = obj->getVariant(4);
         }
         if (argc > 4) {
             arg5 = obj->getVariant(5);
         }
-        if (argc > 5) {
-            arg6 = obj->getVariant(6);
-        }
-        node->draw_rect(Rect2(arg1, arg2), arg3, arg4, arg5, arg6);
+        node->draw_rect(Rect2(arg1, arg2), arg3, arg4, arg5);
        
         return 0;
     };
@@ -181,17 +177,24 @@ void LuaDrawNode::bindDrawString() {
         Vector2 arg1 = obj->getVariant(1);
         String arg2 = obj->getVariant(2);
         
-        Color arg3 = Color(1, 1, 1);
-        int arg4 = -1;
+        int arg4 = 16;
+        Color arg5 = Color(1, 1, 1);
+        int arg6 = 0;
+        Color arg7 = Color(1, 1, 1, 0);
         if (argc > 2) {
-            arg3 = obj->getVariant(3);
+            arg4 = obj->getVariant(3);
         }
         if (argc > 3) {
-            arg4 = obj->getVariant(4);
+            arg5 = obj->getVariant(4);
         }
-
+        if (argc > 4) {
+            arg6 = obj->getVariant(5);
+        }
+        if (argc > 5) {
+            arg7 = obj->getVariant(6);
+        }
         if (pFont->is_valid()) {
-            node->draw_string(*pFont, arg1, arg2, arg3, arg4);
+            node->draw_string(*pFont, arg1, arg2, HORIZONTAL_ALIGNMENT_LEFT, -1, arg4,  arg5, arg6, arg7, 3U);
         }
         return 0;
     };
@@ -217,9 +220,13 @@ void LuaDrawNode::bindGetStringSize() {
         Ref<Font> *pFont = (Ref<Font>*) lua_topointer(L, lua_upvalueindex(2));
         int argc = lua_gettop(L);
         String arg1 = obj->getVariant(1);
+        int arg2 = 16;
+        if (argc > 1) {
+            arg2 = obj->getVariant(2);
+        }
 
         if (pFont->is_valid()) {
-            Vector2 size = pFont->ptr()->get_string_size(arg1);
+            Vector2 size = pFont->ptr()->get_string_size(arg1, arg2);
             obj->pushVariant(size);
             return 1;
         }

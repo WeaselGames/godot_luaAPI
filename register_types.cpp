@@ -1,5 +1,4 @@
 #include "register_types.h"
-#include "core/class_db.h"
 #include "lua.h"
 #include "luaDrawNode.h"
 

@@ -176,11 +176,7 @@ void Lua::setThreaded(bool thread){
 
 // doFile() will just load the file's text and call doString()
 void Lua::doFile( String fileName, bool protected_call , Object* callback_caller , String callback ){
-  _File file;
-
-  file.open(fileName,_File::ModeFlags::READ);
-  String code = file.get_as_text();
-  file.close();
+  String code = FileAccess::get_file_as_string(fileName);
 
   doString(code, protected_call , callback_caller , callback);
 }
@@ -241,32 +237,32 @@ void Lua::runLua( lua_State *L , String code, bool protected_call , Object* call
 
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
 bool Lua::pushVariant(Variant var) {
-    std::wstring str;
     switch (var.get_type())
     {
         case Variant::Type::NIL:
             lua_pushnil(state);
             break;
         case Variant::Type::STRING:
-            str = (var.operator String().c_str());
-            lua_pushstring(state, std::string( str.begin(), str.end() ).c_str());
+            lua_pushstring(state,(var.operator String()).ascii().get_data() );
             break;
         case Variant::Type::INT:
             lua_pushinteger(state, (int64_t)var);
             break;
-        case Variant::Type::REAL:
+        case Variant::Type::FLOAT:
             lua_pushnumber(state,var.operator double());
             break;
         case Variant::Type::BOOL:
             lua_pushboolean(state, (bool)var);
             break;
-        case Variant::Type::POOL_BYTE_ARRAY:
-        case Variant::Type::POOL_INT_ARRAY:
-        case Variant::Type::POOL_STRING_ARRAY:
-        case Variant::Type::POOL_REAL_ARRAY:
-        case Variant::Type::POOL_VECTOR2_ARRAY:
-        case Variant::Type::POOL_VECTOR3_ARRAY:
-        case Variant::Type::POOL_COLOR_ARRAY:            
+        case Variant::Type::PACKED_BYTE_ARRAY:
+        case Variant::Type::PACKED_INT64_ARRAY:
+        case Variant::Type::PACKED_INT32_ARRAY:
+        case Variant::Type::PACKED_STRING_ARRAY:
+        case Variant::Type::PACKED_FLOAT64_ARRAY:
+        case Variant::Type::PACKED_FLOAT32_ARRAY:
+        case Variant::Type::PACKED_VECTOR2_ARRAY:
+        case Variant::Type::PACKED_VECTOR3_ARRAY:
+        case Variant::Type::PACKED_COLOR_ARRAY:            
         case Variant::Type::ARRAY: {
             Array array = var.operator Array();
             lua_newtable(state);
@@ -438,7 +434,7 @@ void Lua::createVector2Metatable( ){
 				lua->pushVariant( arg1.operator Vector2() * arg2.operator Vector2() );
 				return 1;
 			case Variant::Type::INT:
-			case Variant::Type::REAL:
+			case Variant::Type::FLOAT:
 				lua->pushVariant( arg1.operator Vector2() * arg2.operator double() );
 				return 1;
 			default:
@@ -452,7 +448,7 @@ void Lua::createVector2Metatable( ){
 				lua->pushVariant( arg1.operator Vector2() / arg2.operator Vector2() );
 				return 1;
 			case Variant::Type::INT:
-			case Variant::Type::REAL:
+			case Variant::Type::FLOAT:
 				lua->pushVariant( arg1.operator Vector2() / arg2.operator double() );
 				return 1;
 			default:
@@ -495,7 +491,7 @@ void Lua::createVector3Metatable( ){
 				lua->pushVariant( arg1.operator Vector3() * arg2.operator Vector3() );
 				return 1;
 			case Variant::Type::INT:
-			case Variant::Type::REAL:
+			case Variant::Type::FLOAT:
 				lua->pushVariant( arg1.operator Vector3() * arg2.operator double() );
 				return 1;
 			default:
@@ -509,7 +505,7 @@ void Lua::createVector3Metatable( ){
 				lua->pushVariant( arg1.operator Vector3() / arg2.operator Vector3() );
 				return 1;
 			case Variant::Type::INT:
-			case Variant::Type::REAL:
+			case Variant::Type::FLOAT:
 				lua->pushVariant( arg1.operator Vector3() / arg2.operator double() );
 				return 1;
 			default:
@@ -552,7 +548,7 @@ void Lua::createColorMetatable( ){
 				lua->pushVariant( arg1.operator Color() * arg2.operator Color() );
 				return 1;
 			case Variant::Type::INT:
-			case Variant::Type::REAL:
+			case Variant::Type::FLOAT:
 				lua->pushVariant( arg1.operator Color() * arg2.operator double() );
 				return 1;
 			default:
@@ -566,7 +562,7 @@ void Lua::createColorMetatable( ){
 				lua->pushVariant( arg1.operator Color() / arg2.operator Color() );
 				return 1;
 			case Variant::Type::INT:
-			case Variant::Type::REAL:
+			case Variant::Type::FLOAT:
 				lua->pushVariant( arg1.operator Color() / arg2.operator double() );
 				return 1;
 			default:
