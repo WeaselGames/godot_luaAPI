@@ -3,13 +3,11 @@
 
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
-#include "modules/gdscript/gdscript_lambda_callable.h"
 
 #include "luasrc/lua.hpp"
 #include <string>
 #include <thread>
 #include <mutex>
-#include <map>
 
 class Lua : public RefCounted {
   GDCLASS(Lua, RefCounted);
