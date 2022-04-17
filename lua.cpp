@@ -28,16 +28,6 @@ Lua::Lua(){
     // threaded is false by default
 	threaded = false;
 	
-	// loading base libs
-    luaL_requiref(state, "", luaopen_base, 1);
-   	lua_pop(state, 1);
-    luaL_requiref(state, LUA_TABLIBNAME, luaopen_table, 1);
-    lua_pop(state, 1);
-    luaL_requiref(state, LUA_STRLIBNAME, luaopen_string, 1);
-    lua_pop(state, 1);
-    luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
-    lua_pop(state, 1);
-	
 	lua_sethook(state, &LineHook, LUA_MASKLINE, 0);
 	lua_register(state, "print", luaPrint);
 
@@ -56,6 +46,7 @@ Lua::Lua(){
 	
 }
 
+
 Lua::~Lua(){
     // Warning users about object destruction if code is currently being executed see https://github.com/Trey2k/lua/issues/9
     if (executing){
@@ -71,6 +62,7 @@ static bool shouldKill = false;
 void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("kill_all"),&Lua::killAll);
     ClassDB::bind_method(D_METHOD("set_threaded", "bool"),&Lua::setThreaded);
+    ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&Lua::bindLibs);
     ClassDB::bind_method(D_METHOD("do_file", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("do_string", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
@@ -78,6 +70,45 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"),&Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("call_function","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
+}
+
+void Lua::bindLibs(Array libs) {
+    for (int i = 0; i < libs.size(); i++) {
+        String lib = ((String)libs.get(i)).to_lower();
+        if (lib=="base") {
+            luaL_requiref(state, "", luaopen_base, 1);
+   	        lua_pop(state, 1);
+            // base will override print, so we take it back. User can still override them selfs
+            lua_register(state, "print", luaPrint);
+        } else if (lib=="table") {
+            luaL_requiref(state, LUA_TABLIBNAME, luaopen_table, 1);
+            lua_pop(state, 1);
+        }else if (lib=="string") {
+            luaL_requiref(state, LUA_STRLIBNAME, luaopen_string, 1);
+            lua_pop(state, 1);
+        }else if (lib=="math") {
+            luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
+            lua_pop(state, 1);
+        }else if (lib=="os") {
+            luaL_requiref(state, LUA_OSLIBNAME, luaopen_os, 1);
+            lua_pop(state, 1);
+        }else if (lib=="io") {
+            luaL_requiref(state, LUA_IOLIBNAME, luaopen_io, 1);
+            lua_pop(state, 1);
+        }else if (lib=="coroutine") {
+            luaL_requiref(state, LUA_COLIBNAME, luaopen_coroutine, 1);
+            lua_pop(state, 1);
+        }else if (lib=="debug") {
+            luaL_requiref(state, LUA_DBLIBNAME, luaopen_debug, 1);
+            lua_pop(state, 1);
+        }else if (lib=="package") {
+            luaL_requiref(state, LUA_LOADLIBNAME, luaopen_package, 1);
+            lua_pop(state, 1);
+        }else if (lib=="utf8") {
+            luaL_requiref(state, LUA_UTF8LIBNAME, luaopen_utf8, 1);
+            lua_pop(state, 1);
+        }
+    }
 }
 
 // Returns lua state

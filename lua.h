@@ -19,7 +19,8 @@ public:
   Lua();
   ~Lua();
   
-  void exposeFunction(Callable func, String name);
+  void bindLibs(Array libs);
+  void exposeFunction(Callable func, String name); 
   void doFile( String fileName, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void doString( String code, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
   void setThreaded(bool thread);
