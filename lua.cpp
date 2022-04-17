@@ -25,10 +25,7 @@ lua_settable(lua_state,metatable_index-2);
 Lua::Lua(){
 	// Createing lua state instance
 	state = luaL_newstate();
-    // threaded is false by default
-	threaded = false;
-	
-	lua_sethook(state, &LineHook, LUA_MASKLINE, 0);
+
 	lua_register(state, "print", luaPrint);
 
 	// saving this object into registry
@@ -48,28 +45,26 @@ Lua::Lua(){
 
 
 Lua::~Lua(){
-    // Warning users about object destruction if code is currently being executed see https://github.com/Trey2k/lua/issues/9
-    if (executing){
-        print_line("WARNING! Lua object is being destroyed while code is currently being executed.");
-    }
-    
     // Destroying lua state instance
     lua_close(state);
 }
 
-static bool shouldKill = false;
 // Bind C++ functions to GDScript
 void Lua::_bind_methods(){
-    ClassDB::bind_method(D_METHOD("kill_all"),&Lua::killAll);
-    ClassDB::bind_method(D_METHOD("set_threaded", "bool"),&Lua::setThreaded);
     ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&Lua::bindLibs);
-    ClassDB::bind_method(D_METHOD("do_file", "File", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doFile, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
-    ClassDB::bind_method(D_METHOD("do_string", "Code", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::doString, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("add_file", "File"), &Lua::addFile);
+    ClassDB::bind_method(D_METHOD("add_string", "Code"), &Lua::addString);
+    ClassDB::bind_method(D_METHOD("execute"), &Lua::execute);
     ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"),&Lua::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"),&Lua::exposeFunction);
-    ClassDB::bind_method(D_METHOD("call_function","LuaFunctionName", "Args", "ProtectedCall" , "CallbackCaller" , "Callback" ), &Lua::callFunction , DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()) );
+    ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &Lua::callFunction );
+    ClassDB::bind_method(D_METHOD("set_error_handler", "Callable"), &Lua::setErrorHandler );
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
+}
+
+void Lua::setErrorHandler(Callable errorHandler) {
+    this->errorHandler = errorHandler;
 }
 
 void Lua::bindLibs(Array libs) {
@@ -118,7 +113,7 @@ lua_State* Lua::getState() {
 
 // Get one of the callables exposed to lua via its index.
 Callable Lua::getCallable(int index){
-    if (index <= callables.size()) {
+    if (index < callables.size()) {
         return callables.get(index);
     }
     return Callable();
@@ -136,6 +131,10 @@ int Lua::luaExposedFuncCall(lua_State *state) {
     Variant arg4 = obj->getVariant(4);
     Variant arg5 = obj->getVariant(5);
     Callable func = obj->getCallable(callIndex);
+    if (!func.is_valid()) {
+        print_error( vformat("Error during \"Lua::luaExposedFuncCall\" Callable not vlaid \"%s\": ",func) );
+        return 0;
+    }
     const Variant* args[5] = {
         &arg1,
         &arg2,
@@ -146,10 +145,11 @@ int Lua::luaExposedFuncCall(lua_State *state) {
     Variant returned;
     Callable::CallError error;
     func.call(args, argc, returned, error);
-   if (error.error != error.CALL_OK) {
-       // TODO: Better error handling
-       print_error("Error during function call");
-   }
+    if (error.error != error.CALL_OK) {
+        // TODO: Better error handling, maybe this should be passed to errorHandler instead since this could be user triggered as well.
+        print_error( vformat("Error during \"Lua::luaExposedFuncCall\" on Callable \"%s\": ",func) );
+        return 0;
+    }    
 
     // Always returns something. If script instance doesn't returns anything, it will returns a NIL value anyway
     obj->pushVariant(returned);
@@ -174,8 +174,7 @@ void Lua::exposeFunction(Callable func, String name){
 }
 
 // call a Lua function from GDScript
-Variant Lua::callFunction( String function_name, Array args , bool protected_call , Object* callback_caller , String callback ) {
-    Variant toReturn;
+Variant Lua::callFunction( String function_name, Array args) {
     int stack_size = lua_gettop(state);
     // put global function name on stack
     lua_getglobal(state, function_name.ascii().get_data() );
@@ -185,31 +184,16 @@ Variant Lua::callFunction( String function_name, Array args , bool protected_cal
         pushVariant(args[i]);
     }
 
-    if( protected_call ){
-        int ret = lua_pcall(state,args.size(), 1 , 0 );
-        if( ret != LUA_OK ){
+    int ret = lua_pcall(state,args.size(), 1 , 0 );
+    if( ret != LUA_OK ){
 
-            // Default error handling:
-            if( callback_caller == nullptr || callback == String() ){
-                print_error( vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name) );
-                handleError( state , ret );
-            } 
-            
-            // Custom error handling:
-            else {
-                ScriptInstance *scriptInstance = callback_caller->get_script_instance();
-                scriptInstance->call(callback, String(lua_tostring(state,-1)) );
-            }
-        }
-        toReturn = getVariant(1);
-        lua_pop(state, 1);
-
-    } else {
-        lua_call(state,args.size(), 1 );
-        toReturn = getVariant(1);
-        lua_pop(state, 1);
+        if( !errorHandler.is_valid() ){
+            print_error( vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name) );
+        } 
+        handleError( ret );
+        return 0;
     }
-    return toReturn;
+    return getVariant(1);
 }
 
 bool Lua::luaFunctionExists(String function_name){
@@ -218,69 +202,34 @@ bool Lua::luaFunctionExists(String function_name){
     return type == LUA_TFUNCTION;
 }
 
-void Lua::setThreaded(bool thread){
-    threaded = thread;
-}
-
-// doFile() will just load the file's text and call doString()
-void Lua::doFile( String fileName, bool protected_call , Object* callback_caller , String callback ){
-  String code = FileAccess::get_file_as_string(fileName);
-
-  doString(code, protected_call , callback_caller , callback);
-}
-
-// kill all active threads
-void Lua::killAll(){
-    //TODO: Create a method to kill individual threads
-    shouldKill = true;
-}
-
-// Called every line of lua that is ran
-void Lua::LineHook(lua_State *L, lua_Debug *ar){
-    if(shouldKill){
-        luaL_error(L, "Execution terminated");
-        shouldKill = false;
+// addFile() calls luaL_loadfille with the absolute file path
+void Lua::addFile(String fileName){
+    Error error;
+    Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
+    if (error != Error::OK) {
+        // TODO: Maybe better error handling?
+        print_error(error_names[error]);
+        return;
     }
+    String path = file->get_path_absolute();
+    luaL_loadfile(state, path.ascii().get_data());
 }
 
 // Run lua string in a thread if threading is enabled
-void Lua::doString( String code, bool protected_call , Object* callback_caller , String callback ){
-    if(threaded){
-        std::thread(runLua, state , code , protected_call , callback_caller , callback , &executing ).detach();
-    }else{
-        runLua( state , code , protected_call , callback_caller , callback , &executing );
-    }
+void Lua::addString( String code ){
+  luaL_loadstring(state, code.ascii().get_data());
 }
 
-// Execute a lua script string and , if protected_call, call the passed callBack function with the error as the aurgument if an error occurees
-void Lua::runLua( lua_State *L , String code, bool protected_call , Object* callback_caller , String callback, bool *executing ){
-    *executing = true;
-    if( protected_call ){
-        
-        int ret = luaL_dostring( L , code.ascii().get_data() );
-        if( ret != LUA_OK ){
-
-            // Default error handling:
-            if( callback_caller == nullptr || callback == String() ){
-                handleError( L , ret );
-            } 
-            
-            // Custom error handling:
-            else {
-                ScriptInstance *scriptInstance = callback_caller->get_script_instance();
-                scriptInstance->call(callback, String(lua_tostring(L,-1)) );
-            }
-        }
-    } 
-
-    // Call not protected (crashes and exit the program if error!)
-    else {
-        luaL_loadstring(L, code.ascii().get_data() ) ;
-        lua_call(L, 0 /* nargs */ , 0 /* nresults */ ) ;
+// Execute the current lua stack, return error as string if one occures, otherwise return String()
+void Lua::execute() {
+    // TODO: Maybe some custom error types for better error handling
+    int ret = lua_pcall(state, 0, 0, 0);
+    if( ret != LUA_OK ){
+        if( !errorHandler.is_valid() ){
+            print_error( "Error during \"Lua::execute\"" );
+        } 
+        handleError( ret );
     }
-
-    *executing = false;
-
 }
 
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
@@ -372,7 +321,7 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
 Variant Lua::pullVariant(String name){
     int type = lua_getglobal(state, name.ascii().get_data());
     Variant val = getVariant(1);
-    lua_pop(state, 1);
+    
     return val;
 }
 
@@ -409,6 +358,7 @@ Variant Lua::getVariant(int index) {
         default:
             result = Variant();
     }
+    lua_pop(state, 1);
     return result;
 }
 
@@ -622,7 +572,7 @@ void Lua::createColorMetatable( ){
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
-void Lua::handleError( lua_State* L , int lua_error ){
+void Lua::handleError(int lua_error){
     String msg;
     switch( lua_error ){
         case LUA_ERRRUN:
@@ -636,19 +586,31 @@ void Lua::handleError( lua_State* L , int lua_error ){
             break;
         default: break;
     }
-    msg += lua_tostring(L,-1);
-    print_error( msg );
-    lua_pop(L,1);
+    msg += lua_tostring(state,-1);
+    lua_pop(state,1);
+    if (!errorHandler.is_valid()) {
+        print_error(msg);
+        return;
+    }
+    // custom error handling
+    const Variant* args[1];
+    Variant temp = msg;
+    args[0] = &temp;
+    Variant returned;
+    Callable::CallError error;
+    errorHandler.call(args, 1, returned, error);
+    if (error.error != error.CALL_OK) {
+        print_error( vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ",errorHandler) );
+    }
 }
 
 // Lua functions
 // Change lua's print function to print to the Godot console by default
 int Lua::luaPrint(lua_State* state)
 {
-
-  int args = lua_gettop(state);
-	String final_string;
-  for ( int n=1; n<=args; ++n) {
+    int args = lua_gettop(state);
+    String final_string;
+    for ( int n=1; n<=args; ++n) {
 		String it_string;
 		
 		switch( lua_type(state,n) ){
@@ -665,9 +627,9 @@ int Lua::luaPrint(lua_State* state)
 
 		final_string += it_string;
 		if( n < args ) final_string += ", ";
-  }
+    }
 
 	print_line( final_string );
 
-  return 0;
+    return 0;
 }

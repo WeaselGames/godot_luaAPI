@@ -26,7 +26,7 @@ private:
 public:
     LuaDrawNode();
     ~LuaDrawNode();
-    void luaBind(Object *instance, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
+    void luaBind(Object *instance);
     void setFont(const Ref<Font> &pFont);
     Ref<Font> getFont();
 
@@ -34,9 +34,6 @@ public:
     
 private:
     Lua *instance;
-    bool protectedCall;
-    Object* callbackObj;
-    String callbackFunc;
     Ref<Font> font;
 
     float rotAg = 50;

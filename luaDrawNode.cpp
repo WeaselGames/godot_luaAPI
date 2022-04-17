@@ -15,7 +15,7 @@ LuaDrawNode::~LuaDrawNode() {
 }
 
 void LuaDrawNode::_bind_methods(){
-    ClassDB::bind_method(D_METHOD("bind_lua", "Lua", "ProtectedCall" , "CallbackCaller" , "Callback" ), &LuaDrawNode::luaBind, DEFVAL(true) , DEFVAL(Variant()) , DEFVAL(String()));
+    ClassDB::bind_method(D_METHOD("bind_lua", "Lua"), &LuaDrawNode::luaBind);
     ClassDB::bind_method(D_METHOD("set_font", "font"), &LuaDrawNode::setFont);
 	ClassDB::bind_method(D_METHOD("get_font"), &LuaDrawNode::getFont);
     ClassDB::bind_method(D_METHOD("_unhandled_key_input"), &LuaDrawNode::unhandled_key_input);
@@ -45,7 +45,7 @@ void LuaDrawNode::unhandled_key_input(const Ref<InputEvent> &event){
     Array args = Array();
     args.append((int)inputKey->get_keycode());
     args.append((int)inputKey->get_modifiers_mask());
-    instance->callFunction("_input", args, protectedCall, callbackObj, callbackFunc);
+    instance->callFunction("_input", args);
 }
 
 void LuaDrawNode::_process() {
@@ -58,7 +58,7 @@ void LuaDrawNode::_process() {
     }
     Array args = Array();
     args.append(get_process_delta_time());
-    instance->callFunction("_process", args, protectedCall, callbackObj, callbackFunc);
+    instance->callFunction("_process", args);
 }
 
 void LuaDrawNode::_draw() {
@@ -69,7 +69,7 @@ void LuaDrawNode::_draw() {
     if (!instance->luaFunctionExists("_draw")) {
         return;
     }
-    instance->callFunction("_draw", Array(), protectedCall, callbackObj, callbackFunc);
+    instance->callFunction("_draw", Array());
 }
 
 void LuaDrawNode::setFont(const Ref<Font> &pFont) {
@@ -84,12 +84,9 @@ Ref<Font> LuaDrawNode::getFont() {
 	return font;
 }
 
-void LuaDrawNode::luaBind(Object *inst, bool protected_call , Object* callback_caller , String callback ) {
+void LuaDrawNode::luaBind(Object *inst) {
      
     instance = Object::cast_to<Lua>(inst);
-    protectedCall = protected_call;
-    callbackObj = callback_caller;
-    callbackFunc = callback;
     bindDrawArc();
     bindDrawRect();
     bindDrawString();

@@ -20,13 +20,12 @@ public:
   ~Lua();
   
   void bindLibs(Array libs);
+  void setErrorHandler(Callable errorHandler);
   void exposeFunction(Callable func, String name); 
-  void doFile( String fileName, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
-  void doString( String code, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
-  void setThreaded(bool thread);
-  void killAll();
+  void addFile(String fileName);
+  void addString( String code );
+  void execute();
 
-  static void runLua( lua_State *L , String code, bool protected_call , Object* CallbackCaller , String callback, bool *executing );
 
   bool pushVariant(Variant var);
   bool pushGlobalVariant(Variant var, String name);
@@ -34,7 +33,7 @@ public:
   
   Variant pullVariant(String name);
   Variant getVariant(int index = -1);
-  Variant callFunction( String function_name, Array args, bool protected_call = true , Object* CallbackCaller = nullptr , String callback = String() );
+  Variant callFunction( String function_name, Array args );
 
   Callable getCallable(int index);
   lua_State* getState();
@@ -46,9 +45,8 @@ public:
 
 private:
   lua_State *state;
-  bool threaded;
-  bool executing;
   Vector<Callable> callables;
+  Callable errorHandler;
 
 private:
   void exposeConstructors(  );
@@ -56,7 +54,7 @@ private:
   void createVector3Metatable(  );
   void createColorMetatable(  );
 
-  static void handleError( lua_State *L , int lua_error );
+  void handleError( int lua_error );
 
 };
 
