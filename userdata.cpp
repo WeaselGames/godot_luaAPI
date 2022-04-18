@@ -72,6 +72,19 @@ void Lua::exposeConstructors( ){
 		return 1;
 	}));
 	lua_setglobal(state, "Rect2" );
+
+	lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
+        int argc = lua_gettop(inner_state);
+        if( argc == 4 ){
+		    lua->pushVariant( Plane( arg1.operator float() , arg2.operator float(), arg3.operator float(), arg4.operator float()) );
+        } else if ( argc == 3 ) {
+		    lua->pushVariant( Plane( arg1.operator Vector3() , arg2.operator Vector3() , arg3.operator Vector3() ) );
+        } else {
+            lua->pushVariant( Plane( arg1.operator Vector3() , arg1.operator float()) );
+        }
+		return 1;
+	}));
+	lua_setglobal(state, "Plane" );
 }
 
 // Create metatable for Vector2 and saves it at LUA_REGISTRYINDEX with name "mt_Vector2"
@@ -133,6 +146,11 @@ void Lua::createVector2Metatable( ){
 		}
 	});
 
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__eq" , {
+		lua->pushVariant( arg1.operator Vector2() == arg2.operator Vector2() );
+    	return 1;
+	});
+
     lua_pop(state,1); // Stack is now unmodified
 }
 
@@ -188,6 +206,11 @@ void Lua::createVector3Metatable( ){
 			default:
 				return 0;
 		}
+	});
+
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__eq" , {
+		lua->pushVariant( arg1.operator Vector3() == arg2.operator Vector3() );
+    	return 1;
 	});
 
     lua_pop(state,1); // Stack is now unmodified
@@ -247,6 +270,11 @@ void Lua::createColorMetatable( ){
 		}
 	});
 
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__eq" , {
+		lua->pushVariant( arg1.operator Color() == arg2.operator Color() );
+    	return 1;
+	});
+
     lua_pop(state,1); // Stack is now unmodified
 }
 
@@ -264,7 +292,38 @@ void Lua::createRect2Metatable( ){
 		// We can't use arg1 here because we need to reference the userdata
 		((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
 		return 0;
+		
 	});	
+
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__eq" , {
+		lua->pushVariant( arg1.operator Rect2() == arg2.operator Rect2() );
+    	return 1;
+	});
+
+    lua_pop(state,1); // Stack is now unmodified
+}
+
+// Create metatable for Color and saves it at LUA_REGISTRYINDEX with name "mt_Color"
+void Lua::createPlaneMetatable( ){
+
+    luaL_newmetatable( state , "mt_Plane" );
+
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
+		lua->pushVariant( arg1.get( arg2 ) );
+		return 1;
+	});
+
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__newindex" , {
+		// We can't use arg1 here because we need to reference the userdata
+		((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
+		return 0;
+	});	
+
+	LUA_METAMETHOD_TEMPLATE( state , -1 , "__eq" , {
+		lua->pushVariant( arg1.operator Plane() == arg2.operator Plane() );
+    	return 1;
+	});
+	
 
     lua_pop(state,1); // Stack is now unmodified
 }

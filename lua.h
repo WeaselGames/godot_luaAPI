@@ -54,6 +54,7 @@ private:
   void createVector3Metatable(  );
   void createColorMetatable(  );
   void createRect2Metatable(  );
+  void createPlaneMetatable(  );
 
   void handleError( int lua_error );
 
