@@ -26,10 +26,8 @@ void Lua::exposeConstructors( ){
 	lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
         if( argc == 0 ){
-			print_line("test six");
             lua->pushVariant( Vector2() );
         } else {
-			print_line("test seven", arg1, arg2, arg3, arg4, arg5);
 		    lua->pushVariant( Vector2( arg1.operator float() , arg2.operator float() ) );
         }
 		return 1;
@@ -92,26 +90,22 @@ void Lua::createVector2Metatable( ){
     luaL_newmetatable( state , "mt_Vector2" );
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
-		print_line("test one", arg1, arg2, arg3, arg4, arg5);
 		lua->pushVariant( arg1.get( arg2 ) );
 		return 1;
 	});
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__newindex" , {
 		// We can't use arg1 here because we need to reference the userdata
-		print_line("test two");
 		((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
 		return 0;
 	});	
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__add" , {
-		print_line("test three");
 		lua->pushVariant( arg1.operator Vector2() + arg2.operator Vector2() );
     return 1;
 	});
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__sub" , {
-		print_line("test four");
 		lua->pushVariant( arg1.operator Vector2() - arg2.operator Vector2() );
     return 1;
 	});
