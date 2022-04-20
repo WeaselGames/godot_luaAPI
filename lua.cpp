@@ -102,17 +102,25 @@ Callable Lua::getCallable(int index){
 
 // The function used when lua calls a exposed function
 int Lua::luaExposedFuncCall(lua_State *state) {
-    class Lua *obj = (class Lua*) lua_topointer(state, lua_upvalueindex(1));
-    int callIndex = lua_tointeger(state, lua_upvalueindex(2));
+    // Get referance of the class
+    lua_pushstring(inner_state,"__Lua");
+    lua_rawget(inner_state,LUA_REGISTRYINDEX);
+    Lua* lua = (Lua*) lua_touserdata(inner_state,-1);
+    lua_pop(inner_state,1);
+
+    // Get callabes index
+    int callIndex = lua_tointeger(state, lua_upvalueindex(1));
     int argc = lua_gettop(state);
+    
     Variant arg1 = obj->getVariant(1);
     Variant arg2 = obj->getVariant(2);
     Variant arg3 = obj->getVariant(3);
     Variant arg4 = obj->getVariant(4);
     Variant arg5 = obj->getVariant(5);
+    
     Callable func = obj->getCallable(callIndex);
     if (!func.is_valid()) {
-        print_error( vformat("Error during \"Lua::luaExposedFuncCall\" Callable not vlaid \"%s\": ",func) );
+        print_error( vformat("Error during \"Lua::luaExposedFuncCall\" Callable \"%s\" not vlaid.",func) );
         return 0;
     }
     const Variant* args[5] = {
@@ -130,8 +138,9 @@ int Lua::luaExposedFuncCall(lua_State *state) {
         print_error( vformat("Error during \"Lua::luaExposedFuncCall\" on Callable \"%s\": ",func) );
         return 0;
     }    
+    // If val is null dont return anything.
+    if (returned.is_null()) return 0;
 
-    // Always returns something. If script instance doesn't returns anything, it will returns a NIL value anyway
     obj->pushVariant(returned);
     return 1;
 
@@ -141,13 +150,10 @@ int Lua::luaExposedFuncCall(lua_State *state) {
 void Lua::exposeFunction(Callable func, String name){
    callables.push_back(func);
 
-  // Pushing the referance of the class
-  lua_pushlightuserdata(state, this);
-
   // Pushing the callables index
   lua_pushinteger(state, callables.size()-1);
 
-  lua_pushcclosure(state, Lua::luaExposedFuncCall, 2);
+  lua_pushcclosure(state, Lua::luaExposedFuncCall, 1);
   // Setting the global name for the function in lua
   lua_setglobal(state, name.ascii().get_data());
   
@@ -184,18 +190,13 @@ bool Lua::luaFunctionExists(String function_name){
     return type == LUA_TFUNCTION;
 }
 
-// addFile() calls luaL_loadfille with the absolute file path
+// addFile() calls luaL_loadfille with the absolute file path, takes godot file path aka user:// or res://
 void Lua::addFile(String fileName){
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
         // TODO: Maybe better error handling?
-        print_error(error_names[error]);
-        return;
-    }
-    String path = file->get_path_absolute();
-    luaL_loadfile(state, path.ascii().get_data());
-}
+	ClassDB::register_class<LuaDrawNode>();
 
 // Run lua string in a thread if threading is enabled
 void Lua::addString( String code ){
@@ -286,6 +287,12 @@ bool Lua::pushVariant(Variant var) {
             void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
             memcpy( userdata , (void*)&var , sizeof(Variant) );
             luaL_setmetatable(state,"mt_Rect2");
+            break;     
+        }
+        case Variant::Type::PLANE: {
+            void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
+            memcpy( userdata , (void*)&var , sizeof(Variant) );
+            luaL_setmetatable(state,"mt_Plane");
             break;     
         }
         default:
