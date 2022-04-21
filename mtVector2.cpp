@@ -292,12 +292,6 @@ void Lua::createVector2Metatable( ){
     luaL_newmetatable( state , "mt_Vector2" );
 
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
-        Variant value = arg1.get( arg2 );
-        if (!value.is_null()) {
-            lua->pushVariant( value ) ;
-            return 1;
-        }
-        
         // Index was not found, so check to see if there is a matching function
         if (vec2Funcs.find(arg2.operator String()) != vec2Funcs.end()) {
             auto f = vec2Funcs.at(arg2.operator String());
@@ -307,7 +301,8 @@ void Lua::createVector2Metatable( ){
             return 1;
         }
         
-        return 0;
+        lua->pushVariant( arg1.get( arg2 ) );
+        return 1;
     });
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__newindex" , {

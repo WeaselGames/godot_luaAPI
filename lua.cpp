@@ -218,26 +218,6 @@ void Lua::execute() {
     }
 }
 
-// This is the only way I found to let lua own the object
-void Lua::exposeObjectConstructor(Object* obj, String name) {
-    // Make sure we are able to call new
-    if (!obj->has_method("new")) {
-        print_error( "Error during \"Lua::exposeObjectConstructor\" method 'new' does not exist." );
-        return;
-    }
-    lua_pushlightuserdata(state, obj);
-    lua_pushcclosure(state, LUA_LAMBDA_TEMPLATE({
-        Object* inner_obj = (Object*)lua_touserdata(inner_state, lua_upvalueindex(1));
-        Variant* var = (Variant*)lua_newuserdata( inner_state , sizeof(Variant) );
-        // If its owned by lua we wont to clean up the pointer.
-        *var = inner_obj->call("new");
-
-        luaL_setmetatable(inner_state, "mt_Object");
-        return 1;
-    }), 1);
-    lua_setglobal(state, name.ascii().get_data() );
-}
-
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
 bool Lua::pushVariant(Variant var) {
     switch (var.get_type())

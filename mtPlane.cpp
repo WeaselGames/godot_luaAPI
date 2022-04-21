@@ -17,12 +17,6 @@ void Lua::createPlaneMetatable( ){
     luaL_newmetatable( state , "mt_Plane" );
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
-        Variant value = arg1.get( arg2 );
-        if (!value.is_null()) {
-            lua->pushVariant( value ) ;
-            return 1;
-        }
-        
         // Index was not found, so check to see if there is a matching function
         if (planeFuncs.find(arg2.operator String()) != planeFuncs.end()) {
             auto f = planeFuncs.at(arg2.operator String());
@@ -32,7 +26,8 @@ void Lua::createPlaneMetatable( ){
             return 1;
         }
         
-        return 0;
+        lua->pushVariant( arg1.get( arg2 ) );
+        return 1;
     });
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__newindex" , {

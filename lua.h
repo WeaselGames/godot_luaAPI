@@ -72,6 +72,9 @@ private:
   Vector<Callable> callables;
   Callable errorHandler;
 
+public:
+  Vector<Variant*>luaObjects;
+
 private:
   void exposeConstructors(  );
   void createVector2Metatable(  );

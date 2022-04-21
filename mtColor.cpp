@@ -16,12 +16,6 @@ void Lua::createColorMetatable( ){
     luaL_newmetatable( state , "mt_Color" );
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
-        Variant value = arg1.get( arg2 );
-        if (!value.is_null()) {
-            lua->pushVariant( value ) ;
-            return 1;
-        }
-        
         // Index was not found, so check to see if there is a matching function
         if (colorFuncs.find(arg2.operator String()) != colorFuncs.end()) {
             auto f = colorFuncs.at(arg2.operator String());
@@ -31,7 +25,8 @@ void Lua::createColorMetatable( ){
             return 1;
         }
         
-        return 0;
+        lua->pushVariant( arg1.get( arg2 ) ) ;
+        return 1;
     });
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__newindex" , {
