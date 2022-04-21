@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Lua" inherits="Reference" version="3.2">
+<class name="Lua" inherits="RefCounted" version="3.2">
 	<brief_description>
 	</brief_description>
 	<description>
-		It is recommended to always use [code]ProtectedCall=true[/code], otherwise the engine will crash if a error happens. [code]CallbackCaller[/code] and [code]Callback[/code] can be defined to handle the error message instead printing them to the console. 
+		TODO
 	</description>
 	<tutorials>
 	</tutorials>
@@ -15,34 +15,22 @@
 			</argument>
 			<argument index="1" name="Args" type="Array">
 			</argument>
-			<argument index="2" name="ProtectedCall" type="bool" default="true">
-			</argument>
-			<argument index="3" name="CallbackCaller" type="Object" default="null">
-			</argument>
-			<argument index="4" name="Callback" type="String" default="&quot;&quot;">
-			</argument>
 			<description>
-				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with [code]do_file()[/code] or [code]do_string()[/code].
+				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with lua.
 				You may want to check if the function actually exists with [code]lua_function_exists(LuaFunctionName)[/code].
 				This function supports 1 return value from lua. It will be returned as a variant and if lua returns no value it will be null. 
 			</description>
 		</method>
-		<method name="do_file">
+		<method name="load_file">
 			<return type="void">
 			</return>
-			<argument index="0" name="File" type="String">
-			</argument>
-			<argument index="1" name="ProtectedCall" type="bool" default="true">
-			</argument>
-			<argument index="2" name="CallbackCaller" type="Object" default="null">
-			</argument>
-			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
+			<argument index="0" name="FilePath" type="String">
 			</argument>
 			<description>
-				Loads a files content as a string and calls [code]do_string[/code] with it.
+				Loads a file with luaL_laodfile() passing its absolute path.
 			</description>
 		</method>
-		<method name="do_string">
+		<method name="load_string">
 			<return type="void">
 			</return>
 			<argument index="0" name="Code" type="String">
@@ -54,27 +42,18 @@
 			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
 			</argument>
 			<description>
-				Executes [code]Code[/code] as a piece of Lua code.
+				loas a string with luaL_loadstring()
 			</description>
 		</method>
 		<method name="expose_function">
 			<return type="void">
 			</return>
-			<argument index="0" name="NodeObject" type="Object">
-			</argument>
-			<argument index="1" name="GDFunction" type="String">
+			<argument index="0" name="function" type="Callable">
 			</argument>
 			<argument index="2" name="LuaFunctionName" type="String">
 			</argument>
 			<description>
-				Defines a lua function with name [code]LuaFunctionName[/code]. When Lua code calls it, it will call the [code]GDFunction[/code] method of [code]NodeObject[/code], so make sure the object still exists at this moment.
-			</description>
-		</method>
-		<method name="kill_all">
-			<return type="void">
-			</return>
-			<description>
-				Kills all current lua threads in execution.
+				TODO
 			</description>
 		</method>
 		<method name="lua_function_exists">
@@ -104,15 +83,6 @@
 			</argument>
 			<description>
 			Will pull a copy of a glboal Variant from lua to GDScript.
-			</description>
-		</method>
-		<method name="set_threaded">
-			<return type="void">
-			</return>
-			<argument index="0" name="bool" type="bool">
-			</argument>
-			<description>
-				Set weather Lua runs on a seperate thread. Default is false
 			</description>
 		</method>
 	</methods>
