@@ -29,7 +29,7 @@ Features
 - Expose GDScript functions to lua with a return value and up to 5 arguments.
 - Call lua functions from GDScript.
 - Choose which libraries you wont lua to have access to.
-- Register a Object as a userdata type in lua. This allows you to pass a custom class. See [examples](#examples) below.
+- Object passed as userdata see [examples](#examples) below.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
 ```lua
 local v1 = Vector2(1,2)
@@ -66,7 +66,7 @@ lua = Lua.new()
 func _ready():
 	lua = Lua.new()
 	lua.add_string("for i=1,10,1 do print('Hello lua!') end")
-	lua.execue()
+	lua.execute()
 ```
 <br />
 
@@ -79,7 +79,7 @@ lua = Lua.new()
 func _ready():
 	lua = Lua.new()
 	lua.add_file("user://luaFile.lua")
-	lua.execue()
+	lua.execute()
 ```
 <br />
 
@@ -94,7 +94,7 @@ func _ready():
 	lua = Lua.new()
 	lua.push_variant(test, "str")
 	lua.add_string("print(str)")
-	lua.execue()
+	lua.execute()
 ```
 <br />
 
