@@ -146,7 +146,7 @@ func luaCallBack(err):
 
 func _ready():
 	lua = Lua.new()
-	lua.load_string("print(This wont work)")
+	lua.add_stringg("print(This wont work)")
 	lua.set_error_handler(luaCallBack)
 	lua.execute()
 ```
