@@ -48,7 +48,6 @@ public:
   void addFile(String fileName);
   void addString( String code );
   void execute();
-  void registerObject(Object* obj);
 
 
   bool pushVariant(Variant var);
@@ -71,7 +70,6 @@ private:
   lua_State *state;
   Vector<Callable> callables;
   Callable errorHandler;
-  Map<String, bool> registedObjects;
 
 private:
   void exposeConstructors(  );
@@ -80,6 +78,7 @@ private:
   void createColorMetatable(  );
   void createRect2Metatable(  );
   void createPlaneMetatable(  );
+  void createObjectMetatable( );
 
   void handleError( int lua_error );
 

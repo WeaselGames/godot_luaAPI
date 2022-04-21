@@ -18,6 +18,7 @@ Lua::Lua(){
     createColorMetatable();     // "mt_Color"
     createRect2Metatable();     // "mt_Rect2"
     createPlaneMetatable();     //  "mt_Plane"
+    createObjectMetatable();     //  "mt_Object"
 
 	// Exposing basic types constructors
 	exposeConstructors();
@@ -35,7 +36,6 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("add_string", "Code"), &Lua::addString);
     ClassDB::bind_method(D_METHOD("execute"), &Lua::execute);
     ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
-    ClassDB::bind_method(D_METHOD("register_object", "Object"),&Lua::registerObject);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"),&Lua::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"),&Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &Lua::callFunction );
@@ -217,114 +217,6 @@ void Lua::execute() {
     }
 }
 
-static int objFuncCall(lua_State *L) {
-    lua_pushstring(L,"__Lua");
-    lua_rawget(L,LUA_REGISTRYINDEX);
-    Lua* lua = (Lua*) lua_touserdata(L,-1);
-    lua_pop(L,1);
-    int argc = lua_gettop(L);
-
-    Variant arg1 = lua->getVariant(1);
-    Variant arg2 = lua->getVariant(2);
-    Variant arg3 = lua->getVariant(3);
-    Variant arg4 = lua->getVariant(4);
-    Variant arg5 = lua->getVariant(5);
-    String fName = lua->getVariant(lua_upvalueindex(1));
-    Variant* obj  = (Variant*)lua_touserdata(L, lua_upvalueindex(2));
-    Variant ret;
-    // This feels wrong but cant think of a better way atm. Passing the wrong number of args causes a error.
-    switch (argc) {
-        case 0:{
-            ret = obj->call(fName.ascii().get_data());
-            break;
-        }
-        case 1: {
-            ret = obj->call(fName.ascii().get_data(), arg1);
-            break;
-        }
-        case 2: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2);
-            break;
-        }
-        case 3: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2, arg3);
-            break;
-        }
-        case 4: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2, arg3, arg4);
-            break;
-        }
-        case 5: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2, arg3, arg4, arg5);
-            break;
-        }
-    }
-    
-    if (ret.is_null()) return 0;
-    lua->pushVariant(ret);
-    return 1;
-}
-
-void Lua::registerObject(Object* obj) {
-    // Make sure we are able to call new
-    if (!obj->has_method("new")) {
-        print_error( "Error during \"Lua::registerObject\" method 'new' does not exist." );
-        return;
-    }
-
-    // We need to create a instance of the object to chek if lua_name and lua_funcs exists.
-    Variant temp = obj->call("new");
-    String name = temp.get("lua_name");
-    if(name.is_empty()) {
-        print_error( "Error during \"Lua::registerObject\" field 'lua_name' does not exist or is empty." );
-        return;
-    }
-    // lua_funcs will return a array of functions lua is allowed to use.
-    if (!temp.has_method("lua_funcs")) {
-        print_error( "Error during \"Lua::registerObject\" method 'lua_funcs' does not exist." );
-        return;
-    }
-
-    String mName = vformat("omt_%s", name);
-
-    // Push a constructor for the object setting its name to the value of lua_name
-    lua_pushstring(state, mName.ascii().get_data());
-    lua_pushlightuserdata(state, obj);
-    lua_pushcclosure(state, LUA_LAMBDA_TEMPLATE({
-        String inner_mName = lua->getVariant(lua_upvalueindex(1));
-        Object* inner_obj = (Object*)lua_touserdata(inner_state, lua_upvalueindex(2));
-        Variant* var = (Variant*)lua_newuserdata( inner_state , sizeof(Variant) );
-        // If its owned by lua we wont to clean up the pointer.
-        *var = inner_obj->call("new");
-
-        luaL_setmetatable(inner_state, inner_mName.ascii().get_data());
-        return 1;
-    }), 2);
-    lua_setglobal(state, name.ascii().get_data() );
-
-    // Create the meta table for the object. Currently we only capute __index to look for methods
-    
-    registedObjects[mName] = true;
-
-    luaL_newmetatable( state , mName.ascii().get_data());
-
-    LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
-        Variant* inner_obj = (Variant*)lua_touserdata(inner_state, 1);
-        
-        Array funcs = inner_obj->call("lua_funcs");
-        // Make sure the function exists on the object and is in the exposed list
-        if (inner_obj->has_method(arg2) && funcs.has(arg2)) {
-            lua->pushVariant(arg2);
-            lua_pushlightuserdata(inner_state, inner_obj); // passing pointer on
-            lua_pushcclosure(inner_state, objFuncCall, 2);
-            return 1;
-        }
-        return 0;
-    });
-
-    lua_pop(state, 1);
-}
-
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
 bool Lua::pushVariant(Variant var) {
     switch (var.get_type())
@@ -406,16 +298,10 @@ bool Lua::pushVariant(Variant var) {
             break;     
         }
         case Variant::Type::OBJECT: {
-            String name = vformat("omt_%s", var.get("lua_name"));
-            if (!registedObjects.has(name)) {
-                print_error( vformat("Error during \"Lua::pushVariant\" object type \"%s\" has not been registerd.", name) );
-                return false;
-            }
-
             void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
             memcpy( userdata , (void*)&var , sizeof(Variant) );
-            luaL_setmetatable(state, name.ascii().get_data());
-            break;
+            luaL_setmetatable(state,"mt_Object");
+            break;  
         }
         default:
             print_error( vformat("Can't pass Variants of type \"%s\" to Lua." , Variant::get_type_name( var.get_type() ) ) );
