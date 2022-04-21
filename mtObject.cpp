@@ -74,12 +74,26 @@ void Lua::createObjectMetatable( ){
         // If the field is allowed
         if(allowedFields.is_empty() || allowedFields.has(arg2)) {
             Variant var = arg1.get(arg2);
+            print_line(var);
             lua->pushVariant(var);
             return 1;
         }
         
         return 0;
     });
+    
+    LUA_METAMETHOD_TEMPLATE( state , -1 , "__newindex" , {
+        Array allowedFields = Array();
+        if(arg1.has_method("lua_fields")) {
+            allowedFields = arg1.call("lua_fields");
+        }
+        
+        if((allowedFields.is_empty() || allowedFields.has(arg2)) && arg1.has_member(arg3.get_type(), arg2)) {
+            // We can't use arg1 here because we need to reference the userdata
+            ((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
+        }
+        return 0;
+    }); 
 
     // Makeing sure to clean up the pointer
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__gc" , {

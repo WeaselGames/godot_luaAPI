@@ -166,16 +166,18 @@ func _ready():
 ```
 <br />
 
-**Register custom type:**
+**Passing objects as userdata:**
 ```gdscript
 extends Node2D
-
 var lua: Lua
 class Player:
 	var pos = Vector2(0, 0)
 	#If lua_funcs is not defined or returns a empty array, all functions will be aval
 	func lua_funcs():
 		return ["move_forward"]
+	#lua_fields behaves the same as lua_funcs but for fields.
+	func lua_fields():
+		return ["pos"]
 	func move_forward():
 		pos.x+=1
 
@@ -184,11 +186,12 @@ var player2: Player
 func _ready():
 	lua = Lua.new()
 	player2 = Player.new()
-	#lua.expose_function(func(): return player2, "getPlayer2")
+	lua.expose_function(func(): return player2, "getPlayer2")
 	lua.expose_constructor(Player, "Player")
-	lua.add_string("player = Player() player.move_forward()")
+	lua.add_string("player = Player() player.move_forward() print(player.pos.x)")
 	lua.execute()
-	lua.add_string("player2 = getPlayer2() player2.move_forward() print(player2.pos)")
+	lua.add_string("player2 = getPlayer2() player2.pos = Vector2(50, 1) print(player2.pos)")
+	lua.execute()
 	var player = lua.pull_variant("player")
 	print(player.pos)
 	print(player2.pos)
