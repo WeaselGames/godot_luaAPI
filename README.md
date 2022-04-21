@@ -54,7 +54,7 @@ Compiling
 Godot version 3.4.4-stable is confirmed to be working.
 - Start by cloning the Godot 3.4.4-stable [source](https://github.com/godotengine/godot/tree/3.4.4-stable) with this command `git clone https://github.com/godotengine/godot -b 3.4.4-stable`
 
-- Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/Trey2k/lua`
+- Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/Trey2k/lua -b v1.1-stable`
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
