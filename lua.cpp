@@ -13,16 +13,15 @@ Lua::Lua(){
 	lua_rawset( state , LUA_REGISTRYINDEX );
 
 	// Creating basic types metatables and saving them in registry
-	createVector2Metatable(); // "mt_Vector2"
-	createVector3Metatable(); // "mt_Vector3"
-	createColorMetatable(); // "mt_Color"
-    createRect2Metatable(); // "mt_Rect2"
+	createVector2Metatable();   // "mt_Vector2"
+	createVector3Metatable();   // "mt_Vector3"
+    createColorMetatable();     // "mt_Color"
+    createRect2Metatable();     // "mt_Rect2"
+    createPlaneMetatable();     //  "mt_Plane"
 
 	// Exposing basic types constructors
 	exposeConstructors();
-	
 }
-
 
 Lua::~Lua(){
     // Destroying lua state instance
@@ -99,26 +98,25 @@ Callable Lua::getCallable(int index){
     return Callable();
 }
 
-
 // The function used when lua calls a exposed function
 int Lua::luaExposedFuncCall(lua_State *state) {
     // Get referance of the class
-    lua_pushstring(inner_state,"__Lua");
-    lua_rawget(inner_state,LUA_REGISTRYINDEX);
-    Lua* lua = (Lua*) lua_touserdata(inner_state,-1);
-    lua_pop(inner_state,1);
+    lua_pushstring(state,"__Lua");
+    lua_rawget(state,LUA_REGISTRYINDEX);
+    Lua* lua = (Lua*) lua_touserdata(state,-1);
+    lua_pop(state,1);
 
     // Get callabes index
     int callIndex = lua_tointeger(state, lua_upvalueindex(1));
     int argc = lua_gettop(state);
     
-    Variant arg1 = obj->getVariant(1);
-    Variant arg2 = obj->getVariant(2);
-    Variant arg3 = obj->getVariant(3);
-    Variant arg4 = obj->getVariant(4);
-    Variant arg5 = obj->getVariant(5);
-    
-    Callable func = obj->getCallable(callIndex);
+    Variant arg1 = lua->getVariant(1);
+    Variant arg2 = lua->getVariant(2);
+    Variant arg3 = lua->getVariant(3);
+    Variant arg4 = lua->getVariant(4);
+    Variant arg5 = lua->getVariant(5);
+
+    Callable func = lua->getCallable(callIndex);
     if (!func.is_valid()) {
         print_error( vformat("Error during \"Lua::luaExposedFuncCall\" Callable \"%s\" not vlaid.",func) );
         return 0;
@@ -141,7 +139,7 @@ int Lua::luaExposedFuncCall(lua_State *state) {
     // If val is null dont return anything.
     if (returned.is_null()) return 0;
 
-    obj->pushVariant(returned);
+    lua->pushVariant(returned);
     return 1;
 
 }
@@ -190,13 +188,19 @@ bool Lua::luaFunctionExists(String function_name){
     return type == LUA_TFUNCTION;
 }
 
-// addFile() calls luaL_loadfille with the absolute file path, takes godot file path aka user:// or res://
+// addFile() calls luaL_loadfille with the absolute file path
 void Lua::addFile(String fileName){
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
         // TODO: Maybe better error handling?
-	ClassDB::register_class<LuaDrawNode>();
+        print_error(error_names[error]);
+        return;
+    }
+
+    String path = file->get_path_absolute();
+    luaL_loadfile(state, path.ascii().get_data());
+}
 
 // Run lua string in a thread if threading is enabled
 void Lua::addString( String code ){
@@ -229,7 +233,7 @@ bool Lua::pushVariant(Variant var) {
             lua_pushinteger(state, (int64_t)var);
             break;
         case Variant::Type::FLOAT:
-            lua_pushnumber(state,var.operator float());
+            lua_pushnumber(state,var.operator double());
             break;
         case Variant::Type::BOOL:
             lua_pushboolean(state, (bool)var);
