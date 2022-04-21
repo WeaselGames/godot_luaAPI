@@ -30,6 +30,7 @@ lua_settable(lua_state,metatable_index-2);
 #include <string>
 #include <thread>
 #include <mutex>
+#include <map>
 
 class Lua : public RefCounted {
   GDCLASS(Lua, RefCounted);
@@ -47,6 +48,7 @@ public:
   void addFile(String fileName);
   void addString( String code );
   void execute();
+  void registerObject(Object* obj);
 
 
   bool pushVariant(Variant var);
@@ -69,6 +71,7 @@ private:
   lua_State *state;
   Vector<Callable> callables;
   Callable errorHandler;
+  Map<String, bool> registedObjects;
 
 private:
   void exposeConstructors(  );
