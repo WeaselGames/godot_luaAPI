@@ -48,6 +48,7 @@ public:
   void addFile(String fileName);
   void addString( String code );
   void execute();
+  void exposeObjectConstructor(Object* obj, String name);
 
 
   bool pushVariant(Variant var);

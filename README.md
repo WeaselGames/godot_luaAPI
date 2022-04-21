@@ -168,24 +168,30 @@ func _ready():
 
 **Register custom type:**
 ```gdscript
+extends Node2D
+
 var lua: Lua
 class Player:
-	#Name is used by lua to find the type. must be unique! It is also used as the name for the constructor.
-	const lua_name = "Player" 
-	var pos = Vector2()
-	#You wont always want lua to have access to all possible functions. Only functions returned here will be avalible from lua.
+	var pos = Vector2(0, 0)
+	#If lua_funcs is not defined or returns a empty array, all functions will be aval
 	func lua_funcs():
 		return ["move_forward"]
 	func move_forward():
 		pos.x+=1
 
+var player2: Player
+
 func _ready():
 	lua = Lua.new()
-	lua.register_object(Player)
+	player2 = Player.new()
+	#lua.expose_function(func(): return player2, "getPlayer2")
+	lua.expose_constructor(Player, "Player")
 	lua.add_string("player = Player() player.move_forward()")
 	lua.execute()
+	lua.add_string("player2 = getPlayer2() player2.move_forward() print(player2.pos)")
 	var player = lua.pull_variant("player")
 	print(player.pos)
+	print(player2.pos)
 ```
 Contributing And Feature Requests
 ---------------

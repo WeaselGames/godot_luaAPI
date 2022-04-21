@@ -53,7 +53,7 @@ void Lua::createObjectMetatable( ){
     Variant arg9;
 
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
-        Array allowedFuncs;
+        Array allowedFuncs = Array();
         if(arg1.has_method("lua_funcs")) {
             allowedFuncs = arg1.call("lua_funcs");
         }
@@ -65,17 +65,8 @@ void Lua::createObjectMetatable( ){
             lua_pushcclosure(inner_state, objFuncCall, 2);
             return 1;
         }
-
-        Array allowedFields;
-        if(arg1.has_method("lua_fields")) {
-            allowedFields = arg1.call("lua_fields");
-        }
-
-        if(allowedFields.is_empty() || allowedFields.has(arg2)) {
-            lua->pushVariant(arg1.get(arg2));
-            return 1;
-        }
         
         return 0;
     });
+    lua_pop(state,1);
 }
