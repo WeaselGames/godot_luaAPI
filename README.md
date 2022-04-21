@@ -111,7 +111,8 @@ func _ready():
 	lua = Lua.new()
 	lua.expose_function(luaAdd, "add")
 	lua.expose_function(func(a, b): return a+b, "addLamda")
-	lua.do_string("print(add(2, 4), addLamda(3,3))")
+	lua.add_string("print(add(2, 4), addLamda(3,3))")
+	lua.execute()
 ```
 <br />
 
@@ -123,7 +124,7 @@ var lua: Lua
 
 func _ready():
 	lua = Lua.new()
-	lua.load_file("user://luaFile.lua")
+	lua.add_file("user://luaFile.lua")
 	lua.execute()
 	if( lua.lua_function_exists("set_colors") ):
 		# call_function will return a Variant if lua returns nothing the value will be null

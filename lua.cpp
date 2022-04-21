@@ -137,9 +137,7 @@ int Lua::luaExposedFuncCall(lua_State *state) {
         print_error( vformat("Error during \"Lua::luaExposedFuncCall\" on Callable \"%s\": ",func) );
         return 0;
     }    
-    // If val is null dont return anything.
-    if (returned.is_null()) return 0;
-
+    
     lua->pushVariant(returned);
     return 1;
 
@@ -160,7 +158,6 @@ void Lua::exposeFunction(Callable func, String name){
 
 // call a Lua function from GDScript
 Variant Lua::callFunction( String function_name, Array args) {
-    int stack_size = lua_gettop(state);
     // put global function name on stack
     lua_getglobal(state, function_name.ascii().get_data() );
 
@@ -294,13 +291,13 @@ void Lua::registerObject(Object* obj) {
     lua_pushstring(state, mName.ascii().get_data());
     lua_pushlightuserdata(state, obj);
     lua_pushcclosure(state, LUA_LAMBDA_TEMPLATE({
-        String mName = lua->getVariant(lua_upvalueindex(1));
+        String inner_mName = lua->getVariant(lua_upvalueindex(1));
         Object* inner_obj = (Object*)lua_touserdata(inner_state, lua_upvalueindex(2));
-        Variant* temp = (Variant*)lua_newuserdata( inner_state , sizeof(Variant) );
+        Variant* var = (Variant*)lua_newuserdata( inner_state , sizeof(Variant) );
         // If its owned by lua we wont to clean up the pointer.
-        *temp = inner_obj->call("new");
+        *var = inner_obj->call("new");
 
-        luaL_setmetatable(inner_state, mName.ascii().get_data());
+        luaL_setmetatable(inner_state, inner_mName.ascii().get_data());
         return 1;
     }), 2);
     lua_setglobal(state, name.ascii().get_data() );
@@ -439,7 +436,6 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
 
 // Pull a global variant from Lua to GDScript
 Variant Lua::pullVariant(String name){
-    int type = lua_getglobal(state, name.ascii().get_data());
     Variant val = getVariant(1);
     lua_pop(state, 1);
     return val;

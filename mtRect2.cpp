@@ -1,5 +1,4 @@
 #include "lua.h"
-#include <map>
 
 static std::map<String, lua_CFunction> rect2Funcs;
 
