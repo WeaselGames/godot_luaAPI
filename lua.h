@@ -66,14 +66,12 @@ public:
   static void LineHook(lua_State *L, lua_Debug *ar);
   static int luaPrint(lua_State* state);
   static int luaExposedFuncCall(lua_State* state);
+  static int luaUserdataFuncCall(lua_State* state);
 
 private:
   lua_State *state;
   Vector<Callable> callables;
   Callable errorHandler;
-
-public:
-  Vector<Variant*>luaObjects;
 
 private:
   void exposeConstructors(  );
