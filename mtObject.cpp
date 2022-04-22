@@ -88,7 +88,7 @@ void Lua::createObjectMetatable( ){
             allowedFields = arg1.call("lua_fields");
         }
         
-        if((allowedFields.is_empty() || allowedFields.has(arg2)) && arg1.has_member(arg3.get_type(), arg2)) {
+        if(allowedFields.is_empty() || allowedFields.has(arg2)) {
             // We can't use arg1 here because we need to reference the userdata
             ((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
         }
