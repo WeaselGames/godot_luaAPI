@@ -94,7 +94,7 @@ jobs:
         SCONS_CACHE: /.scons_cache/
       run: |
         scons platform=windows target=release tools=no
-      - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
         path: build/godot/bin/*

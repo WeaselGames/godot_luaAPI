@@ -19,7 +19,7 @@ env:
 jobs:
   javascript:
     runs-on: "ubuntu-20.04"
-    name: Linux Editor(platform=linuxbsd tools=yes target=release_debug)
+    name: JavaScript Templates(platform=javascript tools=no target=release)
     steps:
       - uses: actions/checkout@v2
         with:
