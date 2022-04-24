@@ -44,10 +44,12 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
 }
 
+// Set the errorHandler callback function
 void Lua::setErrorHandler(Callable errorHandler) {
     this->errorHandler = errorHandler;
 }
 
+// Binds lua librares with the lua state
 void Lua::bindLibs(Array libs) {
     for (int i = 0; i < libs.size(); i++) {
         String lib = ((String)libs.get(i)).to_lower();
@@ -365,6 +367,71 @@ Variant Lua::getVariant(int index) {
     return result;
 }
 
+// Assumes there is a error in the top of the stack. Pops it.
+void Lua::handleError(int lua_error){
+    String msg;
+    switch( lua_error ){
+        case LUA_ERRRUN:
+            msg += "[LUA_ERRNUN - runtime error ] ";
+            break;
+        case LUA_ERRMEM:
+            msg += "[LUA_ERRMEM - memory allocation error ] ";
+            break;
+        case LUA_ERRERR:
+            msg += "[LUA_ERRERR - error while handling another error ] ";
+            break;
+        default: break;
+    }
+    msg += lua_tostring(state,-1);
+    lua_pop(state,1);
+    if (!errorHandler.is_valid()) {
+        print_error(msg);
+        return;
+    }
+    // custom error handling
+    const Variant* args[1];
+    Variant temp = msg;
+    args[0] = &temp;
+    Variant returned;
+    Callable::CallError error;
+    errorHandler.call(args, 1, returned, error);
+    if (error.error != error.CALL_OK) {
+        print_error( vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ",errorHandler) );
+    }
+}
+
+// Lua functions
+// Change lua's print function to print to the Godot console by default
+int Lua::luaPrint(lua_State* state)
+{
+    int args = lua_gettop(state);
+    String final_string;
+    for ( int n=1; n<=args; ++n) {
+		String it_string;
+		
+		switch( lua_type(state,n) ){
+			case LUA_TUSERDATA:{
+				Variant var = *(Variant*) lua_touserdata(state,n);
+				it_string = var.operator String();
+				break;
+			}
+			default:{
+				it_string = lua_tostring(state, n);
+				break;
+			}
+		}
+
+		final_string += it_string;
+		if( n < args ) final_string += ", ";
+    }
+
+	print_line( final_string );
+
+    return 0;
+}
+
+// -----------meta tables-----------------
+
 // Used to keep track of the original pointer via the userdata pointer
 static std::map<void*, Variant*> luaObjects;
 
@@ -458,71 +525,6 @@ void Lua::exposeConstructors( ){
     lua_setglobal(state, "Plane" );
     
 }
-
-// Assumes there is a error in the top of the stack. Pops it.
-void Lua::handleError(int lua_error){
-    String msg;
-    switch( lua_error ){
-        case LUA_ERRRUN:
-            msg += "[LUA_ERRNUN - runtime error ] ";
-            break;
-        case LUA_ERRMEM:
-            msg += "[LUA_ERRMEM - memory allocation error ] ";
-            break;
-        case LUA_ERRERR:
-            msg += "[LUA_ERRERR - error while handling another error ] ";
-            break;
-        default: break;
-    }
-    msg += lua_tostring(state,-1);
-    lua_pop(state,1);
-    if (!errorHandler.is_valid()) {
-        print_error(msg);
-        return;
-    }
-    // custom error handling
-    const Variant* args[1];
-    Variant temp = msg;
-    args[0] = &temp;
-    Variant returned;
-    Callable::CallError error;
-    errorHandler.call(args, 1, returned, error);
-    if (error.error != error.CALL_OK) {
-        print_error( vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ",errorHandler) );
-    }
-}
-
-// Lua functions
-// Change lua's print function to print to the Godot console by default
-int Lua::luaPrint(lua_State* state)
-{
-    int args = lua_gettop(state);
-    String final_string;
-    for ( int n=1; n<=args; ++n) {
-		String it_string;
-		
-		switch( lua_type(state,n) ){
-			case LUA_TUSERDATA:{
-				Variant var = *(Variant*) lua_touserdata(state,n);
-				it_string = var.operator String();
-				break;
-			}
-			default:{
-				it_string = lua_tostring(state, n);
-				break;
-			}
-		}
-
-		final_string += it_string;
-		if( n < args ) final_string += ", ";
-    }
-
-	print_line( final_string );
-
-    return 0;
-}
-
-// meta tables
 
 // This function is used whenever a function is called on one of the userdata types below
 int Lua::luaUserdataFuncCall(lua_State* L) {
