@@ -5,6 +5,7 @@
 **Table of contents:**
   * [About](#about)
   * [Features](#features)
+  * [Nightly Builds](#nightly-builds)
   * [TODO](#todo)
   * [Compiling](#compiling)
   * [Examples](#examples)
@@ -14,7 +15,7 @@ About
 -------
 [![🐧 Linux](https://github.com/Trey2k/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/Trey2k/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/windows.yml) [![🌐 javascript](https://github.com/Trey2k/lua/actions/workflows/javascript.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/javascript.yml)
 
-***WARNING!!!*** this is a **alpha** version of the module. Please see the branch [v1.1-stable](https://github.com/Trey2k/lua/tree/v1.1-stable) for a more stable build.
+***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/Trey2k/lua/tree/v1.1-stable) for a more stable build.
 
 This is a Godot engine module that adds lua support via GDScript. Importantly this is **NOT** meant to be a replacement for GDScript. The main purpose of this module is to add runtime execution of code for tasks such as modding or in game scripting. 
 
@@ -42,10 +43,18 @@ print( v1+v2 ) -- "(101,102)"
 change_my_sprite_color( Color(1,0,0,1) ) -- if "change_my_sprite_color" was exposed, in GDScript it will receive a Color variant.
 ```
 
+Nightly Builds
+---------------
+- [🐧 Linux Editor](https://nightly.link/Trey2k/lua/workflows/linux/main/linux-editor.zip)
+- [🐧 Linux Templates](https://nightly.link/Trey2k/lua/workflows/linux/main/linux-template64-release.zip)
+- [🎨 Windows Editor](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-editor.zip)
+- [🎨 Windows Templates](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-template.zip)
+- [🌐 JavaScript Templates](https://nightly.link/Trey2k/lua/workflows/javascript/main/javascript.zip)
+
 TODO
 -----
 - Finish v2 documentation
-- Add the rest of the userdata functions. Vector2 is the only complete one.
+- Stability testing
 - More up to date todo list on the v2 [project](https://github.com/Trey2k/lua/projects/1) 
 
 Compiling
