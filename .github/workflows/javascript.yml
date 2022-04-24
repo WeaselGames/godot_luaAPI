@@ -13,7 +13,7 @@ env:
   BASE_BRANCH: main
   SCONSFLAGS: debug_symbols=no --jobs=4
   SCONS_CACHE_LIMIT: 8192
-  EM_VERSION: 2.0.25
+  EM_VERSION: 3.1.9
   EM_CACHE_FOLDER: 'emsdk-cache'
 
 jobs:
@@ -73,6 +73,7 @@ jobs:
       - name: Compilation
         working-directory: ./build
         env:
+          EMSDK: yes
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
            scons platform=javascript tools=no target=release
