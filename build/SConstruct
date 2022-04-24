@@ -16,10 +16,6 @@ lua_ver = "main"
 lua_url = "https://github.com/Trey2k/lua"
 lua_dir = Dir("lua")
 
-emsdk_ver = "main"
-emsdk_url = "https://github.com/emscripten-core/emsdk.git"
-emsdk_dir = Dir("emsdk")
-
 print("Coloning sources...")
 
 # A method which allows us to run `git`, `scons`, and other commands.
@@ -39,14 +35,6 @@ if not lua_dir.exists():
     print("Coloning self.")
     run(["git", "clone", lua_url])
     run(["git", "checkout", lua_ver, "--quiet"], lua_dir.abspath)
-
-if not emsdk_dir.exists() and os.environ["EMSDK"]=="yes":
-    print("Coloning emsdk.")
-    run(["git", "clone", emsdk_url])
-    run(["git", "checkout", emsdk_ver, "--quiet"], emsdk_dir.abspath)
-    run([emsdk_dir.abspath+"/emsdk", "install", "latest"], emsdk_dir.abspath)
-    run([emsdk_dir.abspath+"/emsdk", "activate", "latest", "--permanent"], emsdk_dir.abspath)
-    os.environ["PATH"] = emsdk_dir.abspath + ":" + emsdk_dir.abspath + "/node/14.18.2_64bit/bin:" + emsdk_dir.abspath + "/upstream/emscripten:" + os.environ["PATH"]
 
 # Setup base SCons arguments to the Godot build command.
 args = ["scons"]

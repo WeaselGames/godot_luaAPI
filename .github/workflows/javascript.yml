@@ -12,7 +12,9 @@ on:
 env:
   BASE_BRANCH: main
   SCONSFLAGS: debug_symbols=no --jobs=4
-  SCONS_CACHE_LIMIT: 4096
+  SCONS_CACHE_LIMIT: 8192
+  EM_VERSION: 2.0.25
+  EM_CACHE_FOLDER: 'emsdk-cache'
 
 jobs:
   javascript:
@@ -39,6 +41,14 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}
+      # Additional cache for Emscripten generated system libraries
+      - name: Load Emscripten cache
+        id: javascript-emscripten-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{env.EM_CACHE_FOLDER}}
+          key: ${{env.EM_VERSION}}-${{github.job}}
+
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
@@ -51,10 +61,18 @@ jobs:
           python -m pip install scons
           python --version
           scons --version
+       - name: Set up Emscripten latest
+        uses: mymindstorm/setup-emsdk@v10
+        with:
+          version: ${{env.EM_VERSION}}
+          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
+
+      - name: Verify Emscripten setup
+        run: |
+          emcc -v
       - name: Compilation
         working-directory: ./build
         env:
-          EMSDK: yes
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
            scons platform=javascript tools=no target=release
