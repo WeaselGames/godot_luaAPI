@@ -46,14 +46,15 @@ jobs:
           python --version
           scons --version
       - name: Compilation
+        working-directory: ./build
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=osx tools=yes target=release_debug
       - uses: actions/upload-artifact@v2
         with:
-          name: godot.osx.opt.tools.64.goost
-          path: godot/bin/godot.osx.opt.tools.64.goost
+          name: ${{github.job}}
+          path: build/godot/bin
 
   macos-template:
     runs-on: "macos-latest"
