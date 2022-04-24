@@ -325,7 +325,7 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
 
 // Pull a global variant from Lua to GDScript
 Variant Lua::pullVariant(String name){
-    int type = lua_getglobal(state, name.ascii().get_data());
+    lua_getglobal(state, name.ascii().get_data());
     Variant val = getVariant(1);
     lua_pop(state, 1);
     return val;
