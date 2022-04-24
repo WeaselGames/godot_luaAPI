@@ -50,7 +50,7 @@ Nightly Builds
 - [🎨 Windows Editor](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-editor.zip)
 - [🎨 Windows Templates](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-template.zip)
 - [🍎 MacOS Editor](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-editor.zip)
-- [🍎 MacOS Templates](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-templates.zip)
+- [🍎 MacOS Templates](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-template.zip)
 
 TODO
 -----

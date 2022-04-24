@@ -9,7 +9,7 @@ on:
 
 env:
   BASE_BRANCH: main
-  SCONSFLAGS: godot_modules_enabled=no verbose=yes warnings=all werror=yes debug_symbols=no --jobs=4
+  SCONSFLAGS: debug_symbols=no --jobs=4
   SCONS_CACHE_LIMIT: 12288
 
 jobs:
