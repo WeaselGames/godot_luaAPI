@@ -49,6 +49,7 @@ jobs:
         python --version
         scons --version
     - name: Compilation
+      working-directory: ./build
       env:
         SCONS_CACHE: /.scons_cache/
       run: |
@@ -90,6 +91,7 @@ jobs:
         python --version
         scons --version
     - name: Compilation
+      working-directory: ./build
       env:
         SCONS_CACHE: /.scons_cache/
       run: |

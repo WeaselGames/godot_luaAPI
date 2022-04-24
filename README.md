@@ -12,7 +12,7 @@
 
 About
 -------
-[![🐧 Linux](https://github.com/Trey2k/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/linux.yml) [![🌐 javascript](https://github.com/Trey2k/lua/actions/workflows/javascript.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/javascript.yml)
+[![🐧 Linux](https://github.com/Trey2k/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/Trey2k/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/windows.yml) [![🌐 javascript](https://github.com/Trey2k/lua/actions/workflows/javascript.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/javascript.yml)
 
 ***WARNING!!!*** this is a **alpha** version of the module. Please see the branch [v1.1-stable](https://github.com/Trey2k/lua/tree/v1.1-stable) for a more stable build.
 
