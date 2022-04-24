@@ -1,6 +1,4 @@
-# # Huge credit to https://github.com/goostengine/goost
-# this action was made by them and only modified to my needs
-name: 🐧 Linux
+name: 🍎 macOS
 on: 
   pull_request:
     branches:
@@ -11,26 +9,61 @@ on:
 
 env:
   BASE_BRANCH: main
-  SCONSFLAGS: debug_symbols=no --jobs=4
+  SCONSFLAGS: godot_modules_enabled=no verbose=yes warnings=all werror=yes debug_symbols=no --jobs=4
   SCONS_CACHE_LIMIT: 12288
 
 jobs:
-  linux-editor:
-    runs-on: "ubuntu-20.04"
-    name: Linux Editor(platform=linuxbsd tools=yes target=release_debug)
+  macos-editor:
+    runs-on: "macos-latest"
+
+    name: Editor (target=release_debug, tools=yes)
+
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      # Install all packages except SCons
-      - name: Configure dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
-            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm 
       - name: Load .scons_cache directory
-        id: linux-editor-cache
+        id: macos-editor-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+      - name: Compilation
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons platform=osx tools=yes target=release_debug
+      - uses: actions/upload-artifact@v2
+        with:
+          name: godot.osx.opt.tools.64.goost
+          path: godot/bin/godot.osx.opt.tools.64.goost
+
+  macos-template:
+    runs-on: "macos-latest"
+    name: Template (target=release, tools=no)
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Load .scons_cache directory
+        id: macos-template-cache
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/.scons_cache/
@@ -56,55 +89,9 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-           scons platform=linuxbsd tools=yes target=release_debug
+          scons platform=osx target=release tools=no
+          scons platform=osx target=release_debug tools=no
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
-  linux-template64-release:
-    runs-on: "ubuntu-20.04"
-    name: Linux Templates(platform=linuxbsd tools=no target=release bits=64)
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      # Install all packages except SCons
-      - name: Configure dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
-            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
-      - name: Load .scons_cache directory
-        id: linux-exp64r-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{github.workspace}}/.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-          architecture: 'x64'
-
-      - name: Configuring Python packages
-        run: |
-          python -c "import sys; print(sys.version)"
-          python -m pip install scons
-          python --version
-          scons --version
-      - name: Compilation
-        working-directory: ./build
-        env:
-          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
-        run: |
-           scons platform=linuxbsd tools=no target=release bits=64
-           scons platform=linuxbsd tools=no target=release_debug bits=64
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{github.job}}
-          path: build/godot/bin/*
+          path: build/godot/bin

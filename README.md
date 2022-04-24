@@ -13,7 +13,7 @@
 
 About
 -------
-[![🐧 Linux](https://github.com/Trey2k/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/Trey2k/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/windows.yml) [![🌐 javascript](https://github.com/Trey2k/lua/actions/workflows/javascript.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/javascript.yml)
+[![🐧 Linux](https://github.com/Trey2k/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/Trey2k/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/Trey2k/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/macos.yml)
 
 ***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/Trey2k/lua/tree/v1.1-stable) for a more stable build.
 
@@ -49,7 +49,8 @@ Nightly Builds
 - [🐧 Linux Templates](https://nightly.link/Trey2k/lua/workflows/linux/main/linux-template64-release.zip)
 - [🎨 Windows Editor](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-editor.zip)
 - [🎨 Windows Templates](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-template.zip)
-- [🌐 JavaScript Templates](https://nightly.link/Trey2k/lua/workflows/javascript/main/javascript.zip)
+- [🍎 MacOS Editor](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-editor.zip)
+- [🍎 MacOS Templates](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-templates.zip)
 
 TODO
 -----
