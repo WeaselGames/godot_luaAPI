@@ -73,12 +73,11 @@ Examples
 ```gdscript
 extends Node2D
 
-lua = Lua.new()
+var lua: Lua
 
 func _ready():
 	lua = Lua.new()
-	lua.add_string("for i=1,10,1 do print('Hello lua!') end")
-	lua.execute()
+	lua.do_string("for i=1,10,1 do print('Hello lua!') end")
 ```
 <br />
 
@@ -86,12 +85,11 @@ func _ready():
 ```gdscript
 extends Node2D
 
-lua = Lua.new()
+var lua: Lua
 
 func _ready():
 	lua = Lua.new()
-	lua.add_file("user://luaFile.lua")
-	lua.execute()
+	lua.do_file("user://luaFile.lua")
 ```
 <br />
 
@@ -105,8 +103,7 @@ var test = "Hello lua!"
 func _ready():
 	lua = Lua.new()
 	lua.push_variant(test, "str")
-	lua.add_string("print(str)")
-	lua.execute()
+	lua.do_string("print(str)")
 ```
 <br />
 
@@ -123,8 +120,7 @@ func _ready():
 	lua = Lua.new()
 	lua.expose_function(luaAdd, "add")
 	lua.expose_function(func(a, b): return a+b, "addLamda")
-	lua.add_string("print(add(2, 4), addLamda(3,3))")
-	lua.execute()
+	lua.do_string("print(add(2, 4), addLamda(3,3))")
 ```
 <br />
 
@@ -136,11 +132,10 @@ var lua: Lua
 
 func _ready():
 	lua = Lua.new()
-	lua.add_file("user://luaFile.lua")
-	lua.execute()
-	if( lua.lua_function_exists("set_colors") ):
+	lua.do_string("user://luaFile.lua")
+	if( lua.lua_function_exists("set_colors")):
 		# call_function will return a Variant if lua returns nothing the value will be null
-		var value = lua.call_function( "set_colors", ["red", "blue"])
+		var value = lua.call_function("set_colors", ["red", "blue"])
 		if value != null:
 			print(value)
 		else:
@@ -159,9 +154,8 @@ func luaCallBack(err):
 
 func _ready():
 	lua = Lua.new()
-	lua.add_stringg("print(This wont work)")
 	lua.set_error_handler(luaCallBack)
-	lua.execute()
+	lua.do_string("print(This wont work)")
 ```
 <br />
 
@@ -200,10 +194,8 @@ func _ready():
 	player2 = Player.new()
 	lua.expose_function(func(): return player2, "getPlayer2")
 	lua.expose_constructor(Player, "Player")
-	lua.add_string("player = Player() player.move_forward() print(player.pos.x)")
-	lua.execute()
-	lua.add_string("player2 = getPlayer2() player2.pos = Vector2(50, 1) print(player2.pos)")
-	lua.execute()
+	lua.do_string("player = Player() player.move_forward() print(player.pos.x)")
+	lua.do_string("player2 = getPlayer2() player2.pos = Vector2(50, 1) print(player2.pos)")
 	var player = lua.pull_variant("player")
 	print(player.pos)
 	print(player2.pos)

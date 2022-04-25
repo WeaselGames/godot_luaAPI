@@ -9,16 +9,16 @@ Lua::Lua(){
 
 	// saving this object into registry
 	lua_pushstring(state,"__Lua");
-	lua_pushlightuserdata( state , this );
-	lua_rawset( state , LUA_REGISTRYINDEX );
+	lua_pushlightuserdata(state , this);
+	lua_rawset(state , LUA_REGISTRYINDEX);
 
 	// Creating basic types metatables and saving them in registry
 	createVector2Metatable();   // "mt_Vector2"
 	createVector3Metatable();   // "mt_Vector3"
     createColorMetatable();     // "mt_Color"
     createRect2Metatable();     // "mt_Rect2"
-    createPlaneMetatable();     //  "mt_Plane"
-    createObjectMetatable();     //  "mt_Object"
+    createPlaneMetatable();     // "mt_Plane"
+    createObjectMetatable();    // "mt_Object"
 
 	// Exposing basic types constructors
 	exposeConstructors();
@@ -32,13 +32,12 @@ Lua::~Lua(){
 // Bind C++ functions to GDScript
 void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&Lua::bindLibs);
-    ClassDB::bind_method(D_METHOD("add_file", "File"), &Lua::addFile);
-    ClassDB::bind_method(D_METHOD("add_string", "Code"), &Lua::addString);
-    ClassDB::bind_method(D_METHOD("execute"), &Lua::execute);
-    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"),&Lua::pushGlobalVariant);
-    ClassDB::bind_method(D_METHOD("pull_variant", "Name"),&Lua::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"),&Lua::exposeFunction);
-    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"),&Lua::exposeObjectConstructor);
+    ClassDB::bind_method(D_METHOD("do_file", "File"), &Lua::doFile);
+    ClassDB::bind_method(D_METHOD("do_string", "Code"), &Lua::doString);
+    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &Lua::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &Lua::pullVariant);
+    ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"), &Lua::exposeFunction);
+    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &Lua::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &Lua::callFunction );
     ClassDB::bind_method(D_METHOD("set_error_handler", "Callable"), &Lua::setErrorHandler );
     ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
@@ -160,7 +159,7 @@ void Lua::exposeFunction(Callable func, String name){
 }
 
 // call a Lua function from GDScript
-Variant Lua::callFunction( String function_name, Array args) {
+Variant Lua::callFunction(String function_name, Array args) {
     // put global function name on stack
     lua_getglobal(state, function_name.ascii().get_data() );
 
@@ -190,7 +189,7 @@ bool Lua::luaFunctionExists(String function_name){
 }
 
 // addFile() calls luaL_loadfille with the absolute file path
-void Lua::addFile(String fileName){
+void Lua::doFile(String fileName){
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
@@ -201,11 +200,13 @@ void Lua::addFile(String fileName){
 
     String path = file->get_path_absolute();
     luaL_loadfile(state, path.ascii().get_data());
+    execute();
 }
 
 // Run lua string in a thread if threading is enabled
-void Lua::addString( String code ){
+void Lua::doString(String code ){
   luaL_loadstring(state, code.ascii().get_data());
+  execute()
 }
 
 // Execute the current lua stack, return error as string if one occures, otherwise return String()
@@ -432,10 +433,32 @@ int Lua::luaPrint(lua_State* state)
 
 // -----------meta tables-----------------
 
+// These 2 macros helps us in constructing general metamethods.
+// We can use "lua" as a "Lua" pointer and arg1, arg2, ..., arg5 as Variants objects
+// Check examples in createVector2Metatable
+#define LUA_LAMBDA_TEMPLATE(_f_) \
+ [](lua_State* inner_state) -> int {                      \
+     lua_pushstring(inner_state,"__Lua");                 \
+     lua_rawget(inner_state,LUA_REGISTRYINDEX);           \
+     Lua* lua = (Lua*) lua_touserdata(inner_state,-1);;   \
+     lua_pop(inner_state,1);                              \
+     Variant arg1 = lua->getVariant(1);                             \
+     Variant arg2 = lua->getVariant(2);                             \
+     Variant arg3 = lua->getVariant(3);                             \
+     Variant arg4 = lua->getVariant(4);                             \
+     Variant arg5 = lua->getVariant(5);                             \
+     _f_                                                            \
+}
+ 
+#define LUA_METAMETHOD_TEMPLATE( lua_state , metatable_index , metamethod_name , _f_ )\
+lua_pushstring(lua_state,metamethod_name); \
+lua_pushcfunction(lua_state,LUA_LAMBDA_TEMPLATE( _f_ )); \
+lua_settable(lua_state,metatable_index-2);
+
 // Used to keep track of the original pointer via the userdata pointer
 static std::map<void*, Variant*> luaObjects;
 
-// Expose the contructor for an object to lua
+// Expose the contructor for a object to lua
 void Lua::exposeObjectConstructor(Object* obj, String name) {
     // Make sure we are able to call new
     if (!obj->has_method("new")) {
@@ -452,7 +475,6 @@ void Lua::exposeObjectConstructor(Object* obj, String name) {
         void* userdata = (Variant*)lua_newuserdata( inner_state , sizeof(Variant) );
         luaObjects[userdata] = var;
         memcpy( userdata , (void*)var , sizeof(Variant) );
-        // If its owned by lua we wont to clean up the pointer.
 
         luaL_setmetatable(inner_state, "mt_Object");
         return 1;
@@ -461,7 +483,7 @@ void Lua::exposeObjectConstructor(Object* obj, String name) {
 }
 
 // Expose the default constructors
-void Lua::exposeConstructors( ){
+void Lua::exposeConstructors(){
     
     lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
@@ -653,7 +675,7 @@ void Lua::createVector2Metatable( ){
 }
 
 // Create metatable for Vector3 and saves it at LUA_REGISTRYINDEX with name "mt_Vector3"
-void Lua::createVector3Metatable( ){
+void Lua::createVector3Metatable(){
     luaL_newmetatable( state , "mt_Vector3" );
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
@@ -721,7 +743,7 @@ void Lua::createVector3Metatable( ){
 }
 
 // Create metatable for Rect2 and saves it at LUA_REGISTRYINDEX with name "mt_Rect2"
-void Lua::createRect2Metatable( ){
+void Lua::createRect2Metatable(){
     luaL_newmetatable( state , "mt_Rect2" );
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
@@ -753,7 +775,7 @@ void Lua::createRect2Metatable( ){
 }
 
 // Create metatable for Plane and saves it at LUA_REGISTRYINDEX with name "mt_Plane"
-void Lua::createPlaneMetatable( ){
+void Lua::createPlaneMetatable(){
     luaL_newmetatable( state , "mt_Plane" );
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
@@ -784,7 +806,7 @@ void Lua::createPlaneMetatable( ){
 }
 
 // Create metatable for Color and saves it at LUA_REGISTRYINDEX with name "mt_Color"
-void Lua::createColorMetatable( ){
+void Lua::createColorMetatable(){
     luaL_newmetatable( state , "mt_Color" );
  
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
@@ -852,7 +874,7 @@ void Lua::createColorMetatable( ){
 }
 
 // Create metatable for any Object and saves it at LUA_REGISTRYINDEX with name "mt_Object"
-void Lua::createObjectMetatable( ){
+void Lua::createObjectMetatable(){
     luaL_newmetatable( state , "mt_Object" );
 
     Variant arg9;
