@@ -1,6 +1,8 @@
 
 #include "lua.h"
 
+#include <map>
+
 Lua::Lua(){
 	// Createing lua state instance
 	state = luaL_newstate();
@@ -88,11 +90,6 @@ void Lua::bindLibs(Array libs) {
     }
 }
 
-// Returns lua state
-lua_State* Lua::getState() {
-    return state;
-}
-
 // Get one of the callables exposed to lua via its index.
 Callable Lua::getCallable(int index){
     if (index < callables.size()) {
@@ -142,7 +139,6 @@ int Lua::luaExposedFuncCall(lua_State *state) {
     
     lua->pushVariant(returned);
     return 1;
-
 }
 
 // expose a Callable to lua
@@ -155,7 +151,6 @@ void Lua::exposeFunction(Callable func, String name){
   lua_pushcclosure(state, Lua::luaExposedFuncCall, 1);
   // Setting the global name for the function in lua
   lua_setglobal(state, name.ascii().get_data());
-  
 }
 
 // call a Lua function from GDScript
@@ -391,10 +386,12 @@ void Lua::handleError(int lua_error){
     }
     // custom error handling
     const Variant* args[1];
-    Variant temp = msg;
-    args[0] = &temp;
     Variant returned;
     Callable::CallError error;
+
+    Variant temp = msg;
+    args[0] = &temp;
+
     errorHandler.call(args, 1, returned, error);
     if (error.error != error.CALL_OK) {
         print_error( vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ",errorHandler) );
@@ -801,7 +798,6 @@ void Lua::createPlaneMetatable(){
         return 1;
     });
     
- 
     lua_pop(state,1); // Stack is now unmodified
 }
 
@@ -876,8 +872,6 @@ void Lua::createColorMetatable(){
 // Create metatable for any Object and saves it at LUA_REGISTRYINDEX with name "mt_Object"
 void Lua::createObjectMetatable(){
     luaL_newmetatable( state , "mt_Object" );
-
-    Variant arg9;
 
     LUA_METAMETHOD_TEMPLATE( state , -1 , "__index" , {
         Array allowedFuncs = Array();
