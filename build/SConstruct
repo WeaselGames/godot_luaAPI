@@ -16,7 +16,7 @@ godot_dir = Dir("godot")
 
 lua_dir = Dir("lua")
 
-print("Coloning sources...")
+print("Cloning sources...")
 
 # A method which allows us to run `git`, `scons`, and other commands.
 def run(args, dir="."):
@@ -28,7 +28,7 @@ def run(args, dir="."):
 if not lua_dir.exists():
     print("Copying over source files.")
     copytree("../", lua_dir.abspath, 
-        ignore=ignore_patterns('.github*', 'build*', '*.o', '*.bc', "*pyc*"))
+        ignore=ignore_patterns('.github*', 'build*', '*.o', '*.bc', "*pycache*", ".sons_cache*"))
 
 if not godot_dir.exists():
     # Checkout Godot repository directly under the current directory.

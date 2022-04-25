@@ -206,7 +206,7 @@ void Lua::doFile(String fileName){
 // Run lua string in a thread if threading is enabled
 void Lua::doString(String code ){
   luaL_loadstring(state, code.ascii().get_data());
-  execute()
+  execute();
 }
 
 // Execute the current lua stack, return error as string if one occures, otherwise return String()
