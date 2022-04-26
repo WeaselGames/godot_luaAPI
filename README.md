@@ -29,10 +29,10 @@ Features
 --------------------------------
 - Run lua directly from a string or a text file.
 - Push any Variant as a global.
-- Expose GDScript functions to lua with a return value and up to 5 arguments.
 - Call lua functions from GDScript.
 - Choose which libraries you wont lua to have access to.
 - Object passed as userdata see [examples](#examples) below.
+- Callables passed as userdata, which allows you to puch a callable as a luafunction. see [examples](#examples) below.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
 ```lua
 local v1 = Vector2(1,2)
@@ -118,8 +118,9 @@ func luaAdd(a, b):
 
 func _ready():
 	lua = Lua.new()
-	lua.expose_function(luaAdd, "add")
-	lua.expose_function(func(a, b): return a+b, "addLamda")
+	# Functions are passed the same as any other value to lua.
+	lua.push_variant(luaAdd, "add")
+	lua.push_variant(func(a, b): return a+b, "addLamda")
 	lua.do_string("print(add(2, 4), addLamda(3,3))")
 ```
 <br />
@@ -133,13 +134,22 @@ var lua: Lua
 func _ready():
 	lua = Lua.new()
 	lua.do_string("user://luaFile.lua")
-	if( lua.lua_function_exists("set_colors")):
+	if( lua.function_exists("set_colors")):
 		# call_function will return a Variant if lua returns nothing the value will be null
 		var value = lua.call_function("set_colors", ["red", "blue"])
 		if value != null:
 			print(value)
 		else:
 			print("no value returned")	
+		
+	if( lua.function_exists("set_location")):
+		# Assumeing lua defines a function set_location this will return a callable which you can use ot invoke the lua function
+		var set_location = lua.pull_variant("set_location")
+		var value2 = set_location.call(Vector2(1, 1))
+		if value2 != null:
+			print(value2)
+		else:
+			print("no value returned")
 ```
 <br />
 
@@ -192,7 +202,7 @@ var player2: Player
 func _ready():
 	lua = Lua.new()
 	player2 = Player.new()
-	lua.expose_function(func(): return player2, "getPlayer2")
+	lua.push_variant(func(): return player2, "getPlayer2")
 	lua.expose_constructor(Player, "Player")
 	lua.do_string("player = Player() player.move_forward() print(player.pos.x)")
 	lua.do_string("player2 = getPlayer2() player2.pos = Vector2(50, 1) print(player2.pos)")

@@ -1,5 +1,5 @@
-
 #include "lua.h"
+#include "luaCallable.h"
 
 #include <map>
 
@@ -21,6 +21,7 @@ Lua::Lua(){
     createRect2Metatable();     // "mt_Rect2"
     createPlaneMetatable();     // "mt_Plane"
     createObjectMetatable();    // "mt_Object"
+    createCallableMetatable();  // "mt_Callable"
 
 	// Exposing basic types constructors
 	exposeConstructors();
@@ -38,11 +39,10 @@ void Lua::_bind_methods(){
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &Lua::doString);
     ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &Lua::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &Lua::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_function", "Callable", "LuaFunctionName"), &Lua::exposeFunction);
     ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &Lua::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &Lua::callFunction );
     ClassDB::bind_method(D_METHOD("set_error_handler", "Callable"), &Lua::setErrorHandler );
-    ClassDB::bind_method(D_METHOD("lua_function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
+    ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
 }
 
 // Set the errorHandler callback function
@@ -90,69 +90,6 @@ void Lua::bindLibs(Array libs) {
     }
 }
 
-// Get one of the callables exposed to lua via its index.
-Callable Lua::getCallable(int index){
-    if (index < callables.size()) {
-        return callables.get(index);
-    }
-    return Callable();
-}
-
-// The function used when lua calls a exposed function
-int Lua::luaExposedFuncCall(lua_State *state) {
-    // Get referance of the class
-    lua_pushstring(state,"__Lua");
-    lua_rawget(state,LUA_REGISTRYINDEX);
-    Lua* lua = (Lua*) lua_touserdata(state,-1);
-    lua_pop(state,1);
-
-    // Get callabes index
-    int callIndex = lua_tointeger(state, lua_upvalueindex(1));
-    int argc = lua_gettop(state);
-    
-    Variant arg1 = lua->getVariant(1);
-    Variant arg2 = lua->getVariant(2);
-    Variant arg3 = lua->getVariant(3);
-    Variant arg4 = lua->getVariant(4);
-    Variant arg5 = lua->getVariant(5);
-
-    Callable func = lua->getCallable(callIndex);
-    if (!func.is_valid()) {
-        print_error( vformat("Error during \"Lua::luaExposedFuncCall\" Callable \"%s\" not vlaid.",func) );
-        return 0;
-    }
-    const Variant* args[5] = {
-        &arg1,
-        &arg2,
-        &arg3,
-        &arg4,
-        &arg5,
-    };
-    Variant returned;
-    Callable::CallError error;
-    func.call(args, argc, returned, error);
-    if (error.error != error.CALL_OK) {
-        // TODO: Better error handling, maybe this should be passed to errorHandler instead since this could be user triggered as well.
-        print_error( vformat("Error during \"Lua::luaExposedFuncCall\" on Callable \"%s\": ",func) );
-        return 0;
-    }    
-    
-    lua->pushVariant(returned);
-    return 1;
-}
-
-// expose a Callable to lua
-void Lua::exposeFunction(Callable func, String name){
-   callables.push_back(func);
-
-  // Pushing the callables index
-  lua_pushinteger(state, callables.size()-1);
-
-  lua_pushcclosure(state, Lua::luaExposedFuncCall, 1);
-  // Setting the global name for the function in lua
-  lua_setglobal(state, name.ascii().get_data());
-}
-
 // call a Lua function from GDScript
 Variant Lua::callFunction(String function_name, Array args) {
     // put global function name on stack
@@ -163,7 +100,7 @@ Variant Lua::callFunction(String function_name, Array args) {
         pushVariant(args[i]);
     }
 
-    int ret = lua_pcall(state,args.size(), 1 , 0 );
+    int ret = lua_pcall(state, args.size(), 1 , 0);
     if( ret != LUA_OK ){
 
         if( !errorHandler.is_valid() ){
@@ -217,7 +154,7 @@ void Lua::execute() {
 }
 
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
-bool Lua::pushVariant(Variant var) {
+bool Lua::pushVariant(Variant var) const {
     switch (var.get_type())
     {
         case Variant::Type::NIL:
@@ -302,6 +239,12 @@ bool Lua::pushVariant(Variant var) {
             luaL_setmetatable(state,"mt_Object");
             break;  
         }
+        case Variant::Type::CALLABLE: {
+            void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
+            memcpy( userdata , (void*)&var , sizeof(Variant) );
+            luaL_setmetatable(state,"mt_Callable");
+            break;  
+        }
         default:
             print_error( vformat("Can't pass Variants of type \"%s\" to Lua." , Variant::get_type_name( var.get_type() ) ) );
             lua_pushnil(state);
@@ -328,7 +271,7 @@ Variant Lua::pullVariant(String name){
 }
 
 // get a value at the given index and return as a variant
-Variant Lua::getVariant(int index) {
+Variant Lua::getVariant(int index) const {
     Variant result;
     int type = lua_type(state, index);
     switch (type) {
@@ -357,6 +300,14 @@ Variant Lua::getVariant(int index) {
             result = dict;
             break;
         }
+        case LUA_TFUNCTION:
+        {
+            // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
+            lua_pushvalue(state, index);
+            LuaCallable *callable = memnew(LuaCallable(Ref<Lua>(this), luaL_ref(state, LUA_REGISTRYINDEX), state));
+            result = Callable(callable);
+            break;
+        }
         default:
             result = Variant();
     }
@@ -364,7 +315,7 @@ Variant Lua::getVariant(int index) {
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
-void Lua::handleError(int lua_error){
+void Lua::handleError(int lua_error) const {
     String msg;
     switch( lua_error ){
         case LUA_ERRRUN:
@@ -925,4 +876,52 @@ void Lua::createObjectMetatable(){
     });
 
     lua_pop(state,1);
+}
+
+int Lua::luaCallableCall(lua_State* state){
+    lua_pushstring(state, "__Lua");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    Lua* lua = (Lua*) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its seld will be counted
+    Variant arg1 = lua->getVariant(1);
+    Variant arg2 = lua->getVariant(2);
+    Variant arg3 = lua->getVariant(3);
+    Variant arg4 = lua->getVariant(4);
+    Variant arg5 = lua->getVariant(5);
+    Variant arg6 = lua->getVariant(6);
+
+    const Variant* args[5] = {
+        &arg2,
+        &arg3,
+        &arg4,
+        &arg5,
+        &arg6,
+    };
+    
+    Callable callable = arg1.operator Callable();
+
+    Variant returned;
+    Callable::CallError error;
+    callable.call(args, argc, returned, error);
+    if (error.error != error.CALL_OK) {
+        // TODO: Better error handling, maybe this should be passed to errorHandler instead since this could be user triggered as well.
+        print_error( vformat("Error during \"Lua::luaCallableCall\" on Callable \"%s\": %d", callable, error.error) );
+        return 0;
+    }
+    
+    lua->pushVariant(returned);
+    return 1;
+}
+
+// Create metatable for any Callable and saves it at LUA_REGISTRYINDEX with name "mt_Callable"
+void Lua::createCallableMetatable(){
+    luaL_newmetatable( state , "mt_Callable" );
+
+    lua_pushstring(state, "__call"); 
+    lua_pushcfunction(state, luaCallableCall);
+    lua_settable(state, -3);
+    
+    lua_pop(state, 1);
 }

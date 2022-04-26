@@ -3,7 +3,7 @@
 	<brief_description>
 	</brief_description>
 	<description>
-		Execute Lua code as runtime and make your own API.
+		Execute Lua code at runtime and make your own API.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -17,11 +17,11 @@
 			</argument>
 			<description>
 				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with lua.
-				You may want to check if the function actually exists with [code]lua_function_exists(LuaFunctionName)[/code].
+				You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code].
 				This function supports 1 return value from lua. It will be returned as a variant and if lua returns no value it will be null. 
 			</description>
 		</method>
-		<method name="load_file">
+		<method name="do_file">
 			<return type="void">
 			</return>
 			<argument index="0" name="FilePath" type="String">
@@ -30,33 +30,15 @@
 				Loads a file with luaL_laodfile() passing its absolute path.
 			</description>
 		</method>
-		<method name="load_string">
+		<method name="do_string">
 			<return type="void">
 			</return>
 			<argument index="0" name="Code" type="String">
 			</argument>
-			<argument index="1" name="ProtectedCall" type="bool" default="true">
-			</argument>
-			<argument index="2" name="CallbackCaller" type="Object" default="null">
-			</argument>
-			<argument index="3" name="Callback" type="String" default="&quot;&quot;">
-			</argument>
-			<description>
-				loas a string with luaL_loadstring()
+				loas a string with luaL_loadstring() and executes the top of the stack
 			</description>
 		</method>
-		<method name="expose_function">
-			<return type="void">
-			</return>
-			<argument index="0" name="function" type="Callable">
-			</argument>
-			<argument index="2" name="LuaFunctionName" type="String">
-			</argument>
-			<description>
-				TODO
-			</description>
-		</method>
-		<method name="lua_function_exists">
+		<method name="function_exists">
 			<return type="bool">
 			</return>
 			<argument index="0" name="LuaFunctionName" type="String">
@@ -82,7 +64,7 @@
 			<argument index="0" name="Name" type="String">
 			</argument>
 			<description>
-			Will pull a copy of a glboal Variant from lua to GDScript.
+			Will pull a copy of a glboal Variant from lua.
 			</description>
 		</method>
 	</methods>
