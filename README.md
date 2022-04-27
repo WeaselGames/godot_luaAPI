@@ -32,7 +32,7 @@ Features
 - Call lua functions from GDScript.
 - Choose which libraries you wont lua to have access to.
 - Object passed as userdata see [examples](#examples) below.
-- Callables passed as userdata, which allows you to puch a callable as a luafunction. see [examples](#examples) below.
+- Callables passed as userdata, which allows you to push a Callable as a lua function. see [examples](#examples) below.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
 ```lua
 local v1 = Vector2(1,2)
