@@ -101,7 +101,7 @@ Variant Lua::callFunction(String function_name, Array args) {
         pushVariant(args[i]);
     }
 
-    int ret = lua_pcall(state, args.size(), 1 , 0);
+    int ret = lua_pcall(state, args.size(), 1, 0);
     if (ret != LUA_OK) {
 
         if (!errorHandler.is_valid()) {
@@ -116,7 +116,7 @@ Variant Lua::callFunction(String function_name, Array args) {
 }
 
 bool Lua::luaFunctionExists(String function_name) {
-    int type = lua_getglobal(state , function_name.ascii().get_data());
+    int type = lua_getglobal(state, function_name.ascii().get_data());
     lua_pop(state,1);
     return type == LUA_TFUNCTION;
 }
@@ -205,38 +205,38 @@ bool Lua::pushVariant(Variant var) const {
             }
             break;
         case Variant::Type::VECTOR2: {
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Vector2");
             break;     
         }     
         case Variant::Type::VECTOR3: {
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Vector3");
             break;     
         }
         case Variant::Type::COLOR: {
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Color");
             break;
         }
         case Variant::Type::RECT2: {
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Rect2");
             break;     
         }
         case Variant::Type::PLANE: {
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Plane");
             break;     
         }
         case Variant::Type::OBJECT: {
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Object");
             break;  
         }
@@ -252,13 +252,13 @@ bool Lua::pushVariant(Variant var) const {
                 }
             }
 
-            void* userdata = (Variant*)lua_newuserdata(state , sizeof(Variant));
-            memcpy(userdata , (void*)&var , sizeof(Variant));
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state,"mt_Callable");
             break;  
         }
         default:
-            print_error(vformat("Can't pass Variants of type \"%s\" to Lua." , Variant::get_type_name(var.get_type())));
+            print_error(vformat("Can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())));
             lua_pushnil(state);
             return false;
     }
@@ -303,7 +303,7 @@ Variant Lua::getVariant(int index) const {
         {
             Dictionary dict;
             lua_pushnil(state);  /* first key */
-            while (lua_next(state , (index<0)?(index-1):(index)) != 0) {
+            while (lua_next(state, (index<0)?(index-1):(index)) != 0) {
                 Variant key = getVariant(-2);
                 Variant value = getVariant(-1);
                 dict[key] = value;
@@ -357,7 +357,7 @@ void Lua::handleError(int lua_error) const {
 
     errorHandler.call(args, 1, returned, error);
     if (error.error != error.CALL_OK) {
-        print_error(vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ",errorHandler));
+        print_error(vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ", errorHandler));
     }
 }
 
@@ -372,7 +372,7 @@ int Lua::luaPrint(lua_State* state)
 		
 		switch(lua_type(state,n)) {
 			case LUA_TUSERDATA:{
-				Variant var = *(Variant*) lua_touserdata(state,n);
+				Variant var = *(Variant*) lua_touserdata(state, n);
 				it_string = var.operator String();
 				break;
 			}
@@ -410,7 +410,7 @@ int Lua::luaPrint(lua_State* state)
      _f_                                                            \
 }
  
-#define LUA_METAMETHOD_TEMPLATE(lua_state , metatable_index , metamethod_name , _f_)\
+#define LUA_METAMETHOD_TEMPLATE(lua_state, metatable_index, metamethod_name, _f_)\
 lua_pushstring(lua_state,metamethod_name); \
 lua_pushcfunction(lua_state,LUA_LAMBDA_TEMPLATE(_f_)); \
 lua_settable(lua_state,metatable_index-2);
@@ -432,9 +432,9 @@ void Lua::exposeObjectConstructor(Object* obj, String name) {
         // We cant store the variant directly in the userdata. It will causes crashes.
         Variant* var = memnew(Variant);
         *var = inner_obj->call("new");
-        void* userdata = (Variant*)lua_newuserdata(inner_state , sizeof(Variant));
+        void* userdata = (Variant*)lua_newuserdata(inner_state, sizeof(Variant));
         luaObjects[userdata] = var;
-        memcpy(userdata , (void*)var , sizeof(Variant));
+        memcpy(userdata, (void*)var, sizeof(Variant));
 
         luaL_setmetatable(inner_state, "mt_Object");
         return 1;
@@ -450,7 +450,7 @@ void Lua::exposeConstructors() {
         if (argc == 0) {
             lua->pushVariant(Vector2());
         } else {
-            lua->pushVariant(Vector2(arg1.operator double() , arg2.operator double()));
+            lua->pushVariant(Vector2(arg1.operator double(), arg2.operator double()));
         }
         return 1;
     }));
@@ -461,7 +461,7 @@ void Lua::exposeConstructors() {
         if (argc == 0) {
             lua->pushVariant(Vector3());
         } else {
-            lua->pushVariant(Vector3(arg1.operator double() , arg2.operator double() , arg3.operator double()));
+            lua->pushVariant(Vector3(arg1.operator double(), arg2.operator double(), arg3.operator double()));
         }
         return 1;
     }));
@@ -470,9 +470,9 @@ void Lua::exposeConstructors() {
     lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
         if (argc == 3) {
-            lua->pushVariant(Color(arg1.operator double() , arg2.operator double() , arg3.operator double()));
+            lua->pushVariant(Color(arg1.operator double(), arg2.operator double(), arg3.operator double()));
         } else if (argc == 4) {
-            lua->pushVariant(Color(arg1.operator double() , arg2.operator double() , arg3.operator double() , arg4.operator double()));
+            lua->pushVariant(Color(arg1.operator double(), arg2.operator double(), arg3.operator double(), arg4.operator double()));
         } else {
             lua->pushVariant(Color());
         }
@@ -483,9 +483,9 @@ void Lua::exposeConstructors() {
     lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
         if (argc == 2) {
-            lua->pushVariant(Rect2(arg1.operator Vector2() , arg2.operator Vector2()));
+            lua->pushVariant(Rect2(arg1.operator Vector2(), arg2.operator Vector2()));
         } else if (argc == 4) {
-            lua->pushVariant(Rect2(arg1.operator double() , arg2.operator double() , arg3.operator double() , arg4.operator double()));
+            lua->pushVariant(Rect2(arg1.operator double(), arg2.operator double(), arg3.operator double(), arg4.operator double()));
         } else {
             lua->pushVariant(Rect2());
         }
@@ -496,11 +496,11 @@ void Lua::exposeConstructors() {
     lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
         if (argc == 4) {
-            lua->pushVariant(Plane(arg1.operator double() , arg2.operator double(), arg3.operator double(), arg4.operator double()));
+            lua->pushVariant(Plane(arg1.operator double(), arg2.operator double(), arg3.operator double(), arg4.operator double()));
         } else if (argc == 3) {
-            lua->pushVariant(Plane(arg1.operator Vector3() , arg2.operator Vector3() , arg3.operator Vector3()));
+            lua->pushVariant(Plane(arg1.operator Vector3(), arg2.operator Vector3(), arg3.operator Vector3()));
         } else {
-            lua->pushVariant(Plane(arg1.operator Vector3() , arg1.operator double()));
+            lua->pushVariant(Plane(arg1.operator Vector3(), arg1.operator double()));
         }
         return 1;
     }));
@@ -558,9 +558,9 @@ int Lua::luaUserdataFuncCall(lua_State* L) {
 
 // Create metatable for Vector2 and saves it at LUA_REGISTRYINDEX with name "mt_Vector2"
 void Lua::createVector2Metatable() {
-    luaL_newmetatable(state , "mt_Vector2");
+    luaL_newmetatable(state, "mt_Vector2");
 
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__index" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         if (arg1.has_method(arg2)) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
             lua->pushVariant(arg2);
@@ -572,23 +572,23 @@ void Lua::createVector2Metatable() {
         return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__newindex" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // We can't use arg1 here because we need to reference the userdata
-        ((Variant*)lua_touserdata(inner_state,1))->set(arg2 , arg3);
+        ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
         return 0;
     }); 
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__add" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__add", {
         lua->pushVariant(arg1.operator Vector2() + arg2.operator Vector2());
     return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__sub" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__sub", {
         lua->pushVariant(arg1.operator Vector2() - arg2.operator Vector2());
     return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__mul" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__mul", {
         switch(arg2.get_type()) {
             case Variant::Type::VECTOR2:
                 lua->pushVariant(arg1.operator Vector2() * arg2.operator Vector2());
@@ -602,7 +602,7 @@ void Lua::createVector2Metatable() {
         }
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__div" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__div", {
         switch(arg2.get_type()) {
             case Variant::Type::VECTOR2:
                 lua->pushVariant(arg1.operator Vector2() / arg2.operator Vector2());
@@ -616,17 +616,17 @@ void Lua::createVector2Metatable() {
         }
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__eq" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__eq", {
         lua->pushVariant(arg1.operator Vector2() == arg2.operator Vector2());
         return 1;
     });
 
-	LUA_METAMETHOD_TEMPLATE(state , -1 , "__lt" , {
+	LUA_METAMETHOD_TEMPLATE(state, -1, "__lt", {
         lua->pushVariant(arg1.operator Vector2() < arg2.operator Vector2());
         return 1;
     });
 
-	LUA_METAMETHOD_TEMPLATE(state , -1 , "__le" , {
+	LUA_METAMETHOD_TEMPLATE(state, -1, "__le", {
         lua->pushVariant(arg1.operator Vector2() <= arg2.operator Vector2());
         return 1;
     });
@@ -636,9 +636,9 @@ void Lua::createVector2Metatable() {
 
 // Create metatable for Vector3 and saves it at LUA_REGISTRYINDEX with name "mt_Vector3"
 void Lua::createVector3Metatable() {
-    luaL_newmetatable(state , "mt_Vector3");
+    luaL_newmetatable(state, "mt_Vector3");
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__index" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         if (arg1.has_method(arg2)) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
             lua->pushVariant(arg2);
@@ -650,23 +650,23 @@ void Lua::createVector3Metatable() {
         return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__newindex" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // We can't use arg1 here because we need to reference the userdata
-        ((Variant*)lua_touserdata(inner_state,1))->set(arg2 , arg3);
+        ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
         return 0;
     }); 
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__add" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__add", {
         lua->pushVariant(arg1.operator Vector3() + arg2.operator Vector3());
     return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__sub" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__sub", {
         lua->pushVariant(arg1.operator Vector3() - arg2.operator Vector3());
     return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__mul" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__mul", {
         switch(arg2.get_type()) {
             case Variant::Type::VECTOR3:
                 lua->pushVariant(arg1.operator Vector3() * arg2.operator Vector3());
@@ -680,7 +680,7 @@ void Lua::createVector3Metatable() {
         }
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__div" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__div", {
         switch(arg2.get_type()) {
             case Variant::Type::VECTOR3:
                 lua->pushVariant(arg1.operator Vector3() / arg2.operator Vector3());
@@ -694,7 +694,7 @@ void Lua::createVector3Metatable() {
         }
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__eq" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__eq", {
         lua->pushVariant(arg1.operator Vector3() == arg2.operator Vector3());
         return 1;
     });
@@ -704,9 +704,9 @@ void Lua::createVector3Metatable() {
 
 // Create metatable for Rect2 and saves it at LUA_REGISTRYINDEX with name "mt_Rect2"
 void Lua::createRect2Metatable() {
-    luaL_newmetatable(state , "mt_Rect2");
+    luaL_newmetatable(state, "mt_Rect2");
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__index" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         // Index was not found, so check to see if there is a matching function
         if (arg1.has_method(arg2)) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
@@ -719,14 +719,14 @@ void Lua::createRect2Metatable() {
         return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__newindex" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // We can't use arg1 here because we need to reference the userdata
-        ((Variant*)lua_touserdata(inner_state,1))->set(arg2 , arg3);
+        ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
         return 0;
         
     }); 
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__eq" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__eq", {
         lua->pushVariant(arg1.operator Rect2() == arg2.operator Rect2());
         return 1;
     });
@@ -736,9 +736,9 @@ void Lua::createRect2Metatable() {
 
 // Create metatable for Plane and saves it at LUA_REGISTRYINDEX with name "mt_Plane"
 void Lua::createPlaneMetatable() {
-    luaL_newmetatable(state , "mt_Plane");
+    luaL_newmetatable(state, "mt_Plane");
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__index" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         if (arg1.has_method(arg2)) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
             lua->pushVariant(arg2);
@@ -750,13 +750,13 @@ void Lua::createPlaneMetatable() {
         return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__newindex" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // We can't use arg1 here because we need to reference the userdata
-        ((Variant*)lua_touserdata(inner_state,1))->set(arg2 , arg3);
+        ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
         return 0;
     }); 
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__eq" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__eq", {
         lua->pushVariant(arg1.operator Plane() == arg2.operator Plane());
         return 1;
     });
@@ -766,9 +766,9 @@ void Lua::createPlaneMetatable() {
 
 // Create metatable for Color and saves it at LUA_REGISTRYINDEX with name "mt_Color"
 void Lua::createColorMetatable() {
-    luaL_newmetatable(state , "mt_Color");
+    luaL_newmetatable(state, "mt_Color");
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__index" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         if (arg1.has_method(arg2)) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
             lua->pushVariant(arg2);
@@ -780,23 +780,23 @@ void Lua::createColorMetatable() {
         return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__newindex" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // We can't use arg1 here because we need to reference the userdata
-        ((Variant*)lua_touserdata(inner_state,1))->set(arg2 , arg3);
+        ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
         return 0;
     }); 
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__add" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__add", {
         lua->pushVariant(arg1.operator Color() + arg2.operator Color());
     return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__sub" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__sub", {
         lua->pushVariant(arg1.operator Color() - arg2.operator Color());
     return 1;
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__mul" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__mul", {
         switch(arg2.get_type()) {
             case Variant::Type::COLOR:
                 lua->pushVariant(arg1.operator Color() * arg2.operator Color());
@@ -810,7 +810,7 @@ void Lua::createColorMetatable() {
         }
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__div" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__div", {
         switch(arg2.get_type()) {
             case Variant::Type::COLOR:
                 lua->pushVariant(arg1.operator Color() / arg2.operator Color());
@@ -824,7 +824,7 @@ void Lua::createColorMetatable() {
         }
     });
  
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__eq" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__eq", {
         lua->pushVariant(arg1.operator Color() == arg2.operator Color());
         return 1;
     });
@@ -834,9 +834,9 @@ void Lua::createColorMetatable() {
 
 // Create metatable for any Object and saves it at LUA_REGISTRYINDEX with name "mt_Object"
 void Lua::createObjectMetatable() {
-    luaL_newmetatable(state , "mt_Object");
+    luaL_newmetatable(state, "mt_Object");
 
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__index" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         Array allowedFuncs = Array();
         if (arg1.has_method("lua_funcs")) {
             allowedFuncs = arg1.call("lua_funcs");
@@ -863,7 +863,7 @@ void Lua::createObjectMetatable() {
         return 0;
     });
     
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__newindex" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         Array allowedFields = Array();
         if (arg1.has_method("lua_fields")) {
             allowedFields = arg1.call("lua_fields");
@@ -871,13 +871,13 @@ void Lua::createObjectMetatable() {
         
         if (allowedFields.is_empty() || allowedFields.has(arg2)) {
             // We can't use arg1 here because we need to reference the userdata
-            ((Variant*)lua_touserdata(inner_state,1))->set(arg2 , arg3);
+            ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
         }
         return 0;
     }); 
     
     // Makeing sure to clean up the pointer
-    LUA_METAMETHOD_TEMPLATE(state , -1 , "__gc" , {
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__gc", {
         void* luaPTR = lua_touserdata(inner_state,1);
         // Indexing by the userdata pointer to get the og pointer for cleanup
         if (luaObjects.count(luaPTR) > 0) {
@@ -897,22 +897,21 @@ int Lua::luaCallableCall(lua_State* state) {
     lua_pop(state, 1);
 
     int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its seld will be counted
-    Variant arg1 = lua->getVariant(1);
-    Variant arg2 = lua->getVariant(2);
-    Variant arg3 = lua->getVariant(3);
-    Variant arg4 = lua->getVariant(4);
-    Variant arg5 = lua->getVariant(5);
-    Variant arg6 = lua->getVariant(6);
+    Callable callable = (Callable) lua->getVariant(1);
+
+    Variant arg1 = lua->getVariant(2);
+    Variant arg2 = lua->getVariant(3);
+    Variant arg3 = lua->getVariant(4);
+    Variant arg4 = lua->getVariant(5);
+    Variant arg5 = lua->getVariant(6);
 
     const Variant* args[5] = {
+        &arg1,
         &arg2,
         &arg3,
         &arg4,
         &arg5,
-        &arg6,
     };
-    
-    Callable callable = arg1.operator Callable();
 
     Variant returned;
     Callable::CallError error;
@@ -929,7 +928,7 @@ int Lua::luaCallableCall(lua_State* state) {
 
 // Create metatable for any Callable and saves it at LUA_REGISTRYINDEX with name "mt_Callable"
 void Lua::createCallableMetatable() {
-    luaL_newmetatable(state , "mt_Callable");
+    luaL_newmetatable(state, "mt_Callable");
 
     lua_pushstring(state, "__call"); 
     lua_pushcfunction(state, luaCallableCall);
