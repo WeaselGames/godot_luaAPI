@@ -1,5 +1,3 @@
-
-
  Godot Lua Module
 ===============
 **Table of contents:**
@@ -30,17 +28,18 @@ Features
 - Run lua directly from a string or a text file.
 - Push any Variant as a global.
 - Call lua functions from GDScript.
-- Choose which libraries you wont lua to have access to.
-- Object passed as userdata see [examples](#examples) below.
+- Choose which libraries you want lua to have access to.
+- Custom LuaCallable type which allows you to get a lua function as a Callable. See [examples](#examples) below.
+- Object passed as userdata. See [examples](#examples) below.
 - Callables passed as userdata, which allows you to push a Callable as a lua function. see [examples](#examples) below.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
 ```lua
 local v1 = Vector2(1,2)
 local v2 = Vector2(100.52,100.83)
 v2 = v2.floor()
-print( v2.x ) -- "100"
-print( v1+v2 ) -- "(101,102)"
-change_my_sprite_color( Color(1,0,0,1) ) -- if "change_my_sprite_color" was exposed, in GDScript it will receive a Color variant.
+print(v2.x) -- "100"
+print(v1+v2) -- "(101,102)"
+change_my_sprite_color(Color(1,0,0,1)) -- if "change_my_sprite_color" was exposed, in GDScript it will receive a Color variant.
 ```
 
 Nightly Builds
