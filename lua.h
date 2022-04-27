@@ -19,11 +19,11 @@ public:
   void doFile(String fileName);
   void doString(String code);
   void bindLibs(Array libs);
-  bool pushVariant(Variant var) const;
   void exposeFunction(Callable func, String name); 
   void setErrorHandler(Callable errorHandler);
   void exposeObjectConstructor(Object* obj, String name);
 
+  bool pushVariant(Variant var) const;
   bool pushGlobalVariant(Variant var, String name);
   bool luaFunctionExists(String function_name);
   
@@ -53,7 +53,6 @@ private:
   void createPlaneMetatable();
   void createObjectMetatable();
   void createCallableMetatable();
-  
 };
 
 #endif
