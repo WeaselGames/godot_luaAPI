@@ -75,7 +75,7 @@
 			<argument index="1" name="Name" type="String">
 			</argument>
 			<description>
-				accepts any object that has a new() method. Allows lua to call the contructor aka the new() method. Exposed as a global with the given name.
+				Accepts any object that has a new() method. Allows lua to call the contructor aka the new() method. Exposed as a global with the given name.
 			</description>
 		</method>
 		<method name="set_error_handler">

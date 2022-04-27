@@ -43,7 +43,7 @@ uint32_t LuaCallable::hash() const {
 }
 
 void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
-	// Geting the lua function via the referance stored in funRef
+	// Geting the lua function via the referance stored in funcRef
 	lua_rawgeti(state, LUA_REGISTRYINDEX, funcRef);
 
 	// Push all the argument on to the stack

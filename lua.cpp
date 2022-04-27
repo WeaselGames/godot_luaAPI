@@ -7,12 +7,13 @@ Lua::Lua() {
 	// Createing lua state instance
 	state = luaL_newstate();
 
+    // push our custom print function so by default it prints to the GDConsole.
 	lua_register(state, "print", luaPrint);
 
 	// saving this object into registry
 	lua_pushstring(state,"__Lua");
-	lua_pushlightuserdata(state , this);
-	lua_rawset(state , LUA_REGISTRYINDEX);
+	lua_pushlightuserdata(state, this);
+	lua_rawset(state, LUA_REGISTRYINDEX);
 
 	// Creating basic types metatables and saving them in registry
 	createVector2Metatable();   // "mt_Vector2"
@@ -104,7 +105,7 @@ Variant Lua::callFunction(String function_name, Array args) {
     if (ret != LUA_OK) {
 
         if (!errorHandler.is_valid()) {
-            print_error(vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name));
+            print_error(vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ", function_name));
         } 
         handleError(ret);
         return 0;
