@@ -19,11 +19,14 @@ public:
     ObjectID get_object() const override;
     void call(const Variant **p_argument, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override;
 
+    int getFuncRef();
+
     LuaCallable(Ref<Lua> lua, int ref, lua_State *p_state);
-    ~LuaCallable();
+    virtual ~LuaCallable() = default;
 private:
     int funcRef;
     Ref<Lua> lua;
     lua_State *state;
 };
+
 #endif

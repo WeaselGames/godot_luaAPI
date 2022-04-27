@@ -55,7 +55,7 @@
 			<argument index="1" name="Name" type="String">
 			</argument>
 			<description>
-			Will push a copy of a Variant to lua as a global.
+				Will push a copy of a Variant to lua as a global.
 			</description>
 		</method>
 		<method name="pull_variant">
@@ -64,7 +64,27 @@
 			<argument index="0" name="Name" type="String">
 			</argument>
 			<description>
-			Will pull a copy of a glboal Variant from lua.
+				Will pull a copy of a glboal Variant from lua.
+			</description>
+		</method>
+		<method name="expose_constructor">
+			<return type="void">
+			</return>
+			<argument index="0" name="object" type="Object">
+			</argument>
+			<argument index="1" name="Name" type="String">
+			</argument>
+			<description>
+				Accepts any object that has a new() method. Allows lua to call the contructor aka the new() method. Exposed as a global with the given name.
+			</description>
+		</method>
+		<method name="set_error_handler">
+			<return type="void">
+			</return>
+			<argument index="0" name="Callback" type="Callable">
+			</argument>
+			<description>
+				Takes any Callable that has no return value and takes 1 argument of the type String. The Callable will be called any time the lua state runs into a error with the string being the error message.
 			</description>
 		</method>
 	</methods>
