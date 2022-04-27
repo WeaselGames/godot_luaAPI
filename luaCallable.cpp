@@ -52,7 +52,7 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 	}
 
 	// execute the function using a protected call.
-	int ret = lua_pcall(state, p_argcount, 1 , 0);
+	int ret = lua_pcall(state, p_argcount, 1, 0);
     if (ret != LUA_OK) {
         if (!lua->errorHandler.is_valid()) {
             print_error("Error during \"LuaCallable::call\"");
