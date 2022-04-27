@@ -29,7 +29,7 @@ public:
   
   Variant getVariant(int index = -1) const;
   Variant pullVariant(String name);
-  Variant callFunction(String function_name, Array args );
+  Variant callFunction(String function_name, Array args);
 
   // Lua functions
   static int luaPrint(lua_State* state);

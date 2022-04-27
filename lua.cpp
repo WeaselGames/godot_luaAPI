@@ -11,7 +11,7 @@ Lua::Lua() {
 	lua_register(state, "print", luaPrint);
 
 	// saving this object into registry
-	lua_pushstring(state,"__Lua");
+	lua_pushstring(state, "__Lua");
 	lua_pushlightuserdata(state, this);
 	lua_rawset(state, LUA_REGISTRYINDEX);
 
@@ -63,28 +63,28 @@ void Lua::bindLibs(Array libs) {
         } else if (lib=="table") {
             luaL_requiref(state, LUA_TABLIBNAME, luaopen_table, 1);
             lua_pop(state, 1);
-        }else if (lib=="string") {
+        } else if (lib=="string") {
             luaL_requiref(state, LUA_STRLIBNAME, luaopen_string, 1);
             lua_pop(state, 1);
-        }else if (lib=="math") {
+        } else if (lib=="math") {
             luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
             lua_pop(state, 1);
-        }else if (lib=="os") {
+        } else if (lib=="os") {
             luaL_requiref(state, LUA_OSLIBNAME, luaopen_os, 1);
             lua_pop(state, 1);
-        }else if (lib=="io") {
+        } else if (lib=="io") {
             luaL_requiref(state, LUA_IOLIBNAME, luaopen_io, 1);
             lua_pop(state, 1);
-        }else if (lib=="coroutine") {
+        } else if (lib=="coroutine") {
             luaL_requiref(state, LUA_COLIBNAME, luaopen_coroutine, 1);
             lua_pop(state, 1);
-        }else if (lib=="debug") {
+        } else if (lib=="debug") {
             luaL_requiref(state, LUA_DBLIBNAME, luaopen_debug, 1);
             lua_pop(state, 1);
-        }else if (lib=="package") {
+        } else if (lib=="package") {
             luaL_requiref(state, LUA_LOADLIBNAME, luaopen_package, 1);
             lua_pop(state, 1);
-        }else if (lib=="utf8") {
+        } else if (lib=="utf8") {
             luaL_requiref(state, LUA_UTF8LIBNAME, luaopen_utf8, 1);
             lua_pop(state, 1);
         }
@@ -207,37 +207,37 @@ bool Lua::pushVariant(Variant var) const {
         case Variant::Type::VECTOR2: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Vector2");
+            luaL_setmetatable(state, "mt_Vector2");
             break;     
         }     
         case Variant::Type::VECTOR3: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Vector3");
+            luaL_setmetatable(state, "mt_Vector3");
             break;     
         }
         case Variant::Type::COLOR: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Color");
+            luaL_setmetatable(state, "mt_Color");
             break;
         }
         case Variant::Type::RECT2: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Rect2");
+            luaL_setmetatable(state, "mt_Rect2");
             break;     
         }
         case Variant::Type::PLANE: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Plane");
+            luaL_setmetatable(state, "mt_Plane");
             break;     
         }
         case Variant::Type::OBJECT: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Object");
+            luaL_setmetatable(state, "mt_Object");
             break;  
         }
         case Variant::Type::CALLABLE: {
@@ -254,7 +254,7 @@ bool Lua::pushVariant(Variant var) const {
 
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
-            luaL_setmetatable(state,"mt_Callable");
+            luaL_setmetatable(state, "mt_Callable");
             break;  
         }
         default:
@@ -268,7 +268,7 @@ bool Lua::pushVariant(Variant var) const {
 // Call pushVariant() and set it to a global name
 bool Lua::pushGlobalVariant(Variant var, String name) {
     if (pushVariant(var)) {
-        lua_setglobal(state,name.ascii().get_data());
+        lua_setglobal(state, name.ascii().get_data());
         return true;
     }
     return false;
@@ -297,7 +297,7 @@ Variant Lua::getVariant(int index) const {
             result = (bool)lua_toboolean(state, index);
             break;
         case LUA_TUSERDATA:
-            result = *(Variant*)lua_touserdata(state,index);
+            result = *(Variant*)lua_touserdata(state, index);
             break;
         case LUA_TTABLE:
         {
@@ -341,8 +341,8 @@ void Lua::handleError(int lua_error) const {
             break;
         default: break;
     }
-    msg += lua_tostring(state,-1);
-    lua_pop(state,1);
+    msg += lua_tostring(state, -1);
+    lua_pop(state, 1);
     if (!errorHandler.is_valid()) {
         print_error(msg);
         return;
@@ -370,7 +370,7 @@ int Lua::luaPrint(lua_State* state)
     for (int n=1; n<=args; ++n) {
 		String it_string;
 		
-		switch(lua_type(state,n)) {
+		switch(lua_type(state, n)) {
 			case LUA_TUSERDATA:{
 				Variant var = *(Variant*) lua_touserdata(state, n);
 				it_string = var.operator String();
@@ -396,24 +396,24 @@ int Lua::luaPrint(lua_State* state)
 // These 2 macros helps us in constructing general metamethods.
 // We can use "lua" as a "Lua" pointer and arg1, arg2, ..., arg5 as Variants objects
 // Check examples in createVector2Metatable
-#define LUA_LAMBDA_TEMPLATE(_f_) \
+#define LUA_LAMBDA_TEMPLATE(_f_)                          \
  [](lua_State* inner_state) -> int {                      \
      lua_pushstring(inner_state,"__Lua");                 \
      lua_rawget(inner_state,LUA_REGISTRYINDEX);           \
-     Lua* lua = (Lua*) lua_touserdata(inner_state,-1);;   \
-     lua_pop(inner_state,1);                              \
-     Variant arg1 = lua->getVariant(1);                             \
-     Variant arg2 = lua->getVariant(2);                             \
-     Variant arg3 = lua->getVariant(3);                             \
-     Variant arg4 = lua->getVariant(4);                             \
-     Variant arg5 = lua->getVariant(5);                             \
-     _f_                                                            \
+     Lua* lua = (Lua*) lua_touserdata(inner_state,-1);    \
+     lua_pop(inner_state, 1);                             \
+     Variant arg1 = lua->getVariant(1);                   \
+     Variant arg2 = lua->getVariant(2);                   \
+     Variant arg3 = lua->getVariant(3);                   \
+     Variant arg4 = lua->getVariant(4);                   \
+     Variant arg5 = lua->getVariant(5);                   \
+     _f_                                                  \
 }
  
 #define LUA_METAMETHOD_TEMPLATE(lua_state, metatable_index, metamethod_name, _f_)\
-lua_pushstring(lua_state,metamethod_name); \
-lua_pushcfunction(lua_state,LUA_LAMBDA_TEMPLATE(_f_)); \
-lua_settable(lua_state,metatable_index-2);
+lua_pushstring(lua_state, metamethod_name); \
+lua_pushcfunction(lua_state, LUA_LAMBDA_TEMPLATE(_f_)); \
+lua_settable(lua_state, metatable_index-2);
 
 // Used to keep track of the original pointer via the userdata pointer
 static std::map<void*, Variant*> luaObjects;
@@ -562,7 +562,7 @@ void Lua::createVector2Metatable() {
 
     LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
         if (arg1.has_method(arg2)) {
-            lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
+            lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
             lua->pushVariant(arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
             return 1;
@@ -574,7 +574,7 @@ void Lua::createVector2Metatable() {
  
     LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // We can't use arg1 here because we need to reference the userdata
-        ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
+        ((Variant*)lua_touserdata(inner_state, 1))->set(arg2, arg3);
         return 0;
     }); 
  
@@ -871,14 +871,14 @@ void Lua::createObjectMetatable() {
         
         if (allowedFields.is_empty() || allowedFields.has(arg2)) {
             // We can't use arg1 here because we need to reference the userdata
-            ((Variant*)lua_touserdata(inner_state,1))->set(arg2, arg3);
+            ((Variant*)lua_touserdata(inner_state, 1))->set(arg2, arg3);
         }
         return 0;
     }); 
     
     // Makeing sure to clean up the pointer
     LUA_METAMETHOD_TEMPLATE(state, -1, "__gc", {
-        void* luaPTR = lua_touserdata(inner_state,1);
+        void* luaPTR = lua_touserdata(inner_state, 1);
         // Indexing by the userdata pointer to get the og pointer for cleanup
         if (luaObjects.count(luaPTR) > 0) {
             Variant* ptr = luaObjects[luaPTR];
