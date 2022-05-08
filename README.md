@@ -132,7 +132,7 @@ var lua: Lua
 
 func _ready():
 	lua = Lua.new()
-	lua.do_string("user://luaFile.lua")
+	lua.do_file("user://luaFile.lua")
 	if( lua.function_exists("set_colors")):
 		# call_function will return a Variant if lua returns nothing the value will be null
 		var value = lua.call_function("set_colors", ["red", "blue"])

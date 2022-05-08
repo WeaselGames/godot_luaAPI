@@ -64,7 +64,7 @@
 			<argument index="0" name="Name" type="String">
 			</argument>
 			<description>
-				Will pull a copy of a glboal Variant from lua.
+				Will pull a copy of a global Variant from lua.
 			</description>
 		</method>
 		<method name="expose_constructor">
