@@ -1,5 +1,7 @@
 #ifndef LUA_REGISTER_TYPES_H
 #define LUA_REGISTER_TYPES_H
-void register_lua_types();
-void unregister_lua_types();
+#include "modules/register_module_types.h"
+
+void initialize_lua_module(ModuleInitializationLevel p_level);
+void uninitialize_lua_module(ModuleInitializationLevel p_level);
 #endif

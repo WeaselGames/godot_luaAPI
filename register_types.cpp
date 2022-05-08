@@ -1,9 +1,14 @@
 #include "register_types.h"
 #include "lua.h"
 
-void register_lua_types(){
-	ClassDB::register_class<Lua>();
+void initialize_lua_module(ModuleInitializationLevel p_level) {
+	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
+		ClassDB::register_class<Lua>();
+	}
 }
 
-void unregister_lua_types() {
+void uninitialize_lua_module(ModuleInitializationLevel p_level) {
+	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+		return;
+	}
 }
