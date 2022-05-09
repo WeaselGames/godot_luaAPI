@@ -837,6 +837,12 @@ void Lua::createObjectMetatable() {
     luaL_newmetatable(state, "mt_Object");
 
     LUA_METAMETHOD_TEMPLATE(state, -1, "__index", {
+        // If object overrides
+        if (arg1.has_method("__index")) {
+            lua->pushVariant(arg1.call("__index", arg2));
+            return 1;
+        }
+
         Array allowedFuncs = Array();
         if (arg1.has_method("lua_funcs")) {
             allowedFuncs = arg1.call("lua_funcs");
@@ -864,6 +870,12 @@ void Lua::createObjectMetatable() {
     });
     
     LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
+        // If object overrides
+        if (arg1.has_method("__newindex")) {
+            lua->pushVariant(arg1.call("__newindex", arg2, arg3));
+            return 1;
+        }
+
         Array allowedFields = Array();
         if (arg1.has_method("lua_fields")) {
             allowedFields = arg1.call("lua_fields");
