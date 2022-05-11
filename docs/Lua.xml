@@ -22,7 +22,7 @@
 			</description>
 		</method>
 		<method name="do_file">
-			<return type="void">
+			<return type="LuaError">
 			</return>
 			<argument index="0" name="FilePath" type="String">
 			</argument>
@@ -31,11 +31,11 @@
 			</description>
 		</method>
 		<method name="do_string">
-			<return type="void">
+			<return type="LuaError">
 			</return>
 			<argument index="0" name="Code" type="String">
 			</argument>
-				loas a string with luaL_loadstring() and executes the top of the stack
+				loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors
 			</description>
 		</method>
 		<method name="function_exists">
@@ -48,14 +48,14 @@
 			</description>
 		</method>
 		<method name="push_variant">
-			<return type="bool">
+			<return type="LuaError">
 			</return>
 			<argument index="0" name="var" type="Variant">
 			</argument>
 			<argument index="1" name="Name" type="String">
 			</argument>
 			<description>
-				Will push a copy of a Variant to lua as a global.
+				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
 			</description>
 		</method>
 		<method name="pull_variant">
@@ -76,15 +76,6 @@
 			</argument>
 			<description>
 				Accepts any object that has a new() method. Allows lua to call the contructor aka the new() method. Exposed as a global with the given name.
-			</description>
-		</method>
-		<method name="set_error_handler">
-			<return type="void">
-			</return>
-			<argument index="0" name="Callback" type="Callable">
-			</argument>
-			<description>
-				Takes any Callable that has no return value and takes 1 argument of the type String. The Callable will be called any time the lua state runs into a error with the string being the error message.
 			</description>
 		</method>
 	</methods>
