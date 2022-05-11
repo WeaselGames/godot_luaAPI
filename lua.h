@@ -19,8 +19,7 @@ public:
   ~Lua();
   void bindLibs(Array libs);
   void exposeFunction(Callable func, String name);
-  void exposeObjectConstructor(Object* obj, String name);
-
+  
   bool luaFunctionExists(String function_name);
   
   Variant getVariant(int index = -1) const;
@@ -31,6 +30,7 @@ public:
   LuaError* doString(String code);
   LuaError* pushVariant(Variant var) const;
   LuaError* pushGlobalVariant(Variant var, String name);
+  LuaError* exposeObjectConstructor(Object* obj, String name);
 
   // Lua functions
   static int luaErrorHandler(lua_State* state);

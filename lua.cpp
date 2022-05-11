@@ -131,7 +131,7 @@ LuaError* Lua::doFile(String fileName) {
     if (ret != LUA_OK) {
         return handleError(ret);
     }
-    
+
     LuaError* err = execute(-2);
     // pop the error handler from the stack
     lua_pop(state, 1);
@@ -239,8 +239,16 @@ LuaError* Lua::pushVariant(Variant var) const {
             break;     
         }
         case Variant::Type::OBJECT: {
+            // If the type being pushed is a lua error, Raise a error
+            if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+                print_line("testing");
+                lua_pushstring(state, err->getMsg().ascii().get_data());
+                lua_error(state);
+                break;
+            }
+
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
-            memcpy(userdata, (void*)&var, sizeof(Variant));
+            memcpy(userdata, (void*)var, sizeof(Variant));
             luaL_setmetatable(state, "mt_Object");
             break;  
         }
@@ -263,7 +271,7 @@ LuaError* Lua::pushVariant(Variant var) const {
         }
         default:
             lua_pushnil(state);
-            return LuaError::newError(vformat("Can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
+            return LuaError::newError(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
     }
     return LuaError::errNone();
 }
@@ -324,8 +332,11 @@ Variant Lua::getVariant(int index) const {
             result = Callable(callable);
             break;
         }
+        case LUA_TNIL:{
+            break;
+        }
         default:
-            result = Variant();
+            result = LuaError::newError(vformat("unkown lua type '%d' in Lua::getVariant", type), LuaError::ERR_RUNTIME);
     }
     return result;
 }
@@ -427,11 +438,10 @@ lua_settable(lua_state, metatable_index-2);
 static std::map<void*, Variant*> luaObjects;
 
 // Expose the contructor for a object to lua
-void Lua::exposeObjectConstructor(Object* obj, String name) {
+LuaError* Lua::exposeObjectConstructor(Object* obj, String name) {
     // Make sure we are able to call new
     if (!obj->has_method("new")) {
-        print_error("Error during \"Lua::exposeObjectConstructor\" method 'new' does not exist.");
-        return;
+        return LuaError::newError("during \"Lua::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
     }
     lua_pushlightuserdata(state, obj);
     lua_pushcclosure(state, LUA_LAMBDA_TEMPLATE({
@@ -448,6 +458,7 @@ void Lua::exposeObjectConstructor(Object* obj, String name) {
         return 1;
     }), 1);
     lua_setglobal(state, name.ascii().get_data());
+    return LuaError::errNone();
 }
 
 // Expose the default constructors

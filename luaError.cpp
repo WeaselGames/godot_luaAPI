@@ -12,6 +12,19 @@ LuaError* LuaError::errNone() {
     return err;
 }
 
+// Test if the variants type is a Lua error
+bool LuaError::isErr(Variant var) {
+    if (var.get_type() != Variant::Type::OBJECT) {
+        return false;
+    }
+
+    if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+        return err->getType() != ERR_NONE;
+    }
+
+    return false;
+}
+
 void LuaError::setInfo(String msg, ErrorType type) {
     errType = type;
     errMsg = msg;
@@ -42,11 +55,15 @@ LuaError::ErrorType LuaError::getType() {
 }
 
 void LuaError::_bind_methods(){
-    ClassDB::bind_static_method("LuaError", D_METHOD("new_error", "Message", "Type"), &LuaError::newError);
+    ClassDB::bind_static_method("LuaError", D_METHOD("new_err", "Message", "Type"), &LuaError::newError);
+    ClassDB::bind_static_method("LuaError", D_METHOD("error_none"), &LuaError::errNone);
+    ClassDB::bind_static_method("LuaError", D_METHOD("is_error", "var"), &LuaError::isErr);
+
     ClassDB::bind_method(D_METHOD("set_msg","Message"), &LuaError::setMsg);
     ClassDB::bind_method(D_METHOD("get_msg"), &LuaError::getMsg);
     ClassDB::bind_method(D_METHOD("set_type","Type"), &LuaError::setType);
     ClassDB::bind_method(D_METHOD("get_type"), &LuaError::getType);
+    
 
     ADD_PROPERTY(PropertyInfo(Variant::INT, "type"), "set_type", "get_type");
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "msg"), "set_msg", "get_msg");
