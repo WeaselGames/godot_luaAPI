@@ -123,7 +123,7 @@ LuaError* Lua::doFile(String fileName) {
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
-        return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
+        return LuaError::newErr(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
     }
 
     String path = file->get_path_absolute();
@@ -271,7 +271,7 @@ LuaError* Lua::pushVariant(Variant var) const {
         }
         default:
             lua_pushnil(state);
-            return LuaError::newError(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
+            return LuaError::newErr(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
     }
     return LuaError::errNone();
 }
@@ -336,7 +336,7 @@ Variant Lua::getVariant(int index) const {
             break;
         }
         default:
-            result = LuaError::newError(vformat("unkown lua type '%d' in Lua::getVariant", type), LuaError::ERR_RUNTIME);
+            result = LuaError::newErr(vformat("unkown lua type '%d' in Lua::getVariant", type), LuaError::ERR_RUNTIME);
     }
     return result;
 }
@@ -377,7 +377,7 @@ LuaError* Lua::handleError(int lua_error) const {
         default: break;
     }
     
-    return LuaError::newError(msg, static_cast<LuaError::ErrorType>(lua_error));
+    return LuaError::newErr(msg, static_cast<LuaError::ErrorType>(lua_error));
 }
 
 // Lua functions
@@ -441,7 +441,7 @@ static std::map<void*, Variant*> luaObjects;
 LuaError* Lua::exposeObjectConstructor(Object* obj, String name) {
     // Make sure we are able to call new
     if (!obj->has_method("new")) {
-        return LuaError::newError("during \"Lua::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
+        return LuaError::newErr("during \"Lua::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
     }
     lua_pushlightuserdata(state, obj);
     lua_pushcclosure(state, LUA_LAMBDA_TEMPLATE({
