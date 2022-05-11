@@ -26,14 +26,13 @@ class LuaError : public RefCounted {
         static bool isErr(Variant var);
 
         void setInfo(String msg, ErrorType type);
-        operator String() const;
         bool operator==(const ErrorType type);
+        bool operator==(const LuaError err);
 
         void setMsg(String msg);
-        String getMsg();
+        String getMsg() const;
         void setType(ErrorType type);
-        ErrorType getType();
-        int getLineNumber();
+        ErrorType getType() const;
 
     private:
         ErrorType errType;

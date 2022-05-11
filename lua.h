@@ -31,6 +31,9 @@ public:
   LuaError* pushVariant(Variant var) const;
   LuaError* pushGlobalVariant(Variant var, String name);
   LuaError* exposeObjectConstructor(Object* obj, String name);
+  LuaError* handleError(int lua_error) const;
+
+  static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
 
   // Lua functions
   static int luaErrorHandler(lua_State* state);
@@ -38,8 +41,6 @@ public:
   static int luaExposedFuncCall(lua_State* state);
   static int luaUserdataFuncCall(lua_State* state);
   static int luaCallableCall(lua_State* state);
-
-  LuaError* handleError(int lua_error) const;
 
 private:
   lua_State *state;

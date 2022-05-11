@@ -340,13 +340,6 @@ Variant Lua::getVariant(int index) const {
     return result;
 }
 
-int Lua::luaErrorHandler(lua_State* state) {
-    const char * msg = lua_tostring(state, -1);
-    luaL_traceback(state, state, msg, 2);
-    lua_remove(state, -2);
-    return 1;
-}
-
 // Assumes there is a error in the top of the stack. Pops it.
 LuaError* Lua::handleError(int lua_error) const {
     String msg;
@@ -370,7 +363,7 @@ LuaError* Lua::handleError(int lua_error) const {
             break;
         }
         case LUA_ERRERR:{
-            msg += "[LUA_ERRERR - error while handling another error ]\n";
+            msg += "[LUA_ERRERR - error while calling Lua::luaErrorHandler ] please report this issue: https://github.com/Trey2k/lua/issues/new\n";
             break;
         }
         default: break;
@@ -379,7 +372,60 @@ LuaError* Lua::handleError(int lua_error) const {
     return LuaError::newErr(msg, static_cast<LuaError::ErrorType>(lua_error));
 }
 
+// for handling callable errors. Does not need the lua object thus is a static method
+LuaError* Lua::handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc) {
+    switch (error.error) {
+        case Callable::CallError::CALL_ERROR_INVALID_ARGUMENT: {
+            return LuaError::newErr(
+                vformat("Error calling function: %s - Invalid type for argument %s, expected %s but is %s.", 
+                    String(func), 
+                    itos(error.argument+1), // lua indexes by 1 so this should be more correct
+                    Variant::get_type_name(Variant::Type(error.expected)),
+                    Variant::get_type_name(p_arguments[error.argument]->get_type())), 
+                LuaError::ERR_RUNTIME);
+         }
+        case Callable::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS: {
+            return LuaError::newErr(
+                vformat("Error calling function: %s - Too many arguments, expected %d but got %d.", 
+                    String(func), 
+                    argc),
+                    
+                LuaError::ERR_RUNTIME);
+        }
+        case Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS: {
+            return LuaError::newErr(
+                vformat("Error calling function: %s - Too few arguments, expected %d but got $d.", 
+                    String(func),
+                    error.argument,
+                    argc), 
+                LuaError::ERR_RUNTIME);
+        }
+        case Callable::CallError::CALL_ERROR_INVALID_METHOD: {
+            return LuaError::newErr(
+                vformat("Error calling function: %s - Method is invalid.", 
+                    String(func)), 
+                LuaError::ERR_RUNTIME);
+        }
+        case Callable::CallError::CALL_ERROR_INSTANCE_IS_NULL: {
+            return LuaError::newErr(
+                vformat("Error calling function: %s - Instance is null.", 
+                    String(func)), 
+                LuaError::ERR_RUNTIME);
+        }
+        default:
+            return LuaError::errNone();
+    }
+}
+
 // Lua functions
+// Lua error handler, when a error occures it appends the stacktrace to the error message
+int Lua::luaErrorHandler(lua_State* state) {
+    const char * msg = lua_tostring(state, -1);
+    luaL_traceback(state, state, msg, 2);
+    lua_remove(state, -2);
+    return 1;
+}
+
 // Change lua's print function to print to the Godot console by default
 int Lua::luaPrint(lua_State* state)
 {
@@ -408,6 +454,87 @@ int Lua::luaPrint(lua_State* state)
 
     return 0;
 }
+
+// Used as the __call metamethod for mt_Callable. 
+// All exposed gdscript functions are called vis this method.
+int Lua::luaCallableCall(lua_State* state) {
+    lua_pushstring(state, "__Lua");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    Lua* lua = (Lua*) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its self will be counted
+    Callable callable = (Callable) lua->getVariant(1);
+   
+    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
+    int index = 2; // we start at 2, 1 is the callable
+    for (int i = 0; i < argc; i++) {
+        Variant* temp = memnew(Variant);
+        *temp = lua->getVariant(index++);
+        if (LuaError::isErr(*temp)) {
+            LuaError* err = Object::cast_to<LuaError>(temp->operator Object*());
+            lua_pushstring(state, err->getMsg().ascii().get_data());
+            lua_error(state);
+            return 0;
+        }
+
+        args[i] = temp;
+    }
+
+    Variant returned;
+    Callable::CallError error;
+    callable.call(args, argc, returned, error);
+    if (error.error != error.CALL_OK) {
+        LuaError* err = Lua::handleError(callable.get_method(), error, args, argc);
+        lua_pushstring(state, err->getMsg().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+    
+    lua->pushVariant(returned);
+    return 1;
+}
+
+// This function is invoked whenever a function is called on one of the userdata types excluding mt_Callable or mt_Object if __index is overwritten
+int Lua::luaUserdataFuncCall(lua_State* state) {
+    lua_pushstring(state, "__Lua");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    Lua* lua = (Lua*) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    int argc = lua_gettop(state);
+
+    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
+    int index = 1;
+    for (int i = 0; i < argc; i++) {
+        Variant* temp = memnew(Variant);
+        *temp = lua->getVariant(index++);
+        if (LuaError::isErr(*temp)) {
+            LuaError* err = Object::cast_to<LuaError>(temp->operator Object*());
+            lua_pushstring(state, err->getMsg().ascii().get_data());
+            lua_error(state);
+            return 0;
+        }
+
+        args[i] = temp;
+    }
+
+    Variant* obj  = (Variant*)lua_touserdata(state, lua_upvalueindex(1));
+    String fName = lua->getVariant(lua_upvalueindex(2));
+    Callable::CallError error;
+    Variant ret;
+    obj->callp(fName.ascii().get_data(), args, argc, ret, error);
+    if (error.error != error.CALL_OK) {
+        LuaError* err = Lua::handleError(fName, error, args, argc);
+        lua_pushstring(state, err->getMsg().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
+    lua->pushVariant(ret);
+    return 1;
+}
+
 
 // -----------meta tables-----------------
 
@@ -526,54 +653,6 @@ void Lua::exposeConstructors() {
     
 }
 
-// This function is used whenever a function is called on one of the userdata types below
-int Lua::luaUserdataFuncCall(lua_State* L) {
-    lua_pushstring(L,"__Lua");
-    lua_rawget(L,LUA_REGISTRYINDEX);
-    Lua* lua = (Lua*) lua_touserdata(L,-1);
-    lua_pop(L,1);
-    int argc = lua_gettop(L);
-
-    Variant arg1 = lua->getVariant(1);
-    Variant arg2 = lua->getVariant(2);
-    Variant arg3 = lua->getVariant(3);
-    Variant arg4 = lua->getVariant(4);
-    Variant arg5 = lua->getVariant(5);
-    Variant* obj  = (Variant*)lua_touserdata(L, lua_upvalueindex(1));
-    String fName = lua->getVariant(lua_upvalueindex(2));
-    Variant ret;
-    // This feels wrong but cant think of a better way atm. Passing the wrong number of args causes a error.
-    switch (argc) {
-        case 0:{
-            ret = obj->call(fName.ascii().get_data());
-            break;
-        }
-        case 1: {
-            ret = obj->call(fName.ascii().get_data(), arg1);
-            break;
-        }
-        case 2: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2);
-            break;
-        }
-        case 3: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2, arg3);
-            break;
-        }
-        case 4: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2, arg3, arg4);
-            break;
-        }
-        case 5: {
-            ret = obj->call(fName.ascii().get_data(), arg1, arg2, arg3, arg4, arg5);
-            break;
-        }
-    }
-    
-    lua->pushVariant(ret);
-    return 1;
-}
-
 // Create metatable for Vector2 and saves it at LUA_REGISTRYINDEX with name "mt_Vector2"
 void Lua::createVector2Metatable() {
     luaL_newmetatable(state, "mt_Vector2");
@@ -649,7 +728,7 @@ void Lua::createVector2Metatable() {
         return 1;
     });
  
-    lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state, 1); // Stack is now unmodified
 }
 
 // Create metatable for Vector3 and saves it at LUA_REGISTRYINDEX with name "mt_Vector3"
@@ -717,7 +796,7 @@ void Lua::createVector3Metatable() {
         return 1;
     });
  
-    lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state, 1); // Stack is now unmodified
 }
 
 // Create metatable for Rect2 and saves it at LUA_REGISTRYINDEX with name "mt_Rect2"
@@ -749,7 +828,7 @@ void Lua::createRect2Metatable() {
         return 1;
     });
  
-    lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state, 1); // Stack is now unmodified
 }
 
 // Create metatable for Plane and saves it at LUA_REGISTRYINDEX with name "mt_Plane"
@@ -779,7 +858,7 @@ void Lua::createPlaneMetatable() {
         return 1;
     });
     
-    lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state, 1); // Stack is now unmodified
 }
 
 // Create metatable for Color and saves it at LUA_REGISTRYINDEX with name "mt_Color"
@@ -847,7 +926,7 @@ void Lua::createColorMetatable() {
         return 1;
     });
  
-    lua_pop(state,1); // Stack is now unmodified
+    lua_pop(state, 1); // Stack is now unmodified
 }
 
 // Create metatable for any Object and saves it at LUA_REGISTRYINDEX with name "mt_Object"
@@ -917,43 +996,7 @@ void Lua::createObjectMetatable() {
         return 0;
     });
 
-    lua_pop(state,1);
-}
-
-int Lua::luaCallableCall(lua_State* state) {
-    lua_pushstring(state, "__Lua");
-    lua_rawget(state, LUA_REGISTRYINDEX);
-    Lua* lua = (Lua*) lua_touserdata(state, -1);
     lua_pop(state, 1);
-
-    int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its seld will be counted
-    Callable callable = (Callable) lua->getVariant(1);
-
-    Variant arg1 = lua->getVariant(2);
-    Variant arg2 = lua->getVariant(3);
-    Variant arg3 = lua->getVariant(4);
-    Variant arg4 = lua->getVariant(5);
-    Variant arg5 = lua->getVariant(6);
-
-    const Variant* args[5] = {
-        &arg1,
-        &arg2,
-        &arg3,
-        &arg4,
-        &arg5,
-    };
-
-    Variant returned;
-    Callable::CallError error;
-    callable.call(args, argc, returned, error);
-    if (error.error != error.CALL_OK) {
-        // TODO: Better error handling, maybe this should be passed to errorHandler instead since this could be user triggered as well.
-        print_error(vformat("Error during \"Lua::luaCallableCall\" on Callable \"%s\": %d", callable, error.error));
-        return 0;
-    }
-    
-    lua->pushVariant(returned);
-    return 1;
 }
 
 // Create metatable for any Callable and saves it at LUA_REGISTRYINDEX with name "mt_Callable"

@@ -56,6 +56,7 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
     if (ret != LUA_OK) {
         r_return_value = lua->handleError(ret);
     } else r_return_value = lua->getVariant(1);
+	
 	lua_pop(state, 1);
 }
 
