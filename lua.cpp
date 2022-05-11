@@ -6,6 +6,7 @@
 Lua::Lua() {
 	// Createing lua state instance
 	state = luaL_newstate();
+    luaL_openlibs(state);
 
     // push our custom print function so by default it prints to the GDConsole.
 	lua_register(state, "print", luaPrint);
@@ -42,13 +43,7 @@ void Lua::_bind_methods() {
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &Lua::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &Lua::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &Lua::callFunction);
-    ClassDB::bind_method(D_METHOD("set_error_handler", "Callable"), &Lua::setErrorHandler);
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &Lua::luaFunctionExists);
-}
-
-// Set the errorHandler callback function
-void Lua::setErrorHandler(Callable errorHandler) {
-    this->errorHandler = errorHandler;
 }
 
 // Binds lua librares with the lua state
@@ -93,6 +88,9 @@ void Lua::bindLibs(Array libs) {
 
 // call a Lua function from GDScript
 Variant Lua::callFunction(String function_name, Array args) {
+    // push the error handler on to the stack
+    lua_pushcfunction(state, luaErrorHandler);
+
     // put global function name on stack
     lua_getglobal(state, function_name.ascii().get_data());
 
@@ -101,14 +99,10 @@ Variant Lua::callFunction(String function_name, Array args) {
         pushVariant(args[i]);
     }
 
-    int ret = lua_pcall(state, args.size(), 1, 0);
+    // error handlers index is -2
+    int ret = lua_pcall(state, args.size(), 1, -2);
     if (ret != LUA_OK) {
-
-        if (!errorHandler.is_valid()) {
-            print_error(vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ", function_name));
-        } 
-        handleError(ret);
-        return 0;
+        return handleError(ret);
     }
     Variant toReturn = getVariant(1);
     lua_pop(state, 1);
@@ -122,40 +116,50 @@ bool Lua::luaFunctionExists(String function_name) {
 }
 
 // addFile() calls luaL_loadfille with the absolute file path
-void Lua::doFile(String fileName) {
+LuaError* Lua::doFile(String fileName) {
+    // push the error handler onto the stack
+    lua_pushcfunction(state, luaErrorHandler);
+
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
-        // TODO: Maybe better error handling?
-        print_error(error_names[error]);
-        return;
+        return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
     }
 
     String path = file->get_path_absolute();
-    luaL_loadfile(state, path.ascii().get_data());
-    execute();
+    int ret = luaL_loadfile(state, path.ascii().get_data());
+    if (ret != LUA_OK) {
+        return handleError(ret);
+    }
+    
+    LuaError* err = execute(-2);
+    // pop the error handler from the stack
+    lua_pop(state, 1);
+    return err;
 }
 
 // Run lua string in a thread if threading is enabled
-void Lua::doString(String code) {
-  luaL_loadstring(state, code.ascii().get_data());
-  execute();
+LuaError* Lua::doString(String code) {
+    // push the error handler onto the stack
+    lua_pushcfunction(state, luaErrorHandler);
+    luaL_loadstring(state, code.ascii().get_data());
+    LuaError* err = execute(-2);
+    // pop the error handler from the stack
+    lua_pop(state, 1);
+    return err;
 }
 
 // Execute the current lua stack, return error as string if one occures, otherwise return String()
-void Lua::execute() {
-    // TODO: Maybe some custom error types for better error handling
-    int ret = lua_pcall(state, 0, 0, 0);
+LuaError* Lua::execute(int handlerIndex) {
+    int ret = lua_pcall(state, 0, 0, handlerIndex);
     if (ret != LUA_OK) {
-        if (!errorHandler.is_valid()) {
-            print_error("Error during \"Lua::execute\"");
-        } 
-        handleError(ret);
+        return handleError(ret);
     }
+    return LuaError::errNone();
 }
 
 // Push a GD Variant to the lua stack and return false if type is not supported (in this case, returns a nil value).
-bool Lua::pushVariant(Variant var) const {
+LuaError* Lua::pushVariant(Variant var) const {
     switch (var.get_type())
     {
         case Variant::Type::NIL:
@@ -258,20 +262,20 @@ bool Lua::pushVariant(Variant var) const {
             break;  
         }
         default:
-            print_error(vformat("Can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())));
             lua_pushnil(state);
-            return false;
+            return LuaError::newError(vformat("Can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
     }
-    return true;
+    return LuaError::errNone();
 }
 
 // Call pushVariant() and set it to a global name
-bool Lua::pushGlobalVariant(Variant var, String name) {
-    if (pushVariant(var)) {
+LuaError* Lua::pushGlobalVariant(Variant var, String name) {
+    LuaError* err = pushVariant(var);
+    if (*err == LuaError::ERR_NONE) {
         lua_setglobal(state, name.ascii().get_data());
-        return true;
+        return err;
     }
-    return false;
+    return err;
 }
 
 // Pull a global variant from Lua to GDScript
@@ -326,39 +330,43 @@ Variant Lua::getVariant(int index) const {
     return result;
 }
 
+int Lua::luaErrorHandler(lua_State* state) {
+    const char * msg = lua_tostring(state, -1);
+    luaL_traceback(state, state, msg, 2);
+    lua_remove(state, -2);
+    return 1;
+}
+
 // Assumes there is a error in the top of the stack. Pops it.
-void Lua::handleError(int lua_error) const {
+LuaError* Lua::handleError(int lua_error) const {
     String msg;
     switch(lua_error) {
-        case LUA_ERRRUN:
-            msg += "[LUA_ERRNUN - runtime error ] ";
+        case LUA_ERRRUN: {
+            msg += "[LUA_ERRRUN - runtime error ]\n";
+            msg += lua_tostring(state, -1);
+            msg += "\n";
+            lua_pop(state, 1);
             break;
-        case LUA_ERRMEM:
-            msg += "[LUA_ERRMEM - memory allocation error ] ";
+        }
+        case LUA_ERRSYNTAX:{
+            msg += "[LUA_ERRSYNTAX - syntax error ]\n";
+            msg += lua_tostring(state, -1);
+            msg += "\n";
+            lua_pop(state, 1);
             break;
-        case LUA_ERRERR:
-            msg += "[LUA_ERRERR - error while handling another error ] ";
+        }
+        case LUA_ERRMEM:{
+            msg += "[LUA_ERRMEM - memory allocation error ]\n";
             break;
+        }
+        case LUA_ERRERR:{
+            msg += "[LUA_ERRERR - error while handling another error ]\n";
+            break;
+        }
         default: break;
     }
-    msg += lua_tostring(state, -1);
-    lua_pop(state, 1);
-    if (!errorHandler.is_valid()) {
-        print_error(msg);
-        return;
-    }
-    // custom error handling
-    const Variant* args[1];
-    Variant returned;
-    Callable::CallError error;
-
-    Variant temp = msg;
-    args[0] = &temp;
-
-    errorHandler.call(args, 1, returned, error);
-    if (error.error != error.CALL_OK) {
-        print_error(vformat("Error during \"Lua::handleError\" on Errorhandler Callable \"%s\": ", errorHandler));
-    }
+    
+    return LuaError::newError(msg, static_cast<LuaError::ErrorType>(lua_error));
 }
 
 // Lua functions
