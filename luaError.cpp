@@ -1,6 +1,6 @@
 #include "luaError.h"
 
-LuaError* LuaError::newError(String msg, ErrorType type) {
+LuaError* LuaError::newErr(String msg, ErrorType type) {
     LuaError* err = memnew(LuaError);
     err->setInfo(msg, static_cast<LuaError::ErrorType>(type));
     return err;
@@ -55,9 +55,9 @@ LuaError::ErrorType LuaError::getType() {
 }
 
 void LuaError::_bind_methods(){
-    ClassDB::bind_static_method("LuaError", D_METHOD("new_error", "Message", "Type"), &LuaError::newError);
-    ClassDB::bind_static_method("LuaError", D_METHOD("error_none"), &LuaError::errNone);
-    ClassDB::bind_static_method("LuaError", D_METHOD("is_error", "var"), &LuaError::isErr);
+    ClassDB::bind_static_method("LuaError", D_METHOD("new_err", "Message", "Type"), &LuaError::newErr);
+    ClassDB::bind_static_method("LuaError", D_METHOD("err_none"), &LuaError::errNone);
+    ClassDB::bind_static_method("LuaError", D_METHOD("is_err", "var"), &LuaError::isErr);
     
     ClassDB::bind_method(D_METHOD("set_msg","Message"), &LuaError::setMsg);
     ClassDB::bind_method(D_METHOD("get_msg"), &LuaError::getMsg);
