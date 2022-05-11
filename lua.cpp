@@ -241,7 +241,6 @@ LuaError* Lua::pushVariant(Variant var) const {
         case Variant::Type::OBJECT: {
             // If the type being pushed is a lua error, Raise a error
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
-                print_line("testing");
                 lua_pushstring(state, err->getMsg().ascii().get_data());
                 lua_error(state);
                 break;
