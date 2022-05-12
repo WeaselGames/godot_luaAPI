@@ -16,9 +16,7 @@
 			<argument index="1" name="Args" type="Array">
 			</argument>
 			<description>
-				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with lua.
-				You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code].
-				This function supports 1 return value from lua. It will be returned as a variant and if lua returns no value it will be null. 
+				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if lua returns no value it will be null. 
 			</description>
 		</method>
 		<method name="do_file">
@@ -35,6 +33,7 @@
 			</return>
 			<argument index="0" name="Code" type="String">
 			</argument>
+			<description>
 				loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors
 			</description>
 		</method>
@@ -79,6 +78,17 @@
 			</description>
 		</method>
 	</methods>
+	<method name="bind_libs">
+			<return type="void">
+			</return>
+			<argument index="0" name="libNames" type="Array">
+			</argument>
+			<argument index="1" name="Args" type="Array">
+			</argument>
+			<description>
+				takes a array of lib names to bind to lua. Accepts the name of any built in lua lib. Not cap sensitive.
+			</description>
+		</method>
 	<constants>
 	</constants>
 </class>

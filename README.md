@@ -226,7 +226,7 @@ func _ready():
 	thread.load_string("
 	while true do
 		-- yield is exposed to lua when the thread is bound.
-		yield(10)
+		yield(1)
 		print('Hello world!')
 	end
 	")

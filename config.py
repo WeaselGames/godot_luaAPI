@@ -8,6 +8,7 @@ def get_doc_classes():
     return [
         "Lua",
         "LuaThread",
+        "LuaError",
     ]
 
 def get_doc_path():
