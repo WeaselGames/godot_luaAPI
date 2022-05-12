@@ -3,8 +3,8 @@
 #include "core/templates/hashfuncs.h"
 
 // I used "GDScriptLambdaCallable" as a template for this
-LuaCallable::LuaCallable(Ref<Lua> p_lua, int ref, lua_State *p_state){
-    lua = p_lua;
+LuaCallable::LuaCallable(Ref<RefCounted> p_obj, int ref, lua_State *p_state){
+    obj = p_obj;
     funcRef = ref; 
     state = p_state;
     h = (uint32_t)hash_djb2_one_64((uint64_t)this);
@@ -29,7 +29,7 @@ CallableCustom::CompareLessFunc LuaCallable::get_compare_less_func() const {
 }
 
 ObjectID LuaCallable::get_object() const {
-    return lua->get_instance_id();
+    return obj->get_instance_id();
 }
 
 String LuaCallable::get_as_text() const {
@@ -48,14 +48,14 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 
 	// Push all the argument on to the stack
 	for (int i = 0; i < p_argcount; i++) {
-		lua->pushVariant(*p_arguments[i], state);
+		Lua::pushVariant(*p_arguments[i], state);
 	}
 
 	// execute the function using a protected call.
 	int ret = lua_pcall(state, p_argcount, 1, 0);
     if (ret != LUA_OK) {
         r_return_value = Lua::handleError(ret, state);
-    } else r_return_value = lua->getVariant(1, state);
+    } else r_return_value = Lua::getVariant(1, state, obj);
 
 	lua_pop(state, 1);
 }

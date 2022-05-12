@@ -33,7 +33,6 @@ class LuaThread : public RefCounted {
         lua_State* state;
         lua_State* parentState;
         LuaError* handleError(int lua_error) const;
-        Ref<Lua> lua;
         bool done;
 
 };

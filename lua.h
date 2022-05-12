@@ -23,7 +23,7 @@ public:
   bool luaFunctionExists(String function_name);
   
   Variant getVariant(int index = -1) const;
-  Variant getVariant(int index, lua_State* L) const;
+  static Variant getVariant(int index, lua_State* L, Ref<RefCounted> obj);
   Variant pullVariant(String name);
   Variant callFunction(String function_name, Array args);
 

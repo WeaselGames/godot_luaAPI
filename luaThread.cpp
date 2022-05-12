@@ -21,9 +21,12 @@ LuaThread* LuaThread::newThread(Ref<Lua> lua) {
 
 // binds the thread to a lua object
 void LuaThread::bind(Ref<Lua> lua) {
-    this->lua = lua;
     parentState = lua->getState();
     state = lua->newThread();
+    
+    // Updating the internal object to be this
+    lua_pushstring(state, "__OBJECT");
+	lua_pushlightuserdata(state, this);
     // register the yield method
     lua_register(state, "yield", luaYield);
 }
@@ -68,7 +71,7 @@ Variant LuaThread::resume() {
     
     Array toReturn;
     for (int i = 1; i <= argc; i++) {
-        toReturn.append(lua->getVariant(i, state));
+        toReturn.append(Lua::getVariant(i, state, Ref<RefCounted>(this)));
     }
 
     return toReturn;

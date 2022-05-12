@@ -5,8 +5,6 @@
 #include "core/variant/callable.h"
 #include "luasrc/lua.hpp"
 
-class Lua;
-
 class LuaCallable : public CallableCustom {
     static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);
     static bool compare_less(const CallableCustom *p_a, const CallableCustom *p_b);
@@ -21,11 +19,11 @@ public:
 
     int getFuncRef();
 
-    LuaCallable(Ref<Lua> lua, int ref, lua_State *p_state);
+    LuaCallable(Ref<RefCounted> obj, int ref, lua_State *p_state);
     virtual ~LuaCallable() = default;
 private:
     int funcRef;
-    Ref<Lua> lua;
+    Ref<RefCounted> obj;
     lua_State *state;
 };
 
