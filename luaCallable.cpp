@@ -48,15 +48,15 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 
 	// Push all the argument on to the stack
 	for (int i = 0; i < p_argcount; i++) {
-		lua->pushVariant(*p_arguments[i]);
+		lua->pushVariant(*p_arguments[i], state);
 	}
 
 	// execute the function using a protected call.
 	int ret = lua_pcall(state, p_argcount, 1, 0);
     if (ret != LUA_OK) {
-        r_return_value = lua->handleError(ret);
-    } else r_return_value = lua->getVariant(1);
-	
+        r_return_value = Lua::handleError(ret, state);
+    } else r_return_value = lua->getVariant(1, state);
+
 	lua_pop(state, 1);
 }
 

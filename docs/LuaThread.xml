@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="LuaError" inherits="RefCounted" version="4.0">
+	<brief_description>
+	</brief_description>
+	<description>
+		Binds to a existing Lua object and creates a new lua thread with lua_newthread. This is not a typical thread but a coroutine. 
+        Instead of executing a file or string directly you load it into the state. 
+        Every time the resume method is caleld the lua code will execute untill yield is called from lua.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="bind">
+			<return type="void">
+			</return>
+			<argument index="0" name="lua" type="Lua">
+			</argument>
+			<description>
+				Binds the thread to a lua object. All threads attached to the same object share resources.
+			</description>
+		</method>
+        <method name="load_string">
+			<return type="void">
+			</return>
+			<argument index="0" name="code" type="String">
+			</argument>
+			<description>
+				Loads a string into the threads state.
+			</description>
+		</method>
+        <method name="load_file">
+			<return type="void">
+			</return>
+			<argument index="0" name="filePath" type="String">
+			</argument>
+			<description>
+				Loads a file into the threads state.
+			</description>
+		</method>
+        <method name="reumse">
+			<return type="Variant">
+			</return>
+			<description>
+				Resumes or starts the thread. Will either return a Array of arguments passed by lua in yield() or a LuaError.
+			</description>
+		</method>
+        <method name="is_done">
+			<return type="Variant">
+			</return>
+			<description>
+				Returns true if the thread is finished executing.
+			</description>
+		</method>
+	</methods>
+	<constants>
+	</constants>
+</class>

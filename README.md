@@ -152,19 +152,20 @@ func _ready():
 ```
 <br />
 
-**Capturing lua errors:**
+**Error handling:**
 ```gdscript
 extends Node2D
 
 var lua: Lua
 
-func luaCallBack(err):
-	print(err)
-
 func _ready():
 	lua = Lua.new()
-	lua.set_error_handler(luaCallBack)
-	lua.do_string("print(This wont work)")
+	# Most methods return a LuaError
+	var err = lua.do_string("print(This wont work)")
+	# the static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
+	if LuaError.is_err(err):
+		print("ERROR %d: " % err.type + err.msg)
+
 ```
 <br />
 
@@ -208,6 +209,41 @@ func _ready():
 	var player = lua.pull_variant("player")
 	print(player.pos)
 	print(player2.pos)
+```
+**Using Coroutines:**
+```gdscript
+extends Node2D
+var lua: Lua
+var thread: LuaThread
+
+func test(msg: String): 
+	print(msg)
+	
+func _ready():
+	lua = Lua.new()
+	# Despite the name this is not like a OS thread. It is a coroutine
+	thread = LuaThread.new_thread(lua)
+	thread.load_string("
+	while true do
+		-- yield is exposed to lua when the thread is bound.
+		yield(10)
+		print('Hello world!')
+	end
+	")
+	
+var yieldTime = 0
+var timeSince = 0;
+func _process(delta):
+	timeSince += delta
+	if thread.is_done() || timeSince <= yieldTime:
+		return
+	# thread.resume will either return a LuaError or a Array.
+	var results = thread.resume()
+	if LuaError.is_err(results):
+		print("ERROR %d: " % results.type + results.msg)
+		return
+	yieldTime = results[0]
+	timeSince = 0
 ```
 Contributing And Feature Requests
 ---------------
