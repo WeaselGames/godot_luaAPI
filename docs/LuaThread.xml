@@ -9,7 +9,7 @@
 	</tutorials>
 	<methods>
 		<method name="new_thread">
-			<return type="void">
+			<return type="LuaThread">
 			</return>
 			<argument index="0" name="lua" type="Lua">
 			</argument>
@@ -36,7 +36,7 @@
 			</description>
 		</method>
         <method name="load_file">
-			<return type="void">
+			<return type="LuaError">
 			</return>
 			<argument index="0" name="filePath" type="String">
 			</argument>
@@ -52,7 +52,7 @@
 			</description>
 		</method>
         <method name="is_done">
-			<return type="Variant">
+			<return type="bool">
 			</return>
 			<description>
 				Returns true if the thread is finished executing.

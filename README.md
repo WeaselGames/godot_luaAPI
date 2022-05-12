@@ -158,10 +158,18 @@ extends Node2D
 
 var lua: Lua
 
+func test(n: int):
+	if n != 5:
+		# This will raise a error in the lua state
+		return LuaError.new_err("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
+	return n+5
+
 func _ready():
 	lua = Lua.new()
+	lua.push_variant(test, "test")
 	# Most methods return a LuaError
-	var err = lua.do_string("print(This wont work)")
+	# calling test with a type that is not a int would also raise a error.
+	var err = lua.do_string("test(6)")
 	# the static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
 	if LuaError.is_err(err):
 		print("ERROR %d: " % err.type + err.msg)

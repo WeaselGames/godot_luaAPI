@@ -9,7 +9,7 @@
 	</tutorials>
 	<methods>
 		<method name="new_err">
-			<return type="void">
+			<return type="LuaError">
 			</return>
 			<argument index="0" name="msg" type="String">
 			</argument>
@@ -20,14 +20,14 @@
 			</description>
 		</method>
         <method name="err_none">
-			<return type="void">
+			<return type="LuaError">
 			</return>
 			<description>
 				This is a static method that creates a new error with no message and type of ERR_NONE.
 			</description>
 		</method>
         <method name="is_err">
-			<return type="void">
+			<return type="bool">
 			</return>
 			<argument index="0" name="var" type="Variant">
 			</argument>
