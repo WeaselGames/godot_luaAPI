@@ -7,6 +7,7 @@ def configure(env):
 def get_doc_classes():
     return [
         "Lua",
+        "LuaThread",
     ]
 
 def get_doc_path():
