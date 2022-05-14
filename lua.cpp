@@ -103,8 +103,8 @@ Variant Lua::callFunction(String function_name, Array args) {
     if (ret != LUA_OK) {
         return handleError(ret);
     }
-    Variant toReturn = getVariant(1);
-    lua_pop(state, 1);
+    Variant toReturn = getVariant(-1); // get return value
+    lua_pop(state, 1); // pop err handler
     return toReturn;
 }
 
@@ -325,8 +325,23 @@ Variant Lua::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
             break;
         case LUA_TTABLE:
         {
-            Dictionary dict;
+            lua_len(state, index);
+            int len = lua_tointeger(state, -1);
+            lua_pop(state, 1);
+            // len should be 0 if the type is table and not a array
+            if (len) {
+                Array array;
+                for (int i = 1; i <= len; i++) {
+                    lua_geti(state, index, i);
+                    array.push_back(getVariant(-1, state, obj));
+                    lua_pop(state, 1);
+                }
+                result = array;
+                break;
+            }
+
             lua_pushnil(state);  /* first key */
+            Dictionary dict;
             while (lua_next(state, (index<0)?(index-1):(index)) != 0) {
                 Variant key = getVariant(-2, state, obj);
                 Variant value = getVariant(-1, state, obj);
