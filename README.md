@@ -62,7 +62,7 @@ TODO
 
 Compiling
 ------------
-This build is for godot 4.0.0-alpha.
+This build is for godot 4.0.0-alphaX. X being the latest version. Will not be supporting older alpha builds.
 - Start by cloning the Godot 4.0.0-alpha [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 
 - Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/Trey2k/lua`
@@ -220,6 +220,31 @@ func _ready():
 	var player = lua.pull_variant("player")
 	print(player.pos)
 	print(player2.pos)
+```
+
+**Object metamethod overrides:**
+```gdscript
+extends Node2D
+var lua: Lua
+class Player:
+	var pos = Vector2(1, 0)
+	# Most metamethods can be overriden. The function names are the same as the metamethods.
+	func __index(index):
+		if index=="pos":
+			return pos
+		else:
+			return LuaError.new_err("Invalid index '%s'" % index)
+	func move_forward():
+		pos.x+=1
+
+func _ready():
+	lua = Lua.new()
+	lua.expose_constructor(Player, "Player")
+	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- this will cause our custom error ")
+	if LuaError.is_err(err):
+		print(err.msg)
+	var player = lua.pull_variant("player")
+	print(player.pos)
 ```
 **Using Coroutines:**
 ```gdscript
