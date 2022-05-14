@@ -30,7 +30,10 @@ Features
 - Call lua functions from GDScript.
 - Choose which libraries you want lua to have access to.
 - Custom LuaCallable type which allows you to get a lua function as a Callable. See [examples](#examples) below.
+- LuaError type which is used to report any errors this module or lua run into.
+- LuaThread type which creates a lua thread. This is not a OS thread but a coroutine. 
 - Object passed as userdata. See [examples](#examples) below.
+- Objects can override must of Luas metamethods. I.E. __index by defining a function with the same name.
 - Callables passed as userdata, which allows you to push a Callable as a lua function. see [examples](#examples) below.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
 ```lua
@@ -59,7 +62,7 @@ TODO
 
 Compiling
 ------------
-This build is for godot 4.0.0-alpha.
+This build is for godot 4.0.0-alphaX. X being the latest version. Will not be supporting older alpha builds.
 - Start by cloning the Godot 4.0.0-alpha [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 
 - Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/Trey2k/lua`
@@ -152,19 +155,28 @@ func _ready():
 ```
 <br />
 
-**Capturing lua errors:**
+**Error handling:**
 ```gdscript
 extends Node2D
 
 var lua: Lua
 
-func luaCallBack(err):
-	print(err)
+func test(n: int):
+	if n != 5:
+		# This will raise a error in the lua state
+		return LuaError.new_err("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
+	return n+5
 
 func _ready():
 	lua = Lua.new()
-	lua.set_error_handler(luaCallBack)
-	lua.do_string("print(This wont work)")
+	lua.push_variant(test, "test")
+	# Most methods return a LuaError
+	# calling test with a type that is not a int would also raise a error.
+	var err = lua.do_string("test(6)")
+	# the static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
+	if LuaError.is_err(err):
+		print("ERROR %d: " % err.type + err.msg)
+
 ```
 <br />
 
@@ -208,6 +220,63 @@ func _ready():
 	var player = lua.pull_variant("player")
 	print(player.pos)
 	print(player2.pos)
+```
+
+**Object metamethod overrides:**
+```gdscript
+extends Node2D
+var lua: Lua
+class Player:
+	var pos = Vector2(1, 0)
+	# Most metamethods can be overriden. The function names are the same as the metamethods.
+	func __index(index):
+		if index=="pos":
+			return pos
+		else:
+			return LuaError.new_err("Invalid index '%s'" % index)
+	func move_forward():
+		pos.x+=1
+
+func _ready():
+	lua = Lua.new()
+	lua.expose_constructor(Player, "Player")
+	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- this will cause our custom error ")
+	if LuaError.is_err(err):
+		print(err.msg)
+	var player = lua.pull_variant("player")
+	print(player.pos)
+```
+**Using Coroutines:**
+```gdscript
+extends Node2D
+var lua: Lua
+var thread: LuaThread
+	
+func _ready():
+	lua = Lua.new()
+	# Despite the name this is not like a OS thread. It is a coroutine
+	thread = LuaThread.new_thread(lua)
+	thread.load_string("
+	while true do
+		-- yield is exposed to lua when the thread is bound.
+		yield(1)
+		print('Hello world!')
+	end
+	")
+	
+var yieldTime = 0
+var timeSince = 0;
+func _process(delta):
+	timeSince += delta
+	if thread.is_done() || timeSince <= yieldTime:
+		return
+	# thread.resume will either return a LuaError or a Array.
+	var results = thread.resume()
+	if LuaError.is_err(results):
+		print("ERROR %d: " % results.type + results.msg)
+		return
+	yieldTime = results[0]
+	timeSince = 0
 ```
 Contributing And Feature Requests
 ---------------
