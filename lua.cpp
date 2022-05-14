@@ -245,6 +245,10 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
         case Variant::Type::OBJECT: {
             // If the type being pushed is a lua error, Raise a error
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+                if (err->getType() == LuaError::ERR_NONE) {
+                    break;
+                }
+                
                 lua_pushstring(state, err->getMsg().ascii().get_data());
                 lua_error(state);
                 break;
@@ -995,7 +999,7 @@ void Lua::createObjectMetatable() {
         
         return 0;
     });
-    
+
     LUA_METAMETHOD_TEMPLATE(state, -1, "__newindex", {
         // If object overrides
         if (arg1.has_method("__newindex")) {
@@ -1024,6 +1028,231 @@ void Lua::createObjectMetatable() {
             if (ptr != nullptr) memdelete(ptr);
         }
         return 0;
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__call", {
+        if (!arg1.has_method("__call")) {
+                return 0;
+        }
+        int argc = lua_gettop(inner_state);
+        
+        Array args;
+        for (int i = 1; i < argc; i++) {
+                args.push_back(Lua::getVariant(i+1, inner_state, OBJ));
+        }
+
+        Lua::pushVariant(arg1.call("__call", args), inner_state);
+        return 1;
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__tostring", {
+        // If object overrides
+        if (!arg1.has_method("__tostring")) {
+            return 0;
+        }
+
+        Lua::pushVariant(arg1.call("__tostring"), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__metatable", {
+        // If object overrides
+        if (!arg1.has_method("__metatable")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__metatable", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__len", {
+        // If object overrides
+        if (!arg1.has_method("__len")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__len"), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__unm", {
+        // If object overrides
+        if (!arg1.has_method("__unm")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__unm"), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__add", {
+        // If object overrides
+        if (!arg1.has_method("__add")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__add", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__sub", {
+        // If object overrides
+        if (!arg1.has_method("__sub")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__sub", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__mul", {
+        // If object overrides
+        if (!arg1.has_method("__mul")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__mul", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__div", {
+        // If object overrides
+        if (!arg1.has_method("__div")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__div", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__idiv", {
+        // If object overrides
+        if (!arg1.has_method("__idiv")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__idiv", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__mod", {
+        // If object overrides
+        if (!arg1.has_method("__mod")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__mod", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__pow", {
+        // If object overrides
+        if (!arg1.has_method("__pow")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__pow", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__concat", {
+        // If object overrides
+        if (!arg1.has_method("__concat")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__concat", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__band", {
+        // If object overrides
+        if (!arg1.has_method("__band")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__band", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__bor", {
+        // If object overrides
+        if (!arg1.has_method("__bor")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__bor", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__bxor", {
+        // If object overrides
+        if (!arg1.has_method("__bxor")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__bxor", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__bnot", {
+        // If object overrides
+        if (!arg1.has_method("__bnot")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__bnot", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__shl", {
+        // If object overrides
+        if (!arg1.has_method("__shl")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__shl", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__shr", {
+        // If object overrides
+        if (!arg1.has_method("__shr")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__shr", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__eq", {
+        // If object overrides
+        if (!arg1.has_method("__eq")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__eq", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__lt", {
+        // If object overrides
+        if (!arg1.has_method("__lt")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__lt", arg2), inner_state);
+        return 1;        
+    });
+
+    LUA_METAMETHOD_TEMPLATE(state, -1, "__le", {
+        // If object overrides
+        if (!arg1.has_method("__le")) {
+            return 0;
+        }
+        
+        Lua::pushVariant(arg1.call("__le", arg2), inner_state);
+        return 1;        
     });
 
     lua_pop(state, 1);

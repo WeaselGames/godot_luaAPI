@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="LuaError" inherits="RefCounted" version="4.0">
+<class name="LuaError" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 	</brief_description>
 	<description>
@@ -8,45 +8,57 @@
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="new_err">
-			<return type="LuaError">
-			</return>
-			<argument index="0" name="msg" type="String">
-			</argument>
-            <argument index="1" name="type" type="ErrorType">
-			</argument>
+		<method name="new_err" qualifiers="static">
+			<return type="LuaError" />
+			<argument index="0" name="Message" type="String" />
+			<argument index="1" name="Type" type="int" enum="LuaError.ErrorType" default="2" />
 			<description>
 				This is a static method that exists so you dont have to call LuaError.new() and err.set_info(msg, type) every time. It creates a new error and calls set_info passing msd and type.
 			</description>
 		</method>
-        <method name="err_none">
-			<return type="LuaError">
-			</return>
+		<method name="err_none" qualifiers="static">
+			<return type="LuaError" />
 			<description>
 				This is a static method that creates a new error with no message and type of ERR_NONE.
 			</description>
 		</method>
-        <method name="is_err">
-			<return type="bool">
-			</return>
-			<argument index="0" name="var" type="Variant">
-			</argument>
+		<method name="is_err" qualifiers="static">
+			<return type="bool" />
+			<argument index="0" name="var" type="Variant" />
 			<description>
 				This is a static method that checks if the type of var is LuaError and if the error type is not ERR_NONE.
 			</description>
 		</method>
-        <method name="set_info">
-			<return type="void">
-			</return>
-			<argument index="0" name="msg" type="String">
-			</argument>
-            <argument index="1" name="type" type="ErrorType">
-			</argument>
-			<description>
-				Sets the errors message and type.
-			</description>
-		</method>
 	</methods>
+	<members>
+		<member name="msg" type="String" setter="set_msg" getter="get_msg" default="&quot;&quot;">
+			The error message. Will also contain the stack trace if apllicable.
+		</member>
+		<member name="type" type="int" setter="set_type" getter="get_type" enum="LuaError.ErrorType" default="0">
+			The error type.
+		</member>
+	</members>
 	<constants>
+		<constant name="ERR_NONE" value="0" enum="ErrorType">
+			Indicates no error.
+		</constant>
+		<constant name="ERR_TYPE" value="1" enum="ErrorType">
+			Indicates a error with argument types.
+		</constant>
+		<constant name="ERR_RUNTIME" value="2" enum="ErrorType">
+			Indicates a generic runtime error.
+		</constant>
+		<constant name="ERR_SYNTAX" value="3" enum="ErrorType">
+			Indicates a syntax error.
+		</constant>
+		<constant name="ERR_MEMORY" value="4" enum="ErrorType">
+			Indicates a memory error.
+		</constant>
+		<constant name="ERR_ERR" value="5" enum="ErrorType">
+			Indicates a error running the internal lua error handler. Please report.
+		</constant>
+		<constant name="ERR_FILE" value="6" enum="ErrorType">
+			Indicates a error while opening a file.
+		</constant>
 	</constants>
 </class>

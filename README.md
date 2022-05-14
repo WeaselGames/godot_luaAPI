@@ -30,7 +30,10 @@ Features
 - Call lua functions from GDScript.
 - Choose which libraries you want lua to have access to.
 - Custom LuaCallable type which allows you to get a lua function as a Callable. See [examples](#examples) below.
+- LuaError type which is used to report any errors this module or lua run into.
+- LuaThread type which creates a lua thread. This is not a OS thread but a coroutine. 
 - Object passed as userdata. See [examples](#examples) below.
+- Objects can override must of Luas metamethods. I.E. __index by defining a function with the same name.
 - Callables passed as userdata, which allows you to push a Callable as a lua function. see [examples](#examples) below.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
 ```lua
@@ -223,9 +226,6 @@ func _ready():
 extends Node2D
 var lua: Lua
 var thread: LuaThread
-
-func test(msg: String): 
-	print(msg)
 	
 func _ready():
 	lua = Lua.new()
