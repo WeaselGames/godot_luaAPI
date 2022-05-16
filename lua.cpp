@@ -103,7 +103,7 @@ Variant Lua::callFunction(String function_name, Array args) {
     if (ret != LUA_OK) {
         return handleError(ret);
     }
-    Variant toReturn = getVariant(-1); // get return value
+    Variant toReturn = getVar(-1); // get return value
     lua_pop(state, 1); // pop err handler
     return toReturn;
 }
@@ -296,13 +296,13 @@ LuaError* Lua::pushGlobalVariant(Variant var, String name) {
 // Pull a global variant from Lua to GDScript
 Variant Lua::pullVariant(String name) {
     lua_getglobal(state, name.ascii().get_data());
-    Variant val = getVariant(1);
+    Variant val = getVar(1);
     lua_pop(state, 1);
     return val;
 }
 
 // get a value at the given index and return as a variant
-Variant Lua::getVariant(int index) const {
+Variant Lua::getVar(int index) const {
     return getVariant(index, state, Ref<RefCounted>(this));
 }
 
