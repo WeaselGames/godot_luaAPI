@@ -40,6 +40,7 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}
+            
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
@@ -52,6 +53,7 @@ jobs:
           python -m pip install scons
           python --version
           scons --version
+
       - name: Compilation
         working-directory: ./build
         env:
@@ -69,7 +71,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      
+      - name: Prepare Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+         vulkan-query-version: 1.3.204.0
+         vulkan-components: Vulkan-Headers, Vulkan-Loader
+         vulkan-use-cache: true
+      
       - name: Load .scons_cache directory
         id: macos-template-cache
         uses: actions/cache@v2
@@ -80,6 +89,7 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}
+
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
@@ -92,6 +102,7 @@ jobs:
           python -m pip install scons
           python --version
           scons --version
+          
       - name: Compilation
         working-directory: ./build
         env:
