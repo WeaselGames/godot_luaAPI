@@ -102,13 +102,13 @@ jobs:
           python -m pip install scons
           python --version
           scons --version
-          
+
       - name: Compilation
         working-directory: ./build
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=osx target=release tools=no
+          scons platform=osx target=release tools=no vulkan_sdk_path=$VULKAN_SDK
           scons platform=osx target=release_debug tools=no
       - uses: actions/upload-artifact@v2
         with:
