@@ -14,8 +14,6 @@ godot_ver = "main"
 godot_url = "https://github.com/godotengine/godot"
 godot_dir = Dir("godot")
 
-vulkan_dir = Dir("~/vulkan")
-
 lua_dir = Dir("lua")
 
 print("Cloning sources...")
@@ -27,6 +25,12 @@ def run(args, dir="."):
     else:
         return subprocess.run(args, check=True, cwd=dir).returncode
 
+if sys.platform.startswith("darwin"):
+    print("making vulkan symlink")
+    dest_dir = os.path.expanduser("~/VulkanSDK")
+    source_dir = os.path.expanduser("~/work/lua/lua/VULKAN_SDK")
+    os.symlink(source_dir, dest_dir)
+
 if not lua_dir.exists():
     print("Copying over source files.")
     copytree("../", lua_dir.abspath, 
@@ -37,10 +41,6 @@ if not godot_dir.exists():
     print("Cloning godot.")
     run(["git", "clone", godot_url])
     run(["git", "checkout", godot_ver, "--quiet"], godot_dir.abspath)
-
-if not vulkan_dir.exists() and sys.platform.startswith("darwin"):
-    print("copying vulkan files")
-    copytree(Dir("~/work/lua/lua/VULKAN_SDK").abspath, vulkan_dir.abspath)
 
 # Setup base SCons arguments to the Godot build command.
 args = ["scons"]
