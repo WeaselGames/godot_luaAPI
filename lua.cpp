@@ -531,7 +531,7 @@ int Lua::luaCallableCall(lua_State* state) {
 
     Variant returned;
     Callable::CallError error;
-    callable.call(args, argc, returned, error);
+    callable.callp(args, argc, returned, error);
     if (error.error != error.CALL_OK) {
         LuaError* err = Lua::handleError(callable.get_method(), error, args, argc);
         lua_pushstring(state, err->getMsg().ascii().get_data());
