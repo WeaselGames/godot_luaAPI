@@ -53,7 +53,7 @@ jobs:
       env:
         SCONS_CACHE: /.scons_cache/
       run: |
-        scons platform=windows tools=yes target=release_debug
+        scons platform=windows tools=yes target=editor
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
@@ -95,8 +95,8 @@ jobs:
       env:
         SCONS_CACHE: /.scons_cache/
       run: |
-        scons platform=windows target=release tools=no
-        scons platform=windows target=release_debug tools=no
+        scons platform=windows target=template_release tools=no
+        scons platform=windows target=template_debug tools=no
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
