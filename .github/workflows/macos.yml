@@ -59,7 +59,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=osx tools=yes target=release_debug
+          scons platform=osx tools=yes target=editor
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
@@ -108,8 +108,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=osx target=release tools=no vulkan_sdk_path=$VULKAN_SDK
-          scons platform=osx target=release_debug tools=no
+          scons platform=osx target=template_release tools=no vulkan_sdk_path=$VULKAN_SDK
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
