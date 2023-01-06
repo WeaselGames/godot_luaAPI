@@ -57,7 +57,7 @@ jobs:
 
     - name: Prepare artifact
       run: |
-        Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+        Remove-Item build/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
@@ -102,7 +102,7 @@ jobs:
         scons platform=windows target=template_release tools=no
     - name: Prepare artifact
       run: |
-        Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+        Remove-Item build/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
@@ -147,7 +147,7 @@ jobs:
         scons platform=windows target=template_debug tools=no
     - name: Prepare artifact
       run: |
-        Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+        Remove-Item build/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}

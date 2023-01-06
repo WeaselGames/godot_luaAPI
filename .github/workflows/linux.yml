@@ -60,12 +60,12 @@ jobs:
       - name: Prepare artifact
         
         run: |
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
       - name: Prepare artifact
         run: |
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
@@ -114,8 +114,8 @@ jobs:
            scons platform=linuxbsd tools=no target=template_release
       - name: Prepare artifact
         run: |
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
@@ -165,8 +165,8 @@ jobs:
            scons platform=linuxbsd tools=no target=template_debug
       - name: Prepare artifact
         run: |
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}

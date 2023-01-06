@@ -59,8 +59,8 @@ jobs:
           scons platform=macos tools=yes target=editor
       - name: Prepare artifact
         run: |
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
@@ -109,58 +109,59 @@ jobs:
           scons platform=macos target=template_release tools=no
       - name: Prepare artifact
         run: |
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
           path: build/godot/bin
 
-    macos-template-debug:
-      runs-on: "macos-latest"
-      name: MacOS Template (target=template_debug, tools=no)
+  macos-template-debug:
+    runs-on: "macos-latest"
+    name: MacOS Template Debug (target=template_debug, tools=no)
 
-      steps:
-        - uses: actions/checkout@v2
-        
-        - name: Setup Vulkan SDK
-          run: |
-            sh build/install_vulkan_sdk_macos.sh
-        
-        - name: Load .scons_cache directory
-          id: macos-template-debug-cache
-          uses: actions/cache@v2
-          with:
-            path: ${{github.workspace}}/.scons_cache/
-            key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            restore-keys: |
-              ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-              ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-              ${{github.job}}-${{env.BASE_BRANCH}}
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Vulkan SDK
+        run: |
+          sh build/install_vulkan_sdk_macos.sh
+      
+      - name: Load .scons_cache directory
+        id: macos-template-debug-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
 
-        - name: Set up Python 3.x
-          uses: actions/setup-python@v2
-          with:
-            python-version: '3.x'
-            architecture: 'x64'
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
 
-        - name: Configuring Python packages
-          run: |
-            python -c "import sys; print(sys.version)"
-            python -m pip install scons
-            python --version
-            scons --version
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
 
-        - name: Compilation
-          working-directory: ./build
-          env:
-            SCONS_CACHE: ${{github.workspace}}/.scons_cache/
-          run: |
-            scons platform=macos target=template_debug tools=no
-        - name: Prepare artifact
-          run: |
-            chmod +x bin/godot.*
-        - uses: actions/upload-artifact@v2
-          with:
-            name: ${{github.job}}
-            path: build/godot/bin
+      - name: Compilation
+        working-directory: ./build
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons platform=macos target=template_debug tools=no
+      - name: Prepare artifact
+        run: |
+          strip build/godot/bin/godot.*
+          chmod +x build/godot/bin/godot.*
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: build/godot/bin
