@@ -16,7 +16,7 @@ jobs:
   macos-editor:
     runs-on: "macos-latest"
 
-    name: Editor (target=release_debug, tools=yes)
+    name: MacOS Editor (target=editor, tools=yes)
 
     steps:
       - uses: actions/checkout@v2
@@ -56,7 +56,11 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=osx tools=yes target=editor
+          scons platform=macos tools=yes target=editor
+      - name: Prepare artifact
+        run: |
+          strip bin/godot.*
+          chmod +x bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
@@ -64,17 +68,14 @@ jobs:
 
   macos-template:
     runs-on: "macos-latest"
-    name: Template (target=release, tools=no)
+    name: MacOS Template (target=template_release, tools=no)
 
     steps:
       - uses: actions/checkout@v2
       
-      - name: Prepare Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.2.0
-        with:
-         vulkan-query-version: 1.3.204.0
-         vulkan-components: Vulkan-Headers, Vulkan-Loader
-         vulkan-use-cache: true
+      - name: Setup Vulkan SDK
+        run: |
+          sh build/install_vulkan_sdk_macos.sh
       
       - name: Load .scons_cache directory
         id: macos-template-cache
@@ -106,6 +107,59 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos target=template_release tools=no
+      - name: Prepare artifact
+        run: |
+          strip bin/godot.*
+          chmod +x bin/godot.*
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: build/godot/bin
+
+    macos-template-debug:
+    runs-on: "macos-latest"
+    name: MacOS Template (target=template_debug, tools=no)
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Vulkan SDK
+        run: |
+          sh build/install_vulkan_sdk_macos.sh
+      
+      - name: Load .scons_cache directory
+        id: macos-template-debug-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Compilation
+        working-directory: ./build
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons platform=macos target=template_debug tools=no
+      - name: Prepare artifact
+        run: |
+          chmod +x bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}

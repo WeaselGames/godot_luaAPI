@@ -17,7 +17,7 @@ env:
 jobs:
   linux-editor:
     runs-on: "ubuntu-20.04"
-    name: Linux Editor(platform=linuxbsd tools=yes target=release_debug)
+    name: Linux Editor(platform=linuxbsd tools=yes target=editor)
     steps:
       - uses: actions/checkout@v2
         with:
@@ -57,13 +57,22 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
            scons platform=linuxbsd tools=yes target=editor
+      - name: Prepare artifact
+        
+        run: |
+          strip bin/godot.*
+          chmod +x bin/godot.*
+      - name: Prepare artifact
+        run: |
+          strip bin/godot.*
+          chmod +x bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
           path: build/godot/bin/*
-  linux-template64-release:
+  linux-template-release:
     runs-on: "ubuntu-20.04"
-    name: Linux Templates(platform=linuxbsd tools=no target=template_release bits=64)
+    name: Linux Template (platform=linuxbsd tools=no target=template_release)
     steps:
       - uses: actions/checkout@v2
         with:
@@ -76,7 +85,7 @@ jobs:
           sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
             libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
       - name: Load .scons_cache directory
-        id: linux-exp64r-cache
+        id: linux-template-cache
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/.scons_cache/
@@ -102,8 +111,62 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-           scons platform=linuxbsd tools=no target=template_release bits=64
-           scons platform=linuxbsd tools=no target=template_debug bits=64
+           scons platform=linuxbsd tools=no target=template_release
+      - name: Prepare artifact
+        run: |
+          strip bin/godot.*
+          chmod +x bin/godot.*
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: build/godot/bin/*
+
+  linux-template-debug:
+    runs-on: "ubuntu-20.04" ${{ matrix.artifact }}
+    name: Linux Template Debug (platform=linuxbsd tools=no target=template_debug)
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      # Install all packages except SCons
+      - name: Configure dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
+            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
+      - name: Load .scons_cache directory
+        id: linux-template-debug-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+      - name: Compilation
+        working-directory: ./build
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+           scons platform=linuxbsd tools=no target=template_debug
+      - name: Prepare artifact
+        run: |
+          strip bin/godot.*
+          chmod +x bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}

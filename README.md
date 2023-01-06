@@ -48,14 +48,18 @@ If a feature is missing that you would like to see feel free to create a [Featur
 Nightly Builds
 ---------------
 - [🐧 Linux Editor](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-editor.zip)
-- [🐧 Linux Templates](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-template64-release.zip)
+- [🐧 Linux Template](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-template-release.zip)
+- [🐧 Linux Template Debug](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-template-debug.zip)
 - [🎨 Windows Editor](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-editor.zip)
-- [🎨 Windows Templates](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-template.zip)
+- [🎨 Windows Template](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-template.zip)
+- [🎨 Windows Template Debug](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-template-debug.zip)
 - [🍎 MacOS Editor](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-editor.zip)
 - [🍎 MacOS Templates](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-template.zip)
+- [🍎 MacOS Templates Debug](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-template-debug.zip)
 
 TODO
 -----
+- Bug fixes
 - Finish v2 documentation
 - Stability testing
 - More up to date todo list on the v2 [project](https://github.com/WeaselGames/lua/projects/1) 
