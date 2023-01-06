@@ -58,11 +58,6 @@ jobs:
         run: |
            scons platform=linuxbsd tools=yes target=editor
       - name: Prepare artifact
-        
-        run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
-      - name: Prepare artifact
         run: |
           strip build/godot/bin/godot.*
           chmod +x build/godot/bin/godot.*
