@@ -25,12 +25,6 @@ def run(args, dir="."):
     else:
         return subprocess.run(args, check=True, cwd=dir).returncode
 
-if sys.platform.startswith("darwin"):
-    print("making vulkan symlink")
-    dest_dir = os.path.expanduser("~/VulkanSDK")
-    source_dir = os.path.expanduser("~/work/lua/lua/VULKAN_SDK")
-    os.symlink(source_dir, dest_dir)
-
 if not lua_dir.exists():
     print("Copying over source files.")
     copytree("../", lua_dir.abspath, 
