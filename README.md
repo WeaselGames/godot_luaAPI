@@ -11,9 +11,9 @@
 
 About
 -------
-[![🐧 Linux](https://github.com/Trey2k/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/Trey2k/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/Trey2k/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/Trey2k/lua/actions/workflows/macos.yml)
+[![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml)
 
-***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/Trey2k/lua/tree/v1.1-stable) for a more stable build.
+***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for a more stable build.
 
 This is a Godot engine module that adds lua support via GDScript. Importantly this is **NOT** meant to be a replacement for GDScript. The main purpose of this module is to add runtime execution of code for tasks such as modding or in game scripting. 
 
@@ -43,29 +43,29 @@ print(v1+v2) -- "(101,102)"
 change_my_sprite_color(Color(1,0,0,1)) -- if "change_my_sprite_color" was exposed, in GDScript it will receive a Color variant.
 ```
 
-If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
+If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/WeaselGames/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
 
 Nightly Builds
 ---------------
-- [🐧 Linux Editor](https://nightly.link/Trey2k/lua/workflows/linux/main/linux-editor.zip)
-- [🐧 Linux Templates](https://nightly.link/Trey2k/lua/workflows/linux/main/linux-template64-release.zip)
-- [🎨 Windows Editor](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-editor.zip)
-- [🎨 Windows Templates](https://nightly.link/Trey2k/lua/workflows/windows/main/windows-template.zip)
-- [🍎 MacOS Editor](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-editor.zip)
-- [🍎 MacOS Templates](https://nightly.link/Trey2k/lua/workflows/macos/main/macos-template.zip)
+- [🐧 Linux Editor](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-editor.zip)
+- [🐧 Linux Templates](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-template64-release.zip)
+- [🎨 Windows Editor](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-editor.zip)
+- [🎨 Windows Templates](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-template.zip)
+- [🍎 MacOS Editor](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-editor.zip)
+- [🍎 MacOS Templates](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-template.zip)
 
 TODO
 -----
 - Finish v2 documentation
 - Stability testing
-- More up to date todo list on the v2 [project](https://github.com/Trey2k/lua/projects/1) 
+- More up to date todo list on the v2 [project](https://github.com/WeaselGames/lua/projects/1) 
 
 Compiling
 ------------
 This build is for godot 4.0.0-alphaX. X being the latest version. Will not be supporting older alpha builds.
 - Start by cloning the Godot 4.0.0-alpha [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 
-- Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/Trey2k/lua`
+- Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/WeaselGames/lua`
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
@@ -282,6 +282,6 @@ Contributing And Feature Requests
 ---------------
 All contributions are welcome, if you would like to contribute submit a PR.
 <br />
-Additionally if you do not have the time and or the knowledge you can create a [Feature Request](https://github.com/Trey2k/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=)
+Additionally if you do not have the time and or the knowledge you can create a [Feature Request](https://github.com/WeaselGames/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=)
 
 [![lua logo](https://www.lua.org/images/powered-by-lua.gif)](https://www.lua.org/)
