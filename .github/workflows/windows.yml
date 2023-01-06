@@ -56,8 +56,8 @@ jobs:
         scons platform=windows tools=yes target=editor
 
     - name: Prepare artifact
-        run: |
-          Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+      run: |
+        Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
@@ -100,9 +100,9 @@ jobs:
         SCONS_CACHE: /.scons_cache/
       run: |
         scons platform=windows target=template_release tools=no
-     - name: Prepare artifact
-        run: |
-          Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+    - name: Prepare artifact
+      run: |
+        Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
@@ -146,8 +146,8 @@ jobs:
       run: |
         scons platform=windows target=template_debug tools=no
     - name: Prepare artifact
-        run: |
-          Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+      run: |
+        Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
     - uses: actions/upload-artifact@v2
       with:
         name: ${{github.job}}
