@@ -5,10 +5,10 @@ Import('env_lua')
 
 env_lua = env_lua.Clone()
 
-if env_lua['PLATFORM'] == 'posix':
+if env_lua['PLATFORM'] == 'posix' and env["platform"] == 'linuxbsd':
     env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
 
-if not env.msvc:
+if not env_lua.msvc:
     env_lua['CFLAGS'].remove('-std=gnu11')
     env_lua.Append(CFLAGS=['-std=c99'])
 
