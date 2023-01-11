@@ -197,6 +197,7 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
             for(int i = 0; i < array.size(); i++) {
                 Variant key = i+1;
                 Variant value = array[i];
+
                 LuaError* err = pushVariant(key, state);
                 if (LuaError::isErr(err))
                     return err;
@@ -204,6 +205,7 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
                 err = pushVariant(value, state);
                 if (LuaError::isErr(err))
                     return err;
+
                 lua_settable(state, -3);
             }
             break;
@@ -215,8 +217,15 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
             for(int i = 0; i < dict.size(); i++) {
                 Variant key = dict.keys()[i];
                 Variant value = dict[key];
-                pushVariant(key, state);
-                pushVariant(value, state);
+                
+                LuaError* err = pushVariant(key, state);
+                if (LuaError::isErr(err))
+                    return err;
+                
+                err = pushVariant(value, state);
+                if (LuaError::isErr(err))
+                    return err;
+
                 lua_settable(state, -3);
             }
             break;
