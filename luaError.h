@@ -22,7 +22,6 @@ class LuaError : public RefCounted {
             ERR_FILE    = LUA_ERRFILE,
         };
         static LuaError* newErr(String msg, ErrorType type);
-        static LuaError* errNone();
         static bool isErr(Variant var);
 
         void setInfo(String msg, ErrorType type);

@@ -154,7 +154,7 @@ LuaError* Lua::execute(int handlerIndex) {
     if (ret != LUA_OK) {
         return handleError(ret);
     }
-    return LuaError::errNone();
+    return nullptr;
 }
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
@@ -197,8 +197,13 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
             for(int i = 0; i < array.size(); i++) {
                 Variant key = i+1;
                 Variant value = array[i];
-                pushVariant(key, state);
-                pushVariant(value, state);
+                LuaError* err = pushVariant(key, state);
+                if (LuaError::isErr(err))
+                    return err;
+                
+                err = pushVariant(value, state);
+                if (LuaError::isErr(err))
+                    return err;
                 lua_settable(state, -3);
             }
             break;
@@ -249,10 +254,6 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
         case Variant::Type::OBJECT: {
             // If the type being pushed is a lua error, Raise a error
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
-                if (err->getType() == LuaError::ERR_NONE) {
-                    break;
-                }
-                
                 lua_pushstring(state, err->getMsg().ascii().get_data());
                 lua_error(state);
                 break;
@@ -284,13 +285,13 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
             lua_pushnil(state);
             return LuaError::newErr(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
     }
-    return LuaError::errNone();
+    return nullptr;
 }
 
 // Call pushVariant() and set it to a global name
 LuaError* Lua::pushGlobalVariant(Variant var, String name) {
     LuaError* err = pushVariant(var);
-    if (*err == LuaError::ERR_NONE) {
+    if (LuaError::isErr(err)) {
         lua_setglobal(state, name.ascii().get_data());
         return err;
     }
@@ -465,7 +466,7 @@ LuaError* Lua::handleError(const StringName &func, Callable::CallError error, co
                 LuaError::ERR_RUNTIME);
         }
         default:
-            return LuaError::errNone();
+            return nullptr;
     }
 }
 
@@ -637,7 +638,7 @@ LuaError* Lua::exposeObjectConstructor(Object* obj, String name) {
         return 1;
     }), 1);
     lua_setglobal(state, name.ascii().get_data());
-    return LuaError::errNone();
+    return nullptr;
 }
 
 // Expose the default constructors

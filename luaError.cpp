@@ -3,7 +3,6 @@
 void LuaError::_bind_methods(){
     // Binding static GD methods. This allows the use of LuaError.new_error instead of neededing to call LuaError.new and than calling .setInfo
     ClassDB::bind_static_method("LuaError", D_METHOD("new_err", "Message", "Type"), &LuaError::newErr, DEFVAL(LuaError::ERR_RUNTIME));
-    ClassDB::bind_static_method("LuaError", D_METHOD("err_none"), &LuaError::errNone);
     ClassDB::bind_static_method("LuaError", D_METHOD("is_err", "var"), &LuaError::isErr);
     
     ClassDB::bind_method(D_METHOD("set_msg","Message"), &LuaError::setMsg);
@@ -30,15 +29,10 @@ LuaError* LuaError::newErr(String msg, ErrorType type) {
     return err;
 }
 
-// Create a new non error
-LuaError* LuaError::errNone() {
-    LuaError* err = memnew(LuaError);
-    err->setInfo("", ErrorType::ERR_NONE);
-    return err;
-}
-
 // Test if the variants type is a Lua error
 bool LuaError::isErr(Variant var) {
+    if (var.is_null())
+        return false;
     if (var.get_type() != Variant::Type::OBJECT) {
         return false;
     }
