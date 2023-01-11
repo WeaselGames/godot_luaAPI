@@ -881,6 +881,7 @@ LUALIB_API lua_Integer luaL_len (lua_State *L, int idx) {
 
 
 LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
+  idx = lua_absindex(L,idx);
   if (luaL_callmeta(L, idx, "__tostring")) {  /* metafield? */
     if (!lua_isstring(L, -1))
       luaL_error(L, "'__tostring' must return a string");
@@ -1102,3 +1103,4 @@ LUALIB_API void luaL_checkversion_ (lua_State *L, lua_Number ver, size_t sz) {
     luaL_error(L, "version mismatch: app. needs %f, Lua core provides %f",
                   (LUAI_UACNUMBER)ver, (LUAI_UACNUMBER)v);
 }
+

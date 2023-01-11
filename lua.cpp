@@ -176,7 +176,7 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
             lua_pushinteger(state, (int64_t)var);
             break;
         case Variant::Type::FLOAT:
-            lua_pushnumber(state,var.operator double());
+            lua_pushnumber(state, var.operator double());
             break;
         case Variant::Type::BOOL:
             lua_pushboolean(state, (bool)var);
@@ -192,26 +192,30 @@ LuaError* Lua::pushVariant(Variant var, lua_State* state) {
         case Variant::Type::PACKED_COLOR_ARRAY:            
         case Variant::Type::ARRAY: {
             Array array = var.operator Array();
-            lua_newtable(state);
+            lua_createtable(state, 0, array.size());
+
             for(int i = 0; i < array.size(); i++) {
                 Variant key = i+1;
                 Variant value = array[i];
                 pushVariant(key, state);
                 pushVariant(value, state);
-                lua_settable(state,-3);
+                lua_settable(state, -3);
             }
             break;
         }
-        case Variant::Type::DICTIONARY:
-            lua_newtable(state);
-            for(int i = 0; i < ((Dictionary)var).size(); i++) {
-                Variant key = ((Dictionary)var).keys()[i];
-                Variant value = ((Dictionary)var)[key];
+        case Variant::Type::DICTIONARY: {
+            Dictionary dict = var.operator Dictionary();
+            lua_createtable(state, 0, dict.size());
+
+            for(int i = 0; i < dict.size(); i++) {
+                Variant key = dict.keys()[i];
+                Variant value = dict[key];
                 pushVariant(key, state);
                 pushVariant(value, state);
                 lua_settable(state, -3);
             }
             break;
+        }
         case Variant::Type::VECTOR2: {
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
