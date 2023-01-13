@@ -1,0 +1,4 @@
+[submodule "external/lua"]
+	path = external/lua
+	url = https://github.com/lua/lua
+	branch = 5d708c3

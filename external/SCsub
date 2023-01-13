@@ -1,0 +1,14 @@
+
+Import('env')
+Import('env_lua')
+
+env_lua = env_lua.Clone()
+
+if env_lua['PLATFORM'] == 'posix' and env["platform"] == 'linuxbsd':
+    env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+
+if not env_lua.msvc:
+    env_lua['CFLAGS'].remove('-std=gnu11')
+    env_lua.Append(CFLAGS=['-std=c99'])
+
+env_lua.add_source_files(env.modules_sources,'lua/*.c')

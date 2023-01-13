@@ -19,7 +19,7 @@ jobs:
     runs-on: "ubuntu-20.04"
     name: Linux Editor(platform=linuxbsd tools=yes target=editor)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -69,7 +69,7 @@ jobs:
     runs-on: "ubuntu-20.04"
     name: Linux Template (platform=linuxbsd tools=no target=template_release)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -120,7 +120,7 @@ jobs:
     runs-on: "ubuntu-20.04"
     name: Linux Template Debug (platform=linuxbsd tools=no target=template_debug)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 

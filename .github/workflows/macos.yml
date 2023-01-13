@@ -19,7 +19,7 @@ jobs:
     name: MacOS Editor (target=editor, tools=yes)
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
         
@@ -71,7 +71,9 @@ jobs:
     name: MacOS Template (target=template_release, tools=no)
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       
       - name: Setup Vulkan SDK
         run: |
@@ -121,7 +123,9 @@ jobs:
     name: MacOS Template Debug (target=template_debug, tools=no)
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       
       - name: Setup Vulkan SDK
         run: |
