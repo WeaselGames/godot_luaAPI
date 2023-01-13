@@ -51,7 +51,7 @@ LuaError* LuaThread::loadFile(String fileName) {
     if (ret != LUA_OK) {
         return handleError(ret);
     }
-    return LuaError::errNone();
+    return nullptr;
 }
 
 // Value 1 will always be a boolean which indicates weather the thread is done or not.
