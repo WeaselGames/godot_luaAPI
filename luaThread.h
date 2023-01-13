@@ -34,7 +34,6 @@ class LuaThread : public RefCounted {
         lua_State* parentState;
         LuaError* handleError(int lua_error) const;
         bool done;
-
 };
 
 #endif

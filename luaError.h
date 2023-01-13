@@ -13,7 +13,6 @@ class LuaError : public RefCounted {
 
     public:
         enum ErrorType{
-            ERR_NONE    = 0,
             ERR_TYPE    = 1,
             ERR_RUNTIME = LUA_ERRRUN,
             ERR_SYNTAX  = LUA_ERRSYNTAX,
@@ -22,7 +21,6 @@ class LuaError : public RefCounted {
             ERR_FILE    = LUA_ERRFILE,
         };
         static LuaError* newErr(String msg, ErrorType type);
-        static bool isErr(Variant var);
 
         void setInfo(String msg, ErrorType type);
         bool operator==(const ErrorType type);
