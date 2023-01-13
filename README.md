@@ -161,10 +161,6 @@ func _ready():
 
 **Error handling:**
 ```gdscript
-extends Node2D
-
-var lua: Lua
-
 func test(n: int):
 	if n != 5:
 		# This will raise a error in the lua state
@@ -178,9 +174,8 @@ func _ready():
 	# calling test with a type that is not a int would also raise a error.
 	var err = lua.do_string("test(6)")
 	# the static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
-	if LuaError.is_err(err):
+	if err is LuaError:
 		print("ERROR %d: " % err.type + err.msg)
-
 ```
 <br />
 
@@ -245,7 +240,7 @@ func _ready():
 	lua = Lua.new()
 	lua.expose_constructor(Player, "Player")
 	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- this will cause our custom error ")
-	if LuaError.is_err(err):
+	if err is LuaError:
 		print(err.msg)
 	var player = lua.pull_variant("player")
 	print(player.pos)
@@ -276,7 +271,7 @@ func _process(delta):
 		return
 	# thread.resume will either return a LuaError or a Array.
 	var results = thread.resume()
-	if LuaError.is_err(results):
+	if results is LuaError:
 		print("ERROR %d: " % results.type + results.msg)
 		return
 	yieldTime = results[0]
