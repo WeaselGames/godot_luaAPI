@@ -11,18 +11,9 @@ void LuaThread::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_file"), &LuaThread::loadFile);
     ClassDB::bind_method(D_METHOD("is_done"), &LuaThread::isDone);
 
-    ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&LuaThread::bindLibs);
-    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &LuaThread::pushGlobalVariant);
-    ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaThread::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &LuaThread::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaThread::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaThread::luaFunctionExists);
 
-}
-
-// Calls LuaState::bindLibs()
-void LuaThread::bindLibs(Array libs) {
-    state.bindLibs(libs);
 }
 
 // Calls LuaState::luaFunctionExists()
@@ -30,24 +21,10 @@ bool LuaThread::luaFunctionExists(String functionName) {
     return state.luaFunctionExists(functionName);
 }
 
-// Calls LuaState::pullVariant()
-Variant LuaThread::pullVariant(String name) {
-    return state.pullVariant(name);
-}
 
 // Calls LuaState::callFunction()
 Variant LuaThread::callFunction(String functionName, Array args) {
     return state.callFunction(functionName, args);
-}
-
-// Calls LuaState::pushGlobalVariant()
-LuaError* LuaThread::pushGlobalVariant(Variant var, String name) {
-    return state.pushGlobalVariant(var, name);
-}
-
-// Calls LuaState::exposeObjectConstructor()
-LuaError* LuaThread::exposeObjectConstructor(Object* obj, String name) {
-    return state.exposeObjectConstructor(obj, name);
 }
 
 LuaThread* LuaThread::newThread(Ref<LuaAPI> lua) {

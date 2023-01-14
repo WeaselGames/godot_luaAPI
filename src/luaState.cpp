@@ -362,8 +362,7 @@ Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
         case LUA_TUSERDATA:
             result = *(Variant*)lua_touserdata(state, index);
             break;
-        case LUA_TTABLE:
-        {
+        case LUA_TTABLE: {
             lua_len(state, index);
             int len = lua_tointeger(state, -1);
             lua_pop(state, 1);
@@ -390,15 +389,18 @@ Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
             result = dict;
             break;
         }
-        case LUA_TFUNCTION:
-        {
+        case LUA_TFUNCTION: {
             // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
             lua_pushvalue(state, index);
             LuaCallable *callable = memnew(LuaCallable(obj, luaL_ref(state, LUA_REGISTRYINDEX), state));
             result = Callable(callable);
             break;
         }
-        case LUA_TNIL:{
+        case LUA_TNIL: {
+            break;
+        }
+        case LUA_TTHREAD: {
+            result = LuaError::newErr("Pulling lua threads is not supported. If you did not mean to do this, make sure you are not modifying any global variables on a lua thread and attempting to pull them again.", LuaError::ERR_RUNTIME);
             break;
         }
         default:
