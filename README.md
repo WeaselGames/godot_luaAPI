@@ -230,7 +230,9 @@ func _ready():
 **Object metamethod overrides:**
 ```gdscript
 extends Node2D
+
 var lua: LuaAPI
+
 class Player:
 	var pos = Vector2(1, 0)
 	# Most metamethods can be overriden. The function names are the same as the metamethods.
@@ -254,6 +256,7 @@ func _ready():
 **Using Coroutines:**
 ```gdscript
 extends Node2D
+
 var lua: LuaAPI
 var thread: LuaThread
 	

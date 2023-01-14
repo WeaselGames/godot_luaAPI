@@ -25,7 +25,7 @@ class LuaCallable : public CallableCustom {
     private:
         int funcRef;
         Ref<RefCounted> obj;
-        lua_State *state;
+        lua_State *state = nullptr;
 };
 
 #endif

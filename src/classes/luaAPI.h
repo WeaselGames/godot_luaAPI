@@ -5,9 +5,11 @@
 #include "core/core_bind.h"
 #include "luaError.h"
 
+#include <src/lua.hpp>
+#include <src/luaState.h>
+
 #include <string>
 
-#include <src/lua.hpp>
 
 class LuaAPI : public RefCounted {
     GDCLASS(LuaAPI, RefCounted);
@@ -18,50 +20,26 @@ class LuaAPI : public RefCounted {
     public:
         LuaAPI();
         ~LuaAPI();
+
         void bindLibs(Array libs);
-        void exposeFunction(Callable func, String name);
-        
-        bool luaFunctionExists(String function_name);
-        
-        Variant getVar(int index = -1) const;
-        static Variant getVariant(int index, lua_State* L, Ref<RefCounted> obj);
+
+        bool luaFunctionExists(String functionName);
+
         Variant pullVariant(String name);
-        Variant callFunction(String function_name, Array args);
+        Variant callFunction(String functionName, Array args);
 
         LuaError* doFile(String fileName);
         LuaError* doString(String code);
-        LuaError* pushVariant(Variant var) const;
-        static LuaError* pushVariant(Variant var, lua_State* state);
         LuaError* pushGlobalVariant(Variant var, String name);
         LuaError* exposeObjectConstructor(Object* obj, String name);
         
-
         lua_State* newThread();
         lua_State* getState();
 
-        LuaError* handleError(int lua_error) const;
-        static LuaError* handleError(int lua_error, lua_State* state);
-        static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
-
-        // Lua functions
-        static int luaErrorHandler(lua_State* state);
-        static int luaPrint(lua_State* state);
-        static int luaExposedFuncCall(lua_State* state);
-        static int luaUserdataFuncCall(lua_State* state);
-        static int luaCallableCall(lua_State* state);
-
     private:
-        lua_State *state;
+        LuaState state;
+        lua_State* lState;
         LuaError* execute(int handlerIndex);
-
-        void exposeConstructors();
-        void createVector2Metatable();
-        void createVector3Metatable();
-        void createColorMetatable();
-        void createRect2Metatable();
-        void createPlaneMetatable();
-        void createObjectMetatable();
-        void createCallableMetatable();
 };
 
 #endif
