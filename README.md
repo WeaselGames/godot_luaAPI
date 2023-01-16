@@ -12,6 +12,7 @@
 About
 -------
 [![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml)
+![Logo](.github/luaAPI.png)
 
 ***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for a more stable build.
 
@@ -273,17 +274,17 @@ func _ready():
 	")
 	
 var yieldTime = 0
-var timeSince = 0;
+var timeSince = 0
 func _process(delta):
 	timeSince += delta
 	if thread.is_done() || timeSince <= yieldTime:
 		return
 	# thread.resume will either return a LuaError or a Array.
-	var results = thread.resume()
-	if results is LuaError:
-		print("ERROR %d: " % results.type + results.msg)
+	var ret = thread.resume()
+	if ret is LuaError:
+		print("ERROR %d: " % ret.type + ret.msg)
 		return
-	yieldTime = results[0]
+	yieldTime = ret[0]
 	timeSince = 0
 ```
 Contributing And Feature Requests
