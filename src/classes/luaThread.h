@@ -6,8 +6,8 @@
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
 
-#include "../lua.hpp"
-#include "../luaState.h"
+#include <lua/lua.hpp>
+#include <luaState.h>
 
 class LuaAPI;
 
@@ -26,8 +26,11 @@ class LuaThread : public RefCounted {
         bool luaFunctionExists(String functionName);
 
         LuaError* loadFile(String fileName);
+        LuaError* pushGlobalVariant(Variant var, String name);
+        LuaError* exposeObjectConstructor(Object* obj, String name);
 
         Variant resume();
+        Variant pullVariant(String name);
         Variant callFunction(String functionName, Array args);
 
         bool isDone();

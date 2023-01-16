@@ -1,8 +1,11 @@
 #include "luaState.h"
-#include "classes/luaCallable.h"
+#include <classes/luaCallable.h>
 
-void LuaState::setState(lua_State *L) {
+void LuaState::setState(lua_State *L, bool bindAPI) {
     this->L = L;
+    if (!bindAPI)
+        return;
+
     // push our custom print function so by default it prints to the GDConsole.
     lua_register(L, "print", luaPrint);
 
@@ -78,7 +81,7 @@ Variant LuaState::getVar(int index) const {
 // Pull a global variant from Lua to GDScript
 Variant LuaState::pullVariant(String name) {
     lua_getglobal(L, name.ascii().get_data());
-    Variant val = getVar(1);
+    Variant val = getVar(-1);
     lua_pop(L, 1);
     return val;
 }
@@ -397,10 +400,6 @@ Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
             break;
         }
         case LUA_TNIL: {
-            break;
-        }
-        case LUA_TTHREAD: {
-            result = LuaError::newErr("Pulling lua threads is not supported. If you did not mean to do this, make sure you are not modifying any global variables on a lua thread and attempting to pull them again.", LuaError::ERR_RUNTIME);
             break;
         }
         default:

@@ -14,11 +14,11 @@ static std::map<void*, Variant*> luaObjects;
      lua_rawget(inner_state,LUA_REGISTRYINDEX);                               \
      Ref<RefCounted> OBJ = (Ref<RefCounted>) lua_touserdata(inner_state, -1); \
      lua_pop(inner_state, 1);                                                 \
-     Variant arg1 = LuaState::getVariant(1, inner_state, OBJ);                     \
-     Variant arg2 = LuaState::getVariant(2, inner_state, OBJ);                     \
-     Variant arg3 = LuaState::getVariant(3, inner_state, OBJ);                     \
-     Variant arg4 = LuaState::getVariant(4, inner_state, OBJ);                     \
-     Variant arg5 = LuaState::getVariant(5, inner_state, OBJ);                     \
+     Variant arg1 = LuaState::getVariant(1, inner_state, OBJ);                \
+     Variant arg2 = LuaState::getVariant(2, inner_state, OBJ);                \
+     Variant arg3 = LuaState::getVariant(3, inner_state, OBJ);                \
+     Variant arg4 = LuaState::getVariant(4, inner_state, OBJ);                \
+     Variant arg5 = LuaState::getVariant(5, inner_state, OBJ);                \
      _f_                                                                      \
 }
  

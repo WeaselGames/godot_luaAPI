@@ -1,4 +1,5 @@
 #include "luaThread.h"
+
 #include "luaAPI.h"
 #include "luaCallable.h"
 
@@ -13,6 +14,9 @@ void LuaThread::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaThread::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaThread::luaFunctionExists);
+    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &LuaThread::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaThread::pullVariant);
+    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &LuaThread::exposeObjectConstructor);
 
 }
 
@@ -21,6 +25,20 @@ bool LuaThread::luaFunctionExists(String functionName) {
     return state.luaFunctionExists(functionName);
 }
 
+// Calls LuaState::pullVariant()
+Variant LuaThread::pullVariant(String name) {
+    return state.pullVariant(name);
+}
+
+// Calls LuaState::pushGlobalVariant()
+LuaError* LuaThread::pushGlobalVariant(Variant var, String name) {
+    return state.pushGlobalVariant(var, name);
+}
+
+// Calls LuaState::exposeObjectConstructor()
+LuaError* LuaThread::exposeObjectConstructor(Object* obj, String name) {
+    return state.exposeObjectConstructor(obj, name);
+}
 
 // Calls LuaState::callFunction()
 Variant LuaThread::callFunction(String functionName, Array args) {
@@ -40,7 +58,7 @@ void LuaThread::bind(Ref<LuaAPI> lua) {
     shouldCloseParent=false;
     parentState = lua->getState();
     tState = lua->newThread();
-    state.setState(tState);
+    state.setState(tState, false);
     
     // register the yield method
     lua_register(tState, "yield", luaYield);

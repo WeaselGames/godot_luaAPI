@@ -5,8 +5,8 @@
 #include "core/core_bind.h"
 #include "luaError.h"
 
-#include "../lua.hpp"
-#include "../luaState.h"
+#include <lua/lua.hpp>
+#include <luaState.h>
 
 #include <string>
 

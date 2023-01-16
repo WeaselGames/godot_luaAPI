@@ -4,7 +4,7 @@
 LuaAPI::LuaAPI() {
     lState = luaL_newstate();
 	// Createing lua state instance
-	state.setState(lState);
+	state.setState(lState, true);
 }
 
 LuaAPI::~LuaAPI() {

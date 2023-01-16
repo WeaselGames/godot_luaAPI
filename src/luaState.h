@@ -3,12 +3,12 @@
 
 #include "core/object/ref_counted.h"
 
-#include "lua.hpp"
-#include "classes/luaError.h"
+#include <lua/lua.hpp>
+#include <classes/luaError.h>
 
 class LuaState {
     public:
-        void setState(lua_State* state);
+        void setState(lua_State* state, bool bindAPI);
         void bindLibs(Array libs);
 
         bool luaFunctionExists(String functionName);

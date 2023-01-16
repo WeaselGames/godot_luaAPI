@@ -4,7 +4,7 @@
 #include "core/object/ref_counted.h"
 #include "core/variant/callable.h"
 
-#include "../lua.hpp"
+#include <lua/lua.hpp>
 
 class LuaCallable : public CallableCustom {
     static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);
