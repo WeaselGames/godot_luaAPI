@@ -1,19 +1,19 @@
 #include "register_types.h"
-#include "lua.h"
-#include "luaError.h"
-#include "luaThread.h"
-#include "luaCallable.h"
+#include "src/classes/luaAPI.h"
+#include "src/classes/luaError.h"
+#include "src/classes/luaThread.h"
+#include "src/classes/luaCallable.h"
 
-void initialize_lua_module(ModuleInitializationLevel p_level) {
-	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
-		ClassDB::register_class<Lua>();
-		ClassDB::register_class<LuaThread>();
-		ClassDB::register_class<LuaError>();
-	}
+void initialize_luaAPI_module(ModuleInitializationLevel p_level) {
+	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
+		return;
+	
+	ClassDB::register_class<LuaAPI>();
+	ClassDB::register_class<LuaThread>();
+	ClassDB::register_class<LuaError>();
 }
 
-void uninitialize_lua_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+void uninitialize_luaAPI_module(ModuleInitializationLevel p_level) {
+	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
 		return;
-	}
 }

@@ -20,7 +20,7 @@ jobs:
     runs-on: "windows-latest"
     name: Windows Editor (target=editor, tools=yes)
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
@@ -68,7 +68,9 @@ jobs:
     name: Windows Template (target=template_release, tools=no)
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     # Editing this is pretty dangerous for Windows since it can break.
     # Needs to be properly tested with a fresh cache.
@@ -113,7 +115,9 @@ jobs:
     name: Windows Template Debug (target=template_debug, tools=no)
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     # Editing this is pretty dangerous for Windows since it can break.
     # Needs to be properly tested with a fresh cache.

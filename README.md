@@ -12,6 +12,8 @@
 About
 -------
 [![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml)
+![Logo](.github/LuaAPI.png)
+Art created by [Alex](https://www.instagram.com/redheadalex1)
 
 ***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for a more stable build.
 
@@ -79,10 +81,10 @@ Examples
 ```gdscript
 extends Node2D
 
-var lua: Lua
+var lua: LuaAPI
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	lua.do_string("for i=1,10,1 do print('Hello lua!') end")
 ```
 <br />
@@ -91,10 +93,10 @@ func _ready():
 ```gdscript
 extends Node2D
 
-var lua: Lua
+var lua: LuaAPI
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	lua.do_file("user://luaFile.lua")
 ```
 <br />
@@ -103,11 +105,11 @@ func _ready():
 ```gdscript
 extends Node2D
 
-var lua: Lua
+var lua: LuaAPI
 var test = "Hello lua!"
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	lua.push_variant(test, "str")
 	lua.do_string("print(str)")
 ```
@@ -117,13 +119,13 @@ func _ready():
 ```gdscript
 extends Node2D
 
-var lua: Lua
+var lua: LuaAPI
 
 func luaAdd(a, b):
 	return a + b
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	# Functions are passed the same as any other value to lua.
 	lua.push_variant(luaAdd, "add")
 	lua.push_variant(func(a, b): return a+b, "addLamda")
@@ -135,10 +137,10 @@ func _ready():
 ```gdscript
 extends Node2D
 
-var lua: Lua
+var lua: LuaAPI
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	lua.do_file("user://luaFile.lua")
 	if( lua.function_exists("set_colors")):
 		# call_function will return a Variant if lua returns nothing the value will be null
@@ -161,6 +163,10 @@ func _ready():
 
 **Error handling:**
 ```gdscript
+extends Node2D
+
+var lua: LuaAPI
+
 func test(n: int):
 	if n != 5:
 		# This will raise a error in the lua state
@@ -168,7 +174,7 @@ func test(n: int):
 	return n+5
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	lua.push_variant(test, "test")
 	# Most methods return a LuaError
 	# calling test with a type that is not a int would also raise a error.
@@ -183,10 +189,10 @@ func _ready():
 ```gdscript
 extends Node2D
 
-var lua: Lua
+var lua: LuaAPI
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	#all libraries are avalible. Use OS and IO at your own risk.
 	lua.bind_libs(["base", "table", "string"])
 ```
@@ -195,7 +201,9 @@ func _ready():
 **Passing objects as userdata:**
 ```gdscript
 extends Node2D
-var lua: Lua
+
+var lua: LuaAPI
+
 class Player:
 	var pos = Vector2(0, 0)
 	#If lua_funcs is not defined or returns a empty array, all functions will be aval
@@ -210,7 +218,7 @@ class Player:
 var player2: Player
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	player2 = Player.new()
 	lua.push_variant(func(): return player2, "getPlayer2")
 	lua.expose_constructor(Player, "Player")
@@ -224,7 +232,9 @@ func _ready():
 **Object metamethod overrides:**
 ```gdscript
 extends Node2D
-var lua: Lua
+
+var lua: LuaAPI
+
 class Player:
 	var pos = Vector2(1, 0)
 	# Most metamethods can be overriden. The function names are the same as the metamethods.
@@ -237,7 +247,7 @@ class Player:
 		pos.x+=1
 
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	lua.expose_constructor(Player, "Player")
 	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- this will cause our custom error ")
 	if err is LuaError:
@@ -248,11 +258,12 @@ func _ready():
 **Using Coroutines:**
 ```gdscript
 extends Node2D
-var lua: Lua
+
+var lua: LuaAPI
 var thread: LuaThread
 	
 func _ready():
-	lua = Lua.new()
+	lua = LuaAPI.new()
 	# Despite the name this is not like a OS thread. It is a coroutine
 	thread = LuaThread.new_thread(lua)
 	thread.load_string("
@@ -264,17 +275,17 @@ func _ready():
 	")
 	
 var yieldTime = 0
-var timeSince = 0;
+var timeSince = 0
 func _process(delta):
 	timeSince += delta
 	if thread.is_done() || timeSince <= yieldTime:
 		return
 	# thread.resume will either return a LuaError or a Array.
-	var results = thread.resume()
-	if results is LuaError:
-		print("ERROR %d: " % results.type + results.msg)
+	var ret = thread.resume()
+	if ret is LuaError:
+		print("ERROR %d: " % ret.type + ret.msg)
 		return
-	yieldTime = results[0]
+	yieldTime = ret[0]
 	timeSince = 0
 ```
 Contributing And Feature Requests
