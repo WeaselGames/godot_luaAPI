@@ -13,7 +13,7 @@ About
 -------
 [![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml)
 ![Logo](.github/LuaAPI.png)
-Art created by [Alex](https://www.instagram.com/redheadalex1)
+Art created by [Alex](https://www.instagram.com/redheadalex1){:target="_blank"}
 
 ***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for a more stable build.
 
