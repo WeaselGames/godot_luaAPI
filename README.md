@@ -1,4 +1,4 @@
- Godot Lua Module
+ Godot Lua API
 ===============
 **Table of contents:**
   * [About](#about)
@@ -15,9 +15,14 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-alpha. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for a more stable build.
+***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-beta. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
-This is a Godot engine module that adds lua support via GDScript. Importantly this is **NOT** meant to be a replacement for GDScript. The main purpose of this module is to add runtime execution of code for tasks such as modding or in game scripting. 
+This is a Godot engine module that adds lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functinality to program your game out of the box. This module allows you to create custom modding API's in a sandboxed envierment. You have control of what people can and can not do within that sandbox.
+
+If you are looking to make your game using lua instead of create a modding API check out one of these modules
+- [luascript](https://github.com/perbone/luascript) by [perbone](https://github.com/perbone)
+- [godot-lua-pluginscript](https://github.com/gilzoide/godot-lua-pluginscript) by [gilzoide](https://github.com/gilzoide)
+
 
 To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
 
@@ -68,10 +73,10 @@ TODO
 
 Compiling
 ------------
-This build is for godot 4.0.0-alphaX. X being the latest version. Will not be supporting older alpha builds.
+This build is for godot 4.0.0-betaX. X being the latest version. Will not be supporting older alpha builds.
 - Start by cloning the Godot 4.0.0-alpha [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 
-- Next change directories into the modules folder and clone this repo with this command `git clone https://github.com/WeaselGames/lua`
+- Next change directories into the modules folder and clone this repo into a folder named luaAPI with this command `git clone https://github.com/WeaselGames/godot_luaAPI luaAPI`
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
