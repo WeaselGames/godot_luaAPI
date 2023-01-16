@@ -16,8 +16,6 @@ Export('env_lua')
 
 SConscript('external/SCsub')
 
-env_lua.Append(CPPPATH=[Dir('.').abspath])
-
 env_lua.add_source_files(env.modules_sources,'*.cpp')
 env_lua.add_source_files(env.modules_sources,'src/*.cpp')
 env_lua.add_source_files(env.modules_sources,'src/classes/*.cpp')

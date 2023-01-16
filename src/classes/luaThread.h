@@ -6,8 +6,8 @@
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
 
-#include <src/lua.hpp>
-#include <src/luaState.h>
+#include "../lua.hpp"
+#include "../luaState.h"
 
 class LuaAPI;
 
