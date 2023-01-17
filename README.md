@@ -15,9 +15,9 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is a **alpha** version of the module made for Godot v4-beta. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is an **alpha** version of the module made for Godot v4-beta. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
-This is a Godot engine module that adds lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functinality to program your game out of the box. This module allows you to create custom modding API's in a sandboxed envierment. You have control of what people can and can not do within that sandbox.
+This is a Godot engine module that adds lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functinality to program your game out of the box. This module allows you to create custom modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
 If you are looking to make your game using lua instead of creating a modding API check out one of these modules
 - [luascript](https://github.com/perbone/luascript) by [perbone](https://github.com/perbone)
@@ -82,6 +82,8 @@ This build is for godot 4.0.0-betaX. X being the latest version. Will not be sup
 
 Examples
 ------------
+If you are looking for more in depth information please refer to our [wiki](https://github.com/WeaselGames/godot_luaAPI/wiki).
+
 **Running lua from a string:**
 ```gdscript
 extends Node2D
