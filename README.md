@@ -54,15 +54,15 @@ If a feature is missing that you would like to see feel free to create a [Featur
 
 Nightly Builds
 ---------------
-- [🐧 Linux Editor](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-editor.zip)
-- [🐧 Linux Template](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-template-release.zip)
-- [🐧 Linux Template Debug](https://nightly.link/WeaselGames/lua/workflows/linux/main/linux-template-debug.zip)
-- [🎨 Windows Editor](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-editor.zip)
-- [🎨 Windows Template](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-template.zip)
-- [🎨 Windows Template Debug](https://nightly.link/WeaselGames/lua/workflows/windows/main/windows-template-debug.zip)
-- [🍎 MacOS Editor](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-editor.zip)
-- [🍎 MacOS Templates](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-template.zip)
-- [🍎 MacOS Templates Debug](https://nightly.link/WeaselGames/lua/workflows/macos/main/macos-template-debug.zip)
+- [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
+- [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-release.zip)
+- [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-debug.zip)
+- [🎨 Windows Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor.zip)
+- [🎨 Windows Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template.zip)
+- [🎨 Windows Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template-debug.zip)
+- [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor.zip)
+- [🍎 MacOS Templates](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template.zip)
+- [🍎 MacOS Templates Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template-debug.zip)
 
 TODO
 -----
@@ -74,9 +74,9 @@ TODO
 Compiling
 ------------
 This build is for godot 4.0.0-betaX. X being the latest version. Will not be supporting older alpha builds.
-- Start by cloning the Godot 4.0.0-alpha [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
+- Start by cloning the Godot 4.0.0-beta [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 
-- Next change directories into the modules folder and clone this repo into a folder named luaAPI with this command `git clone --recurse-submodules https://github.com/WeaselGames/godot_luaAPI luaAPI`
+- Next change directories into the modules folder and clone this repo into a folder named luaAPI with this command `git clone --recurse-submodules https://github.com/WeaselGames/godot_luaAPI luaAPI`. Make sure to use --recurse-submodules to pull the submodules aswell.
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).
 
