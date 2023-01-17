@@ -184,7 +184,7 @@ func _ready():
 	lua = LuaAPI.new()
 	lua.push_variant(test, "test")
 	# Most methods return a LuaError
-	# calling test with a type that is not a int would also raise a error.
+	# Calling test with a type that is not a int would also raise a error.
 	var err = lua.do_string("test(6)")
 	# The static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
 	if err is LuaError:
