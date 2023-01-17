@@ -176,7 +176,7 @@ var lua: LuaAPI
 
 func test(n: int):
 	if n != 5:
-		# This will raise a error in the Lua state
+		# This will raise an error in the Lua state.
 		return LuaError.new_err("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
 	return n+5
 
@@ -184,7 +184,7 @@ func _ready():
 	lua = LuaAPI.new()
 	lua.push_variant(test, "test")
 	# Most methods return a LuaError
-	# Calling test with a type that is not a int would also raise a error.
+	# Calling test with a type that is not a int would also raise an error.
 	var err = lua.do_string("test(6)")
 	# The static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
 	if err is LuaError:
@@ -200,7 +200,7 @@ var lua: LuaAPI
 
 func _ready():
 	lua = LuaAPI.new()
-	# All libraries are avalible. Use OS and IO at your own risk.
+	# All libraries are available. Use OS and IO at your own risk.
 	lua.bind_libs(["base", "table", "string"])
 ```
 <br />
@@ -213,7 +213,7 @@ var lua: LuaAPI
 
 class Player:
 	var pos = Vector2(0, 0)
-	# If lua_funcs is not defined or returns a empty array, all functions will be aval
+	# If lua_funcs is not defined or returns a empty array, all functions will be aval.
 	func lua_funcs():
 		return ["move_forward"]
 	# lua_fields behaves the same as lua_funcs but for fields.
