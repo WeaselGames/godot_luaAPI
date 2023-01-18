@@ -40,11 +40,13 @@ void LuaAPI::addOwnedObject(void* luaPtr, Variant* obj) {
 
 // Adds the pointer to a object now owned by lua for cleanup later
 void LuaAPI::removeOwnedObject(Variant* obj) {
-    ownedObjects.erase(obj);
+    memdelete(ownedObjects[(void*)obj]);
+    ownedObjects[(void*)obj] = nullptr;
 }
 
 // Adds the pointer to a object now owned by lua for cleanup later
 void LuaAPI::removeOwnedObject(void* luaPtr) {
+    memdelete(ownedObjects[luaPtr]);
     ownedObjects[luaPtr] = nullptr;
 }
 
