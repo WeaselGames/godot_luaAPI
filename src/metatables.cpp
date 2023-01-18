@@ -37,23 +37,17 @@ LuaError* LuaState::exposeObjectConstructor(String name, Object* obj) {
         // We cant store the variant directly in the userdata. It will causes crashes.
         Variant* var = memnew(Variant);
         *var = inner_obj->call("new");
+        if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
+            lua->addOwnedObject(var);
 
         if (var->is_ref_counted()) {
             Ref<RefCounted> temp = Object::cast_to<RefCounted>(var->operator Object*());
             lua_pushlightuserdata(inner_state, temp.ptr());
-
-            if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
-                lua->addOwnedObject(temp.ptr());
-
             luaL_setmetatable(inner_state, "mt_RefCounted");
             return 1;
         }
 
         void* userdata = (Variant*)lua_newuserdata(inner_state, sizeof(Variant));
-
-        if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
-            lua->addOwnedObject(var);
-
         memcpy(userdata, (void*)var, sizeof(Variant));
         luaL_setmetatable(inner_state, "mt_Object");
         return 1;

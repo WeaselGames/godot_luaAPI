@@ -8,8 +8,8 @@ LuaAPI::LuaAPI() {
 }
 
 LuaAPI::~LuaAPI() {
-    for (void* ptr : ownedObjects) {
-        memdelete(ptr);
+    for (Variant* obj : ownedObjects) {
+        memdelete(obj);
     }
     lua_close(lState);
 }
@@ -19,7 +19,7 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("do_file", "File"), &LuaAPI::doFile);
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
 
-    ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&LuaAPI::bindLibs);
+    ClassDB::bind_method(D_METHOD("bind_libs", "Array"), &LuaAPI::bindLibs);
     ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
@@ -33,7 +33,7 @@ void LuaAPI::bindLibs(Array libs) {
 }
 
 // Adds the pointer to a object now owned by lua for cleanup later
-void LuaAPI::addOwnedObject(void* obj) {
+void LuaAPI::addOwnedObject(Variant* obj) {
     ownedObjects.push_back(obj);
 }
 
