@@ -247,9 +247,7 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
                 luaL_setmetatable(state, "mt_RefCounted");
                 break;  
             }
-
             
-
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state, "mt_Object");
