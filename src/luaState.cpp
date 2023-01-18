@@ -169,11 +169,11 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
                 Variant value = array[i];
 
                 LuaError* err = pushVariant(key, state);
-                if (err == nullptr)
+                if (err != nullptr)
                     return err;
                 
                 err = pushVariant(value, state);
-                if (err == nullptr)
+                if (err != nullptr)
                     return err;
 
                 lua_settable(state, -3);
@@ -189,11 +189,11 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
                 Variant value = dict[key];
                 
                 LuaError* err = pushVariant(key, state);
-                if (err == nullptr)
+                if (err != nullptr)
                     return err;
                 
                 err = pushVariant(value, state);
-                if (err == nullptr)
+                if (err != nullptr)
                     return err;
 
                 lua_settable(state, -3);
