@@ -42,7 +42,7 @@ LuaError* LuaState::exposeObjectConstructor(String name, Object* obj) {
             Ref<RefCounted> temp = Object::cast_to<RefCounted>(var->operator Object*());
             lua_pushlightuserdata(inner_state, temp.ptr());
 
-             if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
+            if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
                 lua->addOwnedObject(temp.ptr());
 
             luaL_setmetatable(inner_state, "mt_RefCounted");
