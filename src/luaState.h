@@ -20,15 +20,15 @@ class LuaState {
         Variant callFunction(String functionName, Array args);
 
         LuaError* pushVariant(Variant var) const;
-        LuaError* pushGlobalVariant(Variant var, String name);
-        LuaError* exposeObjectConstructor(Object* obj, String name);
+        LuaError* pushGlobalVariant(String name, Variant var);
+        LuaError* exposeObjectConstructor(String name, Object* obj);
         LuaError* handleError(int lua_error) const;
         
-        static LuaError* pushVariant(Variant var, lua_State* state);
-        static LuaError* handleError(int lua_error, lua_State* state);
+        static LuaError* pushVariant(lua_State* state, Variant var);
+        static LuaError* handleError(lua_State* state, int lua_error);
         static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
 
-        static Variant getVariant(int index, lua_State* L, Ref<RefCounted> obj);
+        static Variant getVariant(lua_State* state, int index, Ref<RefCounted> obj);
 
         // Lua functions
         static int luaErrorHandler(lua_State* state);

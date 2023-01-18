@@ -26,8 +26,8 @@ class LuaThread : public RefCounted {
         bool luaFunctionExists(String functionName);
 
         LuaError* loadFile(String fileName);
-        LuaError* pushGlobalVariant(Variant var, String name);
-        LuaError* exposeObjectConstructor(Object* obj, String name);
+        LuaError* pushGlobalVariant(String name, Variant var);
+        LuaError* exposeObjectConstructor(String name, Object* obj);
 
         Variant resume();
         Variant pullVariant(String name);
@@ -40,9 +40,7 @@ class LuaThread : public RefCounted {
         LuaState state;
         lua_State* tState;
         lua_State* parentState;
-        LuaError* handleError(int lua_error) const;
         bool done;
-        bool shouldCloseParent = false;
 };
 
 #endif

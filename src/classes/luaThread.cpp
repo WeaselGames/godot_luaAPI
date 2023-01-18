@@ -14,9 +14,9 @@ void LuaThread::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaThread::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaThread::luaFunctionExists);
-    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &LuaThread::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaThread::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaThread::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &LuaThread::exposeObjectConstructor);
+    ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaThread::exposeObjectConstructor);
 
 }
 
@@ -31,13 +31,13 @@ Variant LuaThread::pullVariant(String name) {
 }
 
 // Calls LuaState::pushGlobalVariant()
-LuaError* LuaThread::pushGlobalVariant(Variant var, String name) {
-    return state.pushGlobalVariant(var, name);
+LuaError* LuaThread::pushGlobalVariant(String name, Variant var) {
+    return state.pushGlobalVariant(name, var);
 }
 
 // Calls LuaState::exposeObjectConstructor()
-LuaError* LuaThread::exposeObjectConstructor(Object* obj, String name) {
-    return state.exposeObjectConstructor(obj, name);
+LuaError* LuaThread::exposeObjectConstructor(String name, Object* obj) {
+    return state.exposeObjectConstructor(name, obj);
 }
 
 // Calls LuaState::callFunction()
@@ -53,9 +53,6 @@ LuaThread* LuaThread::newThread(Ref<LuaAPI> lua) {
 
 // binds the thread to a lua object
 void LuaThread::bind(Ref<LuaAPI> lua) {
-    if (shouldCloseParent)
-        lua_close(parentState);
-    shouldCloseParent=false;
     parentState = lua->getState();
     tState = lua->newThread();
     state.setState(tState, Ref<RefCounted>(this), false);
@@ -82,7 +79,7 @@ LuaError* LuaThread::loadFile(String fileName) {
     String path = file->get_path_absolute();
     int ret = luaL_loadfile(tState, path.ascii().get_data());
     if (ret != LUA_OK) {
-        return handleError(ret);
+        return state.handleError(ret);
     }
     return nullptr;
 }
@@ -99,12 +96,12 @@ Variant LuaThread::resume() {
     if (ret == LUA_OK) done = true; // thread is finished
     else if (ret != LUA_YIELD) {
         done = true;
-        return handleError(ret);
+        return state.handleError(ret);
     }
     
     Array toReturn;
     for (int i = 1; i <= argc; i++) {
-        toReturn.append(LuaState::getVariant(i, tState, Ref<RefCounted>(this)));
+        toReturn.append(LuaState::getVariant(tState, i, Ref<RefCounted>(this)));
     }
 
     return toReturn;
@@ -112,43 +109,6 @@ Variant LuaThread::resume() {
 
 bool LuaThread::isDone() {
     return done;
-}
-
-LuaError* LuaThread::handleError(int lua_error) const {
-    String msg;
-    switch(lua_error) {
-        case LUA_ERRRUN: {
-            msg += "[LUA_ERRRUN - runtime error ]\n";
-            luaL_traceback(parentState, tState, lua_tostring(tState, -1), 2);
-            msg += lua_tostring(tState, -1);
-            msg += "\n";
-            lua_pop(tState, 1);
-            break;
-        }
-        case LUA_ERRSYNTAX:{
-            msg += "[LUA_ERRSYNTAX - syntax error ]\n";
-            luaL_traceback(parentState, tState, lua_tostring(tState, -1), 2);
-            msg += lua_tostring(tState, -1);
-            msg += "\n";
-            lua_pop(tState, 1);
-            break;
-        }
-        case LUA_ERRMEM:{
-            msg += "[LUA_ERRMEM - memory allocation error ]\n";
-            break;
-        }
-        case LUA_ERRERR:{
-            msg += "[LUA_ERRERR - error while handling another error]\n";
-            break;
-        }
-        case LUA_ERRFILE:{
-            msg += "[LUA_ERRFILE - error while opening file]\n";
-            break;
-        }
-        default: break;
-    }
-    
-    return LuaError::newErr(msg, static_cast<LuaError::ErrorType>(lua_error));
 }
 
 int LuaThread::luaYield(lua_State *state) {

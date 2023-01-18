@@ -77,7 +77,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 
 // get a value at the given index and return as a variant
 Variant LuaState::getVar(int index) const {
-    return getVariant(index, L, Ref<RefCounted>(this));
+    return getVariant(L, index, obj);
 }
 
 // Pull a global variant from Lua to GDScript
@@ -113,11 +113,11 @@ Variant LuaState::callFunction(String functionName, Array args) {
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
 LuaError* LuaState::pushVariant(Variant var) const{
-    return LuaState::pushVariant(var, L);
+    return LuaState::pushVariant(L, var);
 }
 
 // Call pushVariant() and set it to a global name
-LuaError* LuaState::pushGlobalVariant(Variant var, String name) {
+LuaError* LuaState::pushGlobalVariant(String name, Variant var) {
     LuaError* err = pushVariant(var);
     if (err == nullptr) {
         lua_setglobal(L, name.ascii().get_data());
@@ -127,7 +127,7 @@ LuaError* LuaState::pushGlobalVariant(Variant var, String name) {
 }
 
 LuaError* LuaState::handleError(int lua_error) const {
-    return LuaState::handleError(lua_error, L);
+    return LuaState::handleError(L, lua_error);
 }
 
 // --------------
@@ -135,7 +135,7 @@ LuaError* LuaState::handleError(int lua_error) const {
 // --------------
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
-LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
+LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
     switch (var.get_type())
     {
         case Variant::Type::NIL:
@@ -170,11 +170,11 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
                 Variant key = i+1;
                 Variant value = array[i];
 
-                LuaError* err = pushVariant(key, state);
+                LuaError* err = pushVariant(state, key);
                 if (err != nullptr)
                     return err;
                 
-                err = pushVariant(value, state);
+                err = pushVariant(state, value);
                 if (err != nullptr)
                     return err;
 
@@ -190,11 +190,11 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
                 Variant key = dict.keys()[i];
                 Variant value = dict[key];
                 
-                LuaError* err = pushVariant(key, state);
+                LuaError* err = pushVariant(state, key);
                 if (err != nullptr)
                     return err;
                 
-                err = pushVariant(value, state);
+                err = pushVariant(state, value);
                 if (err != nullptr)
                     return err;
 
@@ -278,7 +278,7 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
-LuaError* LuaState::handleError(int lua_error, lua_State* state) {
+LuaError* LuaState::handleError(lua_State* state, int lua_error) {
     String msg;
     switch(lua_error) {
         case LUA_ERRRUN: {
@@ -359,7 +359,7 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
 }
 
 // gets a variant at a gien index
-Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
+Variant LuaState::getVariant(lua_State* state, int index, Ref<RefCounted> obj) {
     Variant result;
     int type = lua_type(state, index);
     switch (type) {
@@ -388,7 +388,7 @@ Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
                 Array array;
                 for (int i = 1; i <= len; i++) {
                     lua_geti(state, index, i);
-                    array.push_back(getVariant(-1, state, obj));
+                    array.push_back(getVariant(state, -1, obj));
                     lua_pop(state, 1);
                 }
                 result = array;
@@ -398,8 +398,8 @@ Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
             lua_pushnil(state);  /* first key */
             Dictionary dict;
             while (lua_next(state, (index<0)?(index-1):(index)) != 0) {
-                Variant key = getVariant(-2, state, obj);
-                Variant value = getVariant(-1, state, obj);
+                Variant key = getVariant(state, -2, obj);
+                Variant value = getVariant(state, -1, obj);
                 dict[key] = value;
                 lua_pop(state, 1);
             }
@@ -472,13 +472,13 @@ int LuaState::luaCallableCall(lua_State* state) {
     lua_pop(state, 1);
 
     int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its self will be counted
-    Callable callable = (Callable) LuaState::getVariant(1, state, OBJ);
+    Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
    
     const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
     int index = 2; // we start at 2, 1 is the callable
     for (int i = 0; i < argc; i++) {
         Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(index++, state, OBJ);
+        *temp = LuaState::getVariant(state, index++, OBJ);
         if ((*temp).get_type() != Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMsg().ascii().get_data());
@@ -500,7 +500,7 @@ int LuaState::luaCallableCall(lua_State* state) {
         return 0;
     }
     
-    LuaState::pushVariant(returned, state);
+    LuaState::pushVariant(state, returned);
     return 1;
 }
 
@@ -518,7 +518,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     int index = 1;
     for (int i = 0; i < argc; i++) {
         Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(index++, state, OBJ);
+        *temp = LuaState::getVariant(state, index++, OBJ);
         if ((*temp).get_type() != Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMsg().ascii().get_data());
@@ -531,7 +531,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     }
 
     Variant* obj  = (Variant*)lua_touserdata(state, lua_upvalueindex(1));
-    String fName = LuaState::getVariant(lua_upvalueindex(2), state, OBJ);
+    String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
     Callable::CallError error;
     Variant ret;
     obj->callp(fName.ascii().get_data(), args, argc, ret, error);
@@ -542,7 +542,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
         return 0;
     }
 
-    LuaState::pushVariant(ret, state);
+    LuaState::pushVariant(state, ret);
     return 1;
 }
 
@@ -560,7 +560,7 @@ int LuaState::luaLightUserdataFuncCall(lua_State* state) {
     int index = 1;
     for (int i = 0; i < argc; i++) {
         Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(index++, state, OBJ);
+        *temp = LuaState::getVariant(state, index++, OBJ);
         if ((*temp).get_type() != Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMsg().ascii().get_data());
@@ -573,7 +573,7 @@ int LuaState::luaLightUserdataFuncCall(lua_State* state) {
     }
 
     Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(state, lua_upvalueindex(1)));
-    String fName = LuaState::getVariant(lua_upvalueindex(2), state, OBJ);
+    String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
     Callable::CallError error;
     Variant ret = refObj->callp(fName.ascii().get_data(), args, argc, error);
     if (error.error != error.CALL_OK) {
@@ -583,6 +583,6 @@ int LuaState::luaLightUserdataFuncCall(lua_State* state) {
         return 0;
     }
 
-    LuaState::pushVariant(ret, state);
+    LuaState::pushVariant(state, ret);
     return 1;
 }

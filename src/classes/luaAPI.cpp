@@ -17,11 +17,11 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
 
     ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&LuaAPI::bindLibs);
-    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &LuaAPI::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &LuaAPI::exposeObjectConstructor);
+    ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
-    ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaAPI::luaFunctionExists);
+    ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
 }
 
 // Calls LuaState::bindLibs()
@@ -45,13 +45,13 @@ Variant LuaAPI::callFunction(String functionName, Array args) {
 }
 
 // Calls LuaState::pushGlobalVariant()
-LuaError* LuaAPI::pushGlobalVariant(Variant var, String name) {
-    return state.pushGlobalVariant(var, name);
+LuaError* LuaAPI::pushGlobalVariant(String name, Variant var) {
+    return state.pushGlobalVariant(name, var);
 }
 
 // Calls LuaState::exposeObjectConstructor()
-LuaError* LuaAPI::exposeObjectConstructor(Object* obj, String name) {
-    return state.exposeObjectConstructor(obj, name);
+LuaError* LuaAPI::exposeObjectConstructor(String name, Object* obj) {
+    return state.exposeObjectConstructor(name, obj);
 }
 
 // addFile() calls luaL_loadfille with the absolute file path

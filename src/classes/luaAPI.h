@@ -30,8 +30,8 @@ class LuaAPI : public RefCounted {
 
         LuaError* doFile(String fileName);
         LuaError* doString(String code);
-        LuaError* pushGlobalVariant(Variant var, String name);
-        LuaError* exposeObjectConstructor(Object* obj, String name);
+        LuaError* pushGlobalVariant(String name, Variant var);
+        LuaError* exposeObjectConstructor(String name, Object* obj);
         
         lua_State* newThread();
         lua_State* getState();
