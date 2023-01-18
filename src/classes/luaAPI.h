@@ -9,6 +9,7 @@
 #include <luaState.h>
 
 #include <string>
+#include <vector>
 
 
 class LuaAPI : public RefCounted {
@@ -22,6 +23,7 @@ class LuaAPI : public RefCounted {
         ~LuaAPI();
 
         void bindLibs(Array libs);
+        void addOwnedObject(void* obj);
 
         bool luaFunctionExists(String functionName);
 
@@ -39,6 +41,7 @@ class LuaAPI : public RefCounted {
     private:
         LuaState state;
         lua_State* lState;
+        std::vector<void*> ownedObjects;
         LuaError* execute(int handlerIndex);
 };
 

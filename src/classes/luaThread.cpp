@@ -53,7 +53,7 @@ LuaThread* LuaThread::newThread(Ref<LuaAPI> lua) {
 
 // binds the thread to a lua object
 void LuaThread::bind(Ref<LuaAPI> lua) {
-    parentState = lua->getState();
+    parent = lua;
     tState = lua->newThread();
     state.setState(tState, Ref<RefCounted>(this), false);
     

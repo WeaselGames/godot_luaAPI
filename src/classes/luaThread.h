@@ -38,6 +38,7 @@ class LuaThread : public RefCounted {
         static int luaYield(lua_State *state);
     private:
         LuaState state;
+        Ref<LuaAPI> parent;
         lua_State* tState;
         lua_State* parentState;
         bool done;

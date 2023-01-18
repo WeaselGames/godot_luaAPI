@@ -10,6 +10,11 @@ void LuaState::setState(lua_State *L, Ref<RefCounted> obj, bool bindAPI) {
     // push our custom print function so by default it prints to the GDConsole.
     lua_register(L, "print", luaPrint);
 
+    // saving the object into registry
+	lua_pushstring(L, "__OBJECT");
+	lua_pushlightuserdata(L, obj.ptr());
+	lua_rawset(L, LUA_REGISTRYINDEX);
+
     // Creating basic types metatables and saving them in registry
 	createVector2Metatable();   // "mt_Vector2"
 	createVector3Metatable();   // "mt_Vector3"

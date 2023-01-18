@@ -1,12 +1,6 @@
 #include "luaState.h"
 
-#include <map>
-
-// TODO: This should not be static, each state should keep track of its own objects.
-// That way when the state is destroyed we can free that memory
-
-// Used to keep track of the original pointer via the userdata pointer
-static std::map<void*, Variant*> luaObjects;
+#include <classes/luaAPI.h>
 
 // These 2 macros helps us in constructing general metamethods.
 // We can use "lua" as a "Lua" pointer and arg1, arg2, ..., arg5 as Variants objects
@@ -48,14 +42,19 @@ LuaError* LuaState::exposeObjectConstructor(String name, Object* obj) {
             Ref<RefCounted> temp = Object::cast_to<RefCounted>(var->operator Object*());
             lua_pushlightuserdata(inner_state, temp.ptr());
 
+             if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
+                lua->addOwnedObject(temp.ptr());
+
             luaL_setmetatable(inner_state, "mt_RefCounted");
             return 1;
         }
 
         void* userdata = (Variant*)lua_newuserdata(inner_state, sizeof(Variant));
-        luaObjects[userdata] = var;
-        memcpy(userdata, (void*)var, sizeof(Variant));
 
+        if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
+            lua->addOwnedObject(var);
+
+        memcpy(userdata, (void*)var, sizeof(Variant));
         luaL_setmetatable(inner_state, "mt_Object");
         return 1;
     }), 1);
@@ -459,17 +458,6 @@ void LuaState::createObjectMetatable() {
         }
         return 0;
     }); 
-    
-    // Makeing sure to clean up the pointer
-    LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-        void* luaPTR = lua_touserdata(inner_state, 1);
-        // Indexing by the userdata pointer to get the og pointer for cleanup
-        if (luaObjects.count(luaPTR) > 0) {
-            Variant* ptr = luaObjects[luaPTR];
-            if (ptr != nullptr) memdelete(ptr);
-        }
-        return 0;
-    });
 
     LUA_METAMETHOD_TEMPLATE(L, -1, "__call", {
         if (!arg1.has_method("__call")) {
@@ -736,15 +724,6 @@ void LuaState::createRefCountedMetatable() {
         refObj->set(arg2, arg3);
         return 0;
     }); 
-    
-    // Makeing sure to clean up the pointer
-    LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-        Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(inner_state, 1));
-        if (refObj.is_valid()) {
-            memdelete(refObj.ptr());
-        }
-        return 0;
-    });
 
     lua_pop(L, 1);
 }

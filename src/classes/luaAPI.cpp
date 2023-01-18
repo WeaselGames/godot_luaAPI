@@ -8,6 +8,9 @@ LuaAPI::LuaAPI() {
 }
 
 LuaAPI::~LuaAPI() {
+    for (void* ptr : ownedObjects) {
+        memdelete(ptr);
+    }
     lua_close(lState);
 }
 
@@ -27,6 +30,11 @@ void LuaAPI::_bind_methods() {
 // Calls LuaState::bindLibs()
 void LuaAPI::bindLibs(Array libs) {
     state.bindLibs(libs);
+}
+
+// Adds the pointer to a object now owned by lua for cleanup later
+void LuaAPI::addOwnedObject(void* obj) {
+    ownedObjects.push_back(obj);
 }
 
 // Calls LuaState::luaFunctionExists()
