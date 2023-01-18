@@ -58,7 +58,7 @@ void LuaThread::bind(Ref<LuaAPI> lua) {
     shouldCloseParent=false;
     parentState = lua->getState();
     tState = lua->newThread();
-    state.setState(tState, false);
+    state.setState(tState, Ref<RefCounted>(this), false);
     
     // register the yield method
     lua_register(tState, "yield", luaYield);

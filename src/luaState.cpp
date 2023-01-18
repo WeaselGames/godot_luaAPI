@@ -1,8 +1,9 @@
 #include "luaState.h"
 #include <classes/luaCallable.h>
 
-void LuaState::setState(lua_State *L, bool bindAPI) {
+void LuaState::setState(lua_State *L, Ref<RefCounted> obj, bool bindAPI) {
     this->L = L;
+    this->obj = obj;
     if (!bindAPI)
         return;
 
@@ -17,6 +18,7 @@ void LuaState::setState(lua_State *L, bool bindAPI) {
     createPlaneMetatable();     // "mt_Plane"
     createObjectMetatable();    // "mt_Object"
     createCallableMetatable();  // "mt_Callable"
+    createRefCountedMetatable(); // "mt_RefCounted"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -238,6 +240,16 @@ LuaError* LuaState::pushVariant(Variant var, lua_State* state) {
                 break;
             }
 
+            // If the object is RefCounted
+            if (var.is_ref_counted()) {
+                Ref<RefCounted> temp = Object::cast_to<RefCounted>(var.operator Object*());
+                lua_pushlightuserdata(state, temp.ptr());
+                luaL_setmetatable(state, "mt_RefCounted");
+                break;  
+            }
+
+            
+
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state, "mt_Object");
@@ -365,6 +377,10 @@ Variant LuaState::getVariant(int index, lua_State* state, Ref<RefCounted> obj) {
         case LUA_TUSERDATA:
             result = *(Variant*)lua_touserdata(state, index);
             break;
+        case LUA_TLIGHTUSERDATA: {
+            result = (Object*) lua_touserdata(state, index);
+            break;
+        }
         case LUA_TTABLE: {
             lua_len(state, index);
             int len = lua_tointeger(state, -1);
@@ -521,6 +537,47 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     Callable::CallError error;
     Variant ret;
     obj->callp(fName.ascii().get_data(), args, argc, ret, error);
+    if (error.error != error.CALL_OK) {
+        LuaError* err = LuaState::handleError(fName, error, args, argc);
+        lua_pushstring(state, err->getMsg().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
+    LuaState::pushVariant(ret, state);
+    return 1;
+}
+
+// This function is invoked whenever a function is called on one of the light userdata types 
+// excluding mt_Callable or mt_Object if __index is overwritten
+int LuaState::luaLightUserdataFuncCall(lua_State* state) {
+    lua_pushstring(state, "__OBJECT");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    Ref<RefCounted> OBJ = (Ref<RefCounted>) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    int argc = lua_gettop(state);
+
+    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
+    int index = 1;
+    for (int i = 0; i < argc; i++) {
+        Variant* temp = memnew(Variant);
+        *temp = LuaState::getVariant(index++, state, OBJ);
+        if ((*temp).get_type() != Variant::Type::OBJECT) {
+            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
+                lua_pushstring(state, err->getMsg().ascii().get_data());
+                lua_error(state);
+                return 0;
+            }
+        }
+
+        args[i] = temp;
+    }
+
+    Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(state, lua_upvalueindex(1)));
+    String fName = LuaState::getVariant(lua_upvalueindex(2), state, OBJ);
+    Callable::CallError error;
+    Variant ret = refObj->callp(fName.ascii().get_data(), args, argc, error);
     if (error.error != error.CALL_OK) {
         LuaError* err = LuaState::handleError(fName, error, args, argc);
         lua_pushstring(state, err->getMsg().ascii().get_data());

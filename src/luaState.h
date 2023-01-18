@@ -8,7 +8,7 @@
 
 class LuaState {
     public:
-        void setState(lua_State* state, bool bindAPI);
+        void setState(lua_State* state, Ref<RefCounted> obj, bool bindAPI);
         void bindLibs(Array libs);
 
         bool luaFunctionExists(String functionName);
@@ -35,6 +35,7 @@ class LuaState {
         static int luaPrint(lua_State* state);
         static int luaExposedFuncCall(lua_State* state);
         static int luaUserdataFuncCall(lua_State* state);
+        static int luaLightUserdataFuncCall(lua_State* state);
         static int luaCallableCall(lua_State* state);
     private:
         lua_State *L = nullptr;
@@ -47,6 +48,7 @@ class LuaState {
         void createRect2Metatable();
         void createPlaneMetatable();
         void createObjectMetatable();
+        void createRefCountedMetatable();
         void createCallableMetatable();
 };
 
