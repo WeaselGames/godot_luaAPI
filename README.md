@@ -149,7 +149,7 @@ var lua: LuaAPI
 func _ready():
 	lua = LuaAPI.new()
 	lua.do_file("user://luaFile.lua")
-	if( lua.function_exists("set_colors")):
+	if(lua.function_exists("set_colors")):
 		# call_function will return a Variant if Lua returns nothing the value will be null
 		var value = lua.call_function("set_colors", ["red", "blue"])
 		if value != null:
@@ -157,7 +157,7 @@ func _ready():
 		else:
 			print("no value returned")	
 		
-	if( lua.function_exists("set_location")):
+	if(lua.function_exists("set_location")):
 		# Assuming Lua defines a function set_location this will return a callable which you can use to invoke the Lua function.
 		var set_location = lua.pull_variant("set_location")
 		var value2 = set_location.call(Vector2(1, 1))
