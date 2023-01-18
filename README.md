@@ -19,10 +19,10 @@ Art created by [Alex](https://www.instagram.com/redheadalex1)
 
 This is a Godot engine module that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
-If you are looking to make your game using Lua instead of creating a modding API check out one of these projects
+If you are looking to make your game using Lua instead of creating a modding API check out one of these projects:
 - [luascript](https://github.com/perbone/luascript) by [perbone](https://github.com/perbone)
 - [godot-lua-pluginscript](https://github.com/gilzoide/godot-lua-pluginscript) by [gilzoide](https://github.com/gilzoide)
-
+<br />
 
 To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
 
