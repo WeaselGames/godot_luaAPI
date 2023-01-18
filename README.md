@@ -19,10 +19,10 @@ Art created by [Alex](https://www.instagram.com/redheadalex1)
 
 This is a Godot engine module that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
-If you are looking to make your game using Lua instead of creating a modding API check out one of these projects
+If you are looking to make your game using Lua instead of creating a modding API check out one of these projects:
 - [luascript](https://github.com/perbone/luascript) by [perbone](https://github.com/perbone)
 - [godot-lua-pluginscript](https://github.com/gilzoide/godot-lua-pluginscript) by [gilzoide](https://github.com/gilzoide)
-
+<br />
 
 To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
 
@@ -117,7 +117,7 @@ var test = "Hello lua!"
 
 func _ready():
 	lua = LuaAPI.new()
-	lua.push_variant(test, "str")
+	lua.push_variant("str", test)
 	lua.do_string("print(str)")
 ```
 <br />
@@ -134,8 +134,8 @@ func luaAdd(a, b):
 func _ready():
 	lua = LuaAPI.new()
 	# Functions are passed the same as any other value to lua.
-	lua.push_variant(luaAdd, "add")
-	lua.push_variant(func(a, b): return a+b, "addLamda")
+	lua.push_variant("add", luaAdd)
+	lua.push_variant("addLamda", func(a, b): return a+b)
 	lua.do_string("print(add(2, 4), addLamda(3,3))")
 ```
 <br />
@@ -149,7 +149,7 @@ var lua: LuaAPI
 func _ready():
 	lua = LuaAPI.new()
 	lua.do_file("user://luaFile.lua")
-	if( lua.function_exists("set_colors")):
+	if(lua.function_exists("set_colors")):
 		# call_function will return a Variant if Lua returns nothing the value will be null
 		var value = lua.call_function("set_colors", ["red", "blue"])
 		if value != null:
@@ -157,7 +157,7 @@ func _ready():
 		else:
 			print("no value returned")	
 		
-	if( lua.function_exists("set_location")):
+	if(lua.function_exists("set_location")):
 		# Assuming Lua defines a function set_location this will return a callable which you can use to invoke the Lua function.
 		var set_location = lua.pull_variant("set_location")
 		var value2 = set_location.call(Vector2(1, 1))
@@ -182,7 +182,7 @@ func test(n: int):
 
 func _ready():
 	lua = LuaAPI.new()
-	lua.push_variant(test, "test")
+	lua.push_variant("test", test)
 	# Most methods return a LuaError
 	# Calling test with a type that is not a int would also raise an error.
 	var err = lua.do_string("test(6)")
@@ -227,8 +227,8 @@ var player2: Player
 func _ready():
 	lua = LuaAPI.new()
 	player2 = Player.new()
-	lua.push_variant(func(): return player2, "getPlayer2")
-	lua.expose_constructor(Player, "Player")
+	lua.push_variant("getPlayer2", func(): return player2)
+	lua.expose_constructor("Player", Player)
 	lua.do_string("player = Player() player.move_forward() print(player.pos.x)")
 	lua.do_string("player2 = getPlayer2() player2.pos = Vector2(50, 1) print(player2.pos)")
 	var player = lua.pull_variant("player")
@@ -255,7 +255,7 @@ class Player:
 
 func _ready():
 	lua = LuaAPI.new()
-	lua.expose_constructor(Player, "Player")
+	lua.expose_constructor("Player", Player)
 	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- This will cause our custom error ")
 	if err is LuaError:
 		print(err.msg)

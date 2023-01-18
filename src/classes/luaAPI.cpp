@@ -4,10 +4,14 @@
 LuaAPI::LuaAPI() {
     lState = luaL_newstate();
 	// Createing lua state instance
-	state.setState(lState, true);
+	state.setState(lState, Ref<RefCounted>(this), true);
 }
 
 LuaAPI::~LuaAPI() {
+    for (auto &[key, val] : ownedObjects) {
+        if (val != nullptr)
+            memdelete(val);
+    }
     lua_close(lState);
 }
 
@@ -16,18 +20,36 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("do_file", "File"), &LuaAPI::doFile);
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
 
-    ClassDB::bind_method(D_METHOD("bind_libs", "Array"),&LuaAPI::bindLibs);
-    ClassDB::bind_method(D_METHOD("push_variant", "var", "Name"), &LuaAPI::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("bind_libs", "Array"), &LuaAPI::bindLibs);
+    ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_constructor", "Object", "LuaConstructorName"), &LuaAPI::exposeObjectConstructor);
+    ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
-    ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaAPI::luaFunctionExists);
+    ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
 }
 
 // Calls LuaState::bindLibs()
 void LuaAPI::bindLibs(Array libs) {
     state.bindLibs(libs);
 }
+
+// Adds the pointer to a object now owned by lua for cleanup later
+void LuaAPI::addOwnedObject(void* luaPtr, Variant* obj) {
+    ownedObjects[luaPtr] = obj;
+}
+
+// Adds the pointer to a object now owned by lua for cleanup later
+void LuaAPI::removeOwnedObject(Variant* obj) {
+    memdelete(ownedObjects[(void*)obj]);
+    ownedObjects[(void*)obj] = nullptr;
+}
+
+// Adds the pointer to a object now owned by lua for cleanup later
+void LuaAPI::removeOwnedObject(void* luaPtr) {
+    memdelete(ownedObjects[luaPtr]);
+    ownedObjects[luaPtr] = nullptr;
+}
+
 
 // Calls LuaState::luaFunctionExists()
 bool LuaAPI::luaFunctionExists(String functionName) {
@@ -45,13 +67,13 @@ Variant LuaAPI::callFunction(String functionName, Array args) {
 }
 
 // Calls LuaState::pushGlobalVariant()
-LuaError* LuaAPI::pushGlobalVariant(Variant var, String name) {
-    return state.pushGlobalVariant(var, name);
+LuaError* LuaAPI::pushGlobalVariant(String name, Variant var) {
+    return state.pushGlobalVariant(name, var);
 }
 
 // Calls LuaState::exposeObjectConstructor()
-LuaError* LuaAPI::exposeObjectConstructor(Object* obj, String name) {
-    return state.exposeObjectConstructor(obj, name);
+LuaError* LuaAPI::exposeObjectConstructor(String name, Object* obj) {
+    return state.exposeObjectConstructor(name, obj);
 }
 
 // addFile() calls luaL_loadfille with the absolute file path
