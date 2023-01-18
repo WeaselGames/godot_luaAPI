@@ -37,19 +37,25 @@ LuaError* LuaState::exposeObjectConstructor(String name, Object* obj) {
         // We cant store the variant directly in the userdata. It will causes crashes.
         Variant* var = memnew(Variant);
         *var = inner_obj->call("new");
-        if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
-            lua->addOwnedObject(var);
 
         if (var->is_ref_counted()) {
             Ref<RefCounted> temp = Object::cast_to<RefCounted>(var->operator Object*());
             lua_pushlightuserdata(inner_state, temp.ptr());
             luaL_setmetatable(inner_state, "mt_RefCounted");
+
+            if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
+                lua->addOwnedObject((void*)var, var);
+
             return 1;
         }
 
         void* userdata = (Variant*)lua_newuserdata(inner_state, sizeof(Variant));
         memcpy(userdata, (void*)var, sizeof(Variant));
         luaL_setmetatable(inner_state, "mt_Object");
+
+        if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
+            lua->addOwnedObject(userdata, var);
+
         return 1;
     }), 1);
     lua_setglobal(L, name.ascii().get_data());
@@ -453,6 +459,14 @@ void LuaState::createObjectMetatable() {
         return 0;
     }); 
 
+    // Makeing sure to clean up the pointer with lua GC
+    LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+        void* luaPtr = lua_touserdata(inner_state, 1);
+        Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ;
+        lua->removeOwnedObject(luaPtr);
+        return 0;
+    });
+
     LUA_METAMETHOD_TEMPLATE(L, -1, "__call", {
         if (!arg1.has_method("__call")) {
                 return 0;
@@ -718,6 +732,14 @@ void LuaState::createRefCountedMetatable() {
         refObj->set(arg2, arg3);
         return 0;
     }); 
+
+    // Makeing sure to clean up the pointer with lua GC
+    LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+        Variant* obj = (Variant*)lua_touserdata(inner_state, 1);
+        Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ;
+        lua->removeOwnedObject(obj);
+        return 0;
+    });
 
     lua_pop(L, 1);
 }

@@ -9,7 +9,7 @@
 #include <luaState.h>
 
 #include <string>
-#include <vector>
+#include <map>
 
 
 class LuaAPI : public RefCounted {
@@ -23,7 +23,9 @@ class LuaAPI : public RefCounted {
         ~LuaAPI();
 
         void bindLibs(Array libs);
-        void addOwnedObject(Variant* obj);
+        void addOwnedObject(void* luaPtr, Variant* obj);
+        void removeOwnedObject(Variant* obj);
+        void removeOwnedObject(void* luaPtr);
 
         bool luaFunctionExists(String functionName);
 
@@ -41,7 +43,7 @@ class LuaAPI : public RefCounted {
     private:
         LuaState state;
         lua_State* lState;
-        std::vector<Variant*> ownedObjects;
+        std::map<void*, Variant*> ownedObjects;
         LuaError* execute(int handlerIndex);
 };
 

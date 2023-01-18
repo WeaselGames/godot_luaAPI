@@ -8,8 +8,9 @@ LuaAPI::LuaAPI() {
 }
 
 LuaAPI::~LuaAPI() {
-    for (Variant* obj : ownedObjects) {
-        memdelete(obj);
+    for (auto &[key, val] : ownedObjects) {
+        if (val != nullptr)
+            memdelete(val);
     }
     lua_close(lState);
 }
@@ -33,9 +34,20 @@ void LuaAPI::bindLibs(Array libs) {
 }
 
 // Adds the pointer to a object now owned by lua for cleanup later
-void LuaAPI::addOwnedObject(Variant* obj) {
-    ownedObjects.push_back(obj);
+void LuaAPI::addOwnedObject(void* luaPtr, Variant* obj) {
+    ownedObjects[luaPtr] = obj;
 }
+
+// Adds the pointer to a object now owned by lua for cleanup later
+void LuaAPI::removeOwnedObject(Variant* obj) {
+    ownedObjects.erase(obj);
+}
+
+// Adds the pointer to a object now owned by lua for cleanup later
+void LuaAPI::removeOwnedObject(void* luaPtr) {
+    ownedObjects[luaPtr] = nullptr;
+}
+
 
 // Calls LuaState::luaFunctionExists()
 bool LuaAPI::luaFunctionExists(String functionName) {
