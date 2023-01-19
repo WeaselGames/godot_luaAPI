@@ -1,13 +1,19 @@
 # # Huge credit to https://github.com/goostengine/goost
 # this action was made by them and only modified to my needs
 name: 🐧 Linux
-on: 
+on:
   pull_request:
     branches:
-      - '*'
+      - "*"
+    paths-ignore:
+      - "**/README.md"
+      - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
-      - 'main'
+      - "main"
+    paths-ignore:
+      - "**/README.md"
+      - ".github/ISSUE_TEMPLATE/*"
 
 env:
   BASE_BRANCH: main
@@ -28,7 +34,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
-            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm 
+            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
       - name: Load .scons_cache directory
         id: linux-editor-cache
         uses: actions/cache@v2
@@ -42,8 +48,8 @@ jobs:
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-          architecture: 'x64'
+          python-version: "3.x"
+          architecture: "x64"
 
       - name: Configuring Python packages
         run: |
@@ -56,7 +62,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-           scons platform=linuxbsd tools=yes target=editor
+          scons platform=linuxbsd tools=yes target=editor
       - name: Prepare artifact
         run: |
           strip build/godot/bin/godot.*
@@ -92,8 +98,8 @@ jobs:
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-          architecture: 'x64'
+          python-version: "3.x"
+          architecture: "x64"
 
       - name: Configuring Python packages
         run: |
@@ -106,7 +112,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-           scons platform=linuxbsd tools=no target=template_release
+          scons platform=linuxbsd tools=no target=template_release
       - name: Prepare artifact
         run: |
           strip build/godot/bin/godot.*
@@ -143,8 +149,8 @@ jobs:
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-          architecture: 'x64'
+          python-version: "3.x"
+          architecture: "x64"
 
       - name: Configuring Python packages
         run: |
@@ -157,7 +163,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-           scons platform=linuxbsd tools=no target=template_debug
+          scons platform=linuxbsd tools=no target=template_debug
       - name: Prepare artifact
         run: |
           strip build/godot/bin/godot.*

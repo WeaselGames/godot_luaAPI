@@ -1,11 +1,17 @@
 name: 🍎 macOS
-on: 
+on:
   pull_request:
     branches:
-      - '*'
+      - "*"
+    paths-ignore:
+      - "**/README.md"
+      - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
-      - 'main'
+      - "main"
+    paths-ignore:
+      - "**/README.md"
+      - ".github/ISSUE_TEMPLATE/*"
 
 env:
   BASE_BRANCH: main
@@ -22,11 +28,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-        
+
       - name: Setup Vulkan SDK
         run: |
           sh build/install_vulkan_sdk_macos.sh
-       
+
       - name: Load .scons_cache directory
         id: macos-editor-cache
         uses: actions/cache@v2
@@ -37,12 +43,12 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}
-            
+
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-          architecture: 'x64'
+          python-version: "3.x"
+          architecture: "x64"
 
       - name: Configuring Python packages
         run: |
@@ -74,11 +80,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      
+
       - name: Setup Vulkan SDK
         run: |
           sh build/install_vulkan_sdk_macos.sh
-      
+
       - name: Load .scons_cache directory
         id: macos-template-cache
         uses: actions/cache@v2
@@ -93,8 +99,8 @@ jobs:
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-          architecture: 'x64'
+          python-version: "3.x"
+          architecture: "x64"
 
       - name: Configuring Python packages
         run: |
@@ -126,11 +132,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      
+
       - name: Setup Vulkan SDK
         run: |
           sh build/install_vulkan_sdk_macos.sh
-      
+
       - name: Load .scons_cache directory
         id: macos-template-debug-cache
         uses: actions/cache@v2
@@ -145,8 +151,8 @@ jobs:
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-          architecture: 'x64'
+          python-version: "3.x"
+          architecture: "x64"
 
       - name: Configuring Python packages
         run: |
