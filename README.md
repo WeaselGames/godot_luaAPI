@@ -75,9 +75,9 @@ TODO
 
 Compiling
 ------------
-This build is for godot 4.0.0-betaX. X being the latest version. Will not be supporting older alpha builds.
+This build is for godot 4.0.0-beta10. X being the latest beta release. Will not be supporting older alpha builds.
 - Start by cloning the Godot 4.0.0-beta [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
-
+- Next switch to the v4.0.0-beta10 commit with `git checkout d0398f62f`
 - Next change directories into the modules folder and clone this repo into a folder named luaAPI with this command `git clone --recurse-submodules https://github.com/WeaselGames/godot_luaAPI luaAPI`. Make sure to use --recurse-submodules to pull the submodules as well.
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling/).

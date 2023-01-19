@@ -10,7 +10,8 @@ import subprocess
 
 from shutil import copytree, ignore_patterns
 
-godot_ver = "main"
+# godot v4.0.0-beta10
+godot_ver = "d0398f62f"
 godot_url = "https://github.com/godotengine/godot"
 godot_dir = Dir("godot")
 
@@ -31,7 +32,6 @@ if not lua_dir.exists():
 if not godot_dir.exists():
     # Checkout Godot repository directly under the current directory.
     print("Cloning godot.")
-    run(["git", "clone", godot_url])
     run(["git", "checkout", godot_ver, "--quiet"], godot_dir.abspath)
 
 # Setup base SCons arguments to the Godot build command.
