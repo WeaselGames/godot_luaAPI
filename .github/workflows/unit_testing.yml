@@ -68,7 +68,7 @@ jobs:
           chmod +x scripts/godot/bin/godot.*
       - name: Unit Testing
         run: |
-          /bin/bash -e ./scripts/run_tests.sh
+          /bin/bash -e ./testing/run_tests.sh
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
