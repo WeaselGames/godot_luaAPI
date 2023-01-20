@@ -251,7 +251,7 @@ class Player:
 		if index=="pos":
 			return pos
 		else:
-			return LuaError.new_err("Invalid index '%s'" % index)
+			return LuaError.new_error("Invalid index '%s'" % index)
 	func move_forward():
 		pos.x+=1
 
@@ -260,7 +260,7 @@ func _ready():
 	lua.expose_constructor("Player", Player)
 	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- This will cause our custom error ")
 	if err is LuaError:
-		print(err.msg)
+		print(err.message)
 	var player = lua.pull_variant("player")
 	print(player.pos)
 ```
