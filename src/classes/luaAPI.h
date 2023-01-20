@@ -5,8 +5,8 @@
 #include "core/core_bind.h"
 #include "luaError.h"
 
-#include <lua/lua.hpp>
-#include <luaState.h>
+#include "modules/luaAPI/src/lua/lua.hpp"
+#include "modules/luaAPI/src/luaState.h"
 
 #include <string>
 #include <map>

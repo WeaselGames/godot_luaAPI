@@ -55,7 +55,7 @@ LuaThread* LuaThread::newThread(Ref<LuaAPI> lua) {
 void LuaThread::bind(Ref<LuaAPI> lua) {
     parent = lua;
     tState = lua->newThread();
-    state.setState(tState, Ref<RefCounted>(this), false);
+    state.setState(tState, this, false);
     
     // register the yield method
     lua_register(tState, "yield", luaYield);
@@ -101,7 +101,7 @@ Variant LuaThread::resume() {
     
     Array toReturn;
     for (int i = 1; i <= argc; i++) {
-        toReturn.append(LuaState::getVariant(tState, i, Ref<RefCounted>(this)));
+        toReturn.append(LuaState::getVariant(tState, i, this));
     }
 
     return toReturn;

@@ -3,12 +3,12 @@
 
 #include "core/object/ref_counted.h"
 
-#include <lua/lua.hpp>
-#include <classes/luaError.h>
+#include "modules/luaAPI/src/lua/lua.hpp"
+#include "modules/luaAPI/src/classes/luaError.h"
 
 class LuaState {
     public:
-        void setState(lua_State* state, Ref<RefCounted> obj, bool bindAPI);
+        void setState(lua_State* state, RefCounted* obj, bool bindAPI);
         void bindLibs(Array libs);
 
         bool luaFunctionExists(String functionName);
@@ -28,7 +28,7 @@ class LuaState {
         static LuaError* handleError(lua_State* state, int lua_error);
         static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
 
-        static Variant getVariant(lua_State* state, int index, Ref<RefCounted> obj);
+        static Variant getVariant(lua_State* state, int index, const RefCounted* obj);
 
         // Lua functions
         static int luaErrorHandler(lua_State* state);
@@ -39,7 +39,7 @@ class LuaState {
         static int luaCallableCall(lua_State* state);
     private:
         lua_State *L = nullptr;
-        Ref<RefCounted> obj;
+        RefCounted* obj;
 
         void exposeConstructors();
         void createVector2Metatable();

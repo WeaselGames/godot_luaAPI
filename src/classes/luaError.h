@@ -4,7 +4,7 @@
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
 
-#include <lua/lua.hpp>
+#include "modules/luaAPI/src/lua/lua.hpp"
 
 class LuaError : public RefCounted {
     GDCLASS(LuaError, RefCounted);
