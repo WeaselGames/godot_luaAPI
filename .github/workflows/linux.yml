@@ -22,7 +22,7 @@ on:
 env:
   BASE_BRANCH: main
   SCONSFLAGS: debug_symbols=no --jobs=4
-  SCONS_CACHE_LIMIT: 12288
+  SCONS_CACHE_LIMIT: 7168
 
 jobs:
   linux-editor:

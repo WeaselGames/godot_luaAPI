@@ -13,6 +13,11 @@ on:
       - "**/*.md"
       - ".github/ISSUE_TEMPLATE/*"
 
+env:
+  BASE_BRANCH: main
+  SCONSFLAGS: debug_symbols=no --jobs=4
+  SCONS_CACHE_LIMIT: 7168
+
 jobs:
   unit-tests:
     runs-on: "ubuntu-20.04"

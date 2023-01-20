@@ -18,7 +18,7 @@ func _process(delta):
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._process(delta)
 	
-	var err = lua.do_string("
+	var err = lua.do_string("TEST_FAIL()
 	function Fib(n)
 	  local function inner(m)
 		if m < 2 then
