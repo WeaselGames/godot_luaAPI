@@ -3,8 +3,8 @@
 
 #include "core/object/ref_counted.h"
 
-#include "modules/luaAPI/src/lua/lua.hpp"
-#include "modules/luaAPI/src/classes/luaError.h"
+#include <lua/lua.hpp>
+#include <classes/luaError.h>
 
 class LuaState {
     public:
