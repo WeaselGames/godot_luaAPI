@@ -7,9 +7,9 @@ extends SceneTree
 var time_elapsed = 0
 var testCount = 0
 
-var tests: Array[Test]
-var doneTests: Array[Test]
-var currentTest: Test
+var tests: Array[UnitTest]
+var doneTests: Array[UnitTest]
+var currentTest: UnitTest
 
 func sort_tests(a, b):
 	if a.id < b.id:

@@ -1,4 +1,4 @@
-extends Test
+extends UnitTest
 var lua: LuaAPI
 
 func _init():

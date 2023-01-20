@@ -25,7 +25,7 @@ config/features=PackedStringArray("4.0", "GL Compatibility")
 
 [autoload]
 
-Test="*res://test.gd"
+UnitTest="*res://unit_test.gd"
 
 [editor_plugins]
 

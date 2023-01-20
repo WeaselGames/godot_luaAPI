@@ -68,8 +68,7 @@ jobs:
           chmod +x scripts/godot/bin/godot.*
       - name: Unit Testing
         run: |
-          ./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --headless --path ./testing -s run_tests.gd 2>&1 | tee report.txt
-      - uses: actions/upload-artifact@v2
+          /bin/bash -e ./scripts/run_tests.sh
         if: ${{ always() }}
         with:
           name: ${{github.job}}
