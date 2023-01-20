@@ -34,7 +34,7 @@ lua_State* LuaState::getState() const {
 }
 
 // Binds lua librares with the lua state
-void LuaState::bindLibs(Array libs) {
+void LuaState::bindLibraries(Array libs) {
     for (int i = 0; i < libs.size(); i++) {
         String lib = ((String)libs.get(i)).to_lower();
         if (lib=="base") {
@@ -240,7 +240,7 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
         case Variant::Type::OBJECT: {
             // If the type being pushed is a lua error, Raise a error
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMsg().ascii().get_data());
+                lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 break;
             }
@@ -277,7 +277,7 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
         }
         default:
             lua_pushnil(state);
-            return LuaError::newErr(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
+            return LuaError::newError(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
     }
     return nullptr;
 }
@@ -315,14 +315,14 @@ LuaError* LuaState::handleError(lua_State* state, int lua_error) {
         default: break;
     }
     
-    return LuaError::newErr(msg, static_cast<LuaError::ErrorType>(lua_error));
+    return LuaError::newError(msg, static_cast<LuaError::ErrorType>(lua_error));
 }
 
 // for handling callable errors.
 LuaError* LuaState::handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc) {
     switch (error.error) {
         case Callable::CallError::CALL_ERROR_INVALID_ARGUMENT: {
-            return LuaError::newErr(
+            return LuaError::newError(
                 vformat("Error calling function: %s - Invalid type for argument %s, expected %s but is %s.", 
                     String(func), 
                     itos(error.argument+1), // lua indexes by 1 so this should be more correct
@@ -331,7 +331,7 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
                 LuaError::ERR_RUNTIME);
          }
         case Callable::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS: {
-            return LuaError::newErr(
+            return LuaError::newError(
                 vformat("Error calling function: %s - Too many arguments, expected %d but got %d.", 
                     String(func), 
                     argc),
@@ -339,7 +339,7 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
                 LuaError::ERR_RUNTIME);
         }
         case Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS: {
-            return LuaError::newErr(
+            return LuaError::newError(
                 vformat("Error calling function: %s - Too few arguments, expected %d but got $d.", 
                     String(func),
                     error.argument,
@@ -347,13 +347,13 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
                 LuaError::ERR_RUNTIME);
         }
         case Callable::CallError::CALL_ERROR_INVALID_METHOD: {
-            return LuaError::newErr(
+            return LuaError::newError(
                 vformat("Error calling function: %s - Method is invalid.", 
                     String(func)), 
                 LuaError::ERR_RUNTIME);
         }
         case Callable::CallError::CALL_ERROR_INSTANCE_IS_NULL: {
-            return LuaError::newErr(
+            return LuaError::newError(
                 vformat("Error calling function: %s - Instance is null.", 
                     String(func)), 
                 LuaError::ERR_RUNTIME);
@@ -422,7 +422,7 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
             break;
         }
         default:
-            result = LuaError::newErr(vformat("unkown lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
+            result = LuaError::newError(vformat("unkown lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
     }
     return result;
 }
@@ -486,7 +486,7 @@ int LuaState::luaCallableCall(lua_State* state) {
         *temp = LuaState::getVariant(state, index++, OBJ);
         if ((*temp).get_type() != Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMsg().ascii().get_data());
+                lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
@@ -500,7 +500,7 @@ int LuaState::luaCallableCall(lua_State* state) {
     callable.callp(args, argc, returned, error);
     if (error.error != error.CALL_OK) {
         LuaError* err = LuaState::handleError(callable.get_method(), error, args, argc);
-        lua_pushstring(state, err->getMsg().ascii().get_data());
+        lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
     }
@@ -526,7 +526,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
         *temp = LuaState::getVariant(state, index++, OBJ);
         if ((*temp).get_type() != Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMsg().ascii().get_data());
+                lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
@@ -542,7 +542,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     obj->callp(fName.ascii().get_data(), args, argc, ret, error);
     if (error.error != error.CALL_OK) {
         LuaError* err = LuaState::handleError(fName, error, args, argc);
-        lua_pushstring(state, err->getMsg().ascii().get_data());
+        lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
     }
@@ -568,7 +568,7 @@ int LuaState::luaLightUserdataFuncCall(lua_State* state) {
         *temp = LuaState::getVariant(state, index++, OBJ);
         if ((*temp).get_type() != Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMsg().ascii().get_data());
+                lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
@@ -583,7 +583,7 @@ int LuaState::luaLightUserdataFuncCall(lua_State* state) {
     Variant ret = refObj->callp(fName.ascii().get_data(), args, argc, error);
     if (error.error != error.CALL_OK) {
         LuaError* err = LuaState::handleError(fName, error, args, argc);
-        lua_pushstring(state, err->getMsg().ascii().get_data());
+        lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
     }

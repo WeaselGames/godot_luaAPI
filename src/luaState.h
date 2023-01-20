@@ -9,7 +9,7 @@
 class LuaState {
     public:
         void setState(lua_State* state, RefCounted* obj, bool bindAPI);
-        void bindLibs(Array libs);
+        void bindLibraries(Array libs);
 
         bool luaFunctionExists(String functionName);
 

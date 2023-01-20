@@ -28,7 +28,7 @@ lua_settable(lua_state, metatable_index-2);
 LuaError* LuaState::exposeObjectConstructor(String name, Object* obj) {
     // Make sure we are able to call new
     if (!obj->has_method("new")) {
-        return LuaError::newErr("during \"LuaState::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
+        return LuaError::newError("during \"LuaState::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
     }
     lua_pushlightuserdata(L, obj);
     lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
@@ -702,7 +702,7 @@ void LuaState::createRefCountedMetatable() {
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
         Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(inner_state, 1));
         if (!refObj.is_valid()) {
-            LuaState::pushVariant(inner_state, LuaError::newErr("during \"LuaState::createRefCountedMetatable __index metamethod\" Invalid RefCounted object.", LuaError::ERR_RUNTIME));
+            LuaState::pushVariant(inner_state, LuaError::newError("during \"LuaState::createRefCountedMetatable __index metamethod\" Invalid RefCounted object.", LuaError::ERR_RUNTIME));
             return 1;
         }
         
@@ -725,7 +725,7 @@ void LuaState::createRefCountedMetatable() {
     LUA_METAMETHOD_TEMPLATE(L, -1, "__newindex", {
         Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(inner_state, 1));
         if (!refObj.is_valid()) {
-            LuaState::pushVariant(inner_state, LuaError::newErr("during \"LuaState::createRefCountedMetatable __index metamethod\" Invalid RefCounted object.", LuaError::ERR_RUNTIME));
+            LuaState::pushVariant(inner_state, LuaError::newError("during \"LuaState::createRefCountedMetatable __index metamethod\" Invalid RefCounted object.", LuaError::ERR_RUNTIME));
             return 1;
         }
 

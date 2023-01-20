@@ -15,7 +15,7 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is an **alpha** version of the module made for Godot v4-beta. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is an **alpha** version of the module made for Godot v4-beta. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
 This is a Godot engine module that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
@@ -180,7 +180,7 @@ var lua: LuaAPI
 func test(n: int):
 	if n != 5:
 		# This will raise an error in the Lua state.
-		return LuaError.new_err("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
+		return LuaError.new_error("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
 	return n+5
 
 func _ready():
@@ -189,9 +189,8 @@ func _ready():
 	# Most methods return a LuaError
 	# Calling test with a type that is not a int would also raise an error.
 	var err = lua.do_string("test(6)")
-	# The static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
 	if err is LuaError:
-		print("ERROR %d: " % err.type + err.msg)
+		print("ERROR %d: " % err.type + err.message)
 ```
 <br />
 
@@ -204,7 +203,7 @@ var lua: LuaAPI
 func _ready():
 	lua = LuaAPI.new()
 	# All libraries are available. Use OS and IO at your own risk.
-	lua.bind_libs(["base", "table", "string"])
+	lua.bind_libraries(["base", "table", "string"])
 ```
 <br />
 
@@ -252,7 +251,7 @@ class Player:
 		if index=="pos":
 			return pos
 		else:
-			return LuaError.new_err("Invalid index '%s'" % index)
+			return LuaError.new_error("Invalid index '%s'" % index)
 	func move_forward():
 		pos.x+=1
 
@@ -261,7 +260,7 @@ func _ready():
 	lua.expose_constructor("Player", Player)
 	var err = lua.do_string("player = Player() print(player.pos.x)  player.move_forward() -- This will cause our custom error ")
 	if err is LuaError:
-		print(err.msg)
+		print(err.message)
 	var player = lua.pull_variant("player")
 	print(player.pos)
 ```

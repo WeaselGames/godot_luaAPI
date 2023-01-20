@@ -21,14 +21,14 @@ class LuaError : public RefCounted {
             ERR_ERR     = LUA_ERRERR,
             ERR_FILE    = LUA_ERRFILE,
         };
-        static LuaError* newErr(String msg, ErrorType type);
+        static LuaError* newError(String msg, ErrorType type);
 
         void setInfo(String msg, ErrorType type);
         bool operator==(const ErrorType type);
         bool operator==(const LuaError err);
 
-        void setMsg(String msg);
-        String getMsg() const;
+        void setMessage(String msg);
+        String getMessage() const;
         void setType(ErrorType type);
         ErrorType getType() const;
 

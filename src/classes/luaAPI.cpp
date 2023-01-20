@@ -17,10 +17,10 @@ LuaAPI::~LuaAPI() {
 
 // Bind C++ functions to GDScript
 void LuaAPI::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("do_file", "File"), &LuaAPI::doFile);
+    ClassDB::bind_method(D_METHOD("do_file", "FilePath"), &LuaAPI::doFile);
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
 
-    ClassDB::bind_method(D_METHOD("bind_libs", "Array"), &LuaAPI::bindLibs);
+    ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
     ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
@@ -29,8 +29,8 @@ void LuaAPI::_bind_methods() {
 }
 
 // Calls LuaState::bindLibs()
-void LuaAPI::bindLibs(Array libs) {
-    state.bindLibs(libs);
+void LuaAPI::bindLibraries(Array libs) {
+    state.bindLibraries(libs);
 }
 
 // Adds the pointer to a object now owned by lua for cleanup later
@@ -87,7 +87,7 @@ LuaError* LuaAPI::doFile(String fileName) {
     {
         Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
         if (error != Error::OK) {
-            return LuaError::newErr(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
+            return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
         }
 
         path = file->get_path_absolute();

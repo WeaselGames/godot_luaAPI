@@ -1,31 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="LuaAPI" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="LuaThread" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 	</brief_description>
+		A coroutine.
 	<description>
-		Execute Lua code at runtime and make your own API.
+		Binds to a existing Lua object and creates a new lua thread with lua_newthread. This is not a typical thread but a coroutine. Instead of executing a file or string directly you load it into the state. Every time the resume method is caleld the lua code will execute untill yield is called from lua.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="bind_libs">
+		<method name="new_thread" qualifiers="static">
+			<return type="LuaThread" />
+			<param index="0" name="Lua" type="LuaAPI" />
+			<description>
+				This is a static method that exists so you dont have to call LuaThread.new() and thread.bind(lua) every time. It creates a new thread and calls bind passing lua.
+			</description>
+		</method>
+		<method name="bind">
 			<return type="void" />
-			<param index="0" name="Array" type="Array" />
+			<param index="0" name="Lua" type="LuaAPI" />
 			<description>
+				Binds the thread to a lua object. All threads attached to the same object share resources.
 			</description>
 		</method>
-		<method name="do_file">
+		<method name="load_file">
 			<return type="LuaError" />
-			<param index="0" name="File" type="String" />
+			<param index="0" name="FilePath" type="String" />
 			<description>
-				Loads a file with luaL_laodfile() passing its absolute path.
+				Loads a file into the threads state.
 			</description>
 		</method>
-		<method name="do_string">
-			<return type="LuaError" />
+		<method name="load_string">
+			<return type="void" />
 			<param index="0" name="Code" type="String" />
 			<description>
-				loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors
+				Loads a string into the threads state.
+			</description>
+		</method>
+		<method name="resume">
+			<return type="Variant" />
+			<description>
+				Resumes or starts the thread. Will either return a Array of arguments passed by lua in yield() or a LuaError.
+			</description>
+		</method>
+		<method name="is_done">
+			<return type="bool" />
+			<description>
+				Returns true if the thread is finished executing.
 			</description>
 		</method>
 		<method name="expose_constructor">

@@ -8,8 +8,8 @@ void LuaThread::_bind_methods() {
     
     ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaThread::bind);
     ClassDB::bind_method(D_METHOD("resume"), &LuaThread::resume);
-    ClassDB::bind_method(D_METHOD("load_string"), &LuaThread::loadString);
-    ClassDB::bind_method(D_METHOD("load_file"), &LuaThread::loadFile);
+    ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaThread::loadString);
+    ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaThread::loadFile);
     ClassDB::bind_method(D_METHOD("is_done"), &LuaThread::isDone);
 
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaThread::callFunction);
@@ -73,7 +73,7 @@ LuaError* LuaThread::loadFile(String fileName) {
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
-        return LuaError::newErr(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
+        return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
     }
 
     String path = file->get_path_absolute();
@@ -88,7 +88,7 @@ LuaError* LuaThread::loadFile(String fileName) {
 // If a error occures it will be value number 2, otherwise the rest of the values are arguments passed to yield()
 Variant LuaThread::resume() {
     if (done) {
-        return LuaError::newErr("Thread is done executing", LuaError::ERR_RUNTIME);
+        return LuaError::newError("Thread is done executing", LuaError::ERR_RUNTIME);
     }
 
     int argc;
