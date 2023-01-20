@@ -11,20 +11,27 @@ var tests: Array[UnitTest]
 var doneTests: Array[UnitTest]
 var currentTest: UnitTest
 
+var logFile: FileAccess
+
+func logPrint(msg: String):
+	logFile.store_line(msg)
+	print(msg)
+
 func sort_tests(a, b):
 	if a.id < b.id:
 		return true
 	return false
 
 func _init():
-	print("LuaAPI Testing framework for v2-alpha")
-	print("Starting time: %s\n" % str(time_elapsed))
+	logFile = FileAccess.open("res://log.txt", FileAccess.WRITE_READ)
+	logPrint("LuaAPI Testing framework for v2-alpha")
+	logPrint("Starting time: %s\n" % str(time_elapsed))
 	load_tests()
 	for test in tests:
 		test._init()
 		testCount += 1
 	tests.sort_custom(sort_tests)
-	print("Loaded %d tests\n" % testCount)
+	logPrint("Loaded %d tests\n" % testCount)
 		
 func _process(delta):
 	time_elapsed += delta
@@ -35,7 +42,7 @@ func _process(delta):
 	currentTest._process(delta)
 	
 	if currentTest.done:
-		print("Test #%d: " % currentTest.id + currentTest.testName + " has finished.")
+		logPrint("Test #%d: " % currentTest.id + currentTest.testName + " has finished.")
 		doneTests.append(currentTest)
 		currentTest = null
 	
@@ -43,34 +50,37 @@ func _process(delta):
 		finish()
 
 func finish():
-	print("\nFinished!")
-	print("End time: %s\n" % str(time_elapsed))
-	print("Report:\n")
+	logPrint("\nFinished!")
+	logPrint("End time: %s\n" % str(time_elapsed))
+	logPrint("Report:\n")
 	var failures = 0
 	for test in doneTests:
-		print("Test Name: %s" % test.testName)
-		print("-------------------------------")
-		print("Test id(start order): %d" % test.id)
-		print("Test Description:")
-		print(test.testDescription)
-		print("Frames: %d" % test.frames)
-		print("Time: %s" % str(test.time))
+		logPrint("Test Name: %s" % test.testName)
+		logPrint("-------------------------------")
+		logPrint("Test id(start order): %d" % test.id)
+		logPrint("Test Description:")
+		logPrint(test.testDescription)
+		logPrint("Frames: %d" % test.frames)
+		logPrint("Time: %s" % str(test.time))
 		
 		if test.status:
-			print("Test finished with no errors.")
-			print("-------------------------------\n")
+			logPrint("Test finished with no errors.")
+			logPrint("-------------------------------\n")
 			test._finalize()
 			test.free()
 			continue
 			
 		failures += 1
 		
-		print("Test finished with %d errors." % test.errors.size())
+		logPrint("Test finished with %d errors." % test.errors.size())
 		for err in test.errors:
-			print("\nERROR %d: " % err.type + err.msg)
-		print("-------------------------------\n")
+			logPrint("\nERROR %d: " % err.type + err.msg)
+		logPrint("-------------------------------\n")
 		test._finalize()
 		test.free()
+		
+		var res = DirAccess.open("res://")
+		res.copy("res://log.txt", "res://log.txt.error")
 	
 	doneTests.clear()
 

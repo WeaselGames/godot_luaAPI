@@ -73,4 +73,4 @@ jobs:
         if: ${{ always() }}
         with:
           name: ${{github.job}}
-          path: report.txt
+          path: testing/*.txt*
