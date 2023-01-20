@@ -38,6 +38,7 @@ func finish():
 	print("Report:")
 	var failures = 0
 	for test in doneTests:
+		print("-------------------------------")
 		print("Test Name: %s" % test.testName)
 		print("Test Description:")
 		print(test.testDescription)
@@ -46,6 +47,7 @@ func finish():
 		
 		if test.status:
 			print("Test finished with no errors.")
+			print("-------------------------------")
 			doneTests.erase(test)
 			test.free()
 			continue
@@ -54,7 +56,8 @@ func finish():
 		
 		print("Test finished with %d errors." % test.errors.size())
 		for err in test.errors:
-			print("ERROR %d: " % err.type + err.msg)
+			print("\nERROR %d: " % err.type + err.msg)
+		print("-------------------------------")
 			
 		doneTests.erase(test)
 		test.free()

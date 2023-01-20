@@ -8,14 +8,15 @@ on:
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
-      - "dev/testing"
+      - "main"
     paths-ignore:
       - "**/*.md"
       - ".github/ISSUE_TEMPLATE/*"
 
 jobs:
-  linux-editor:
+  unit-tests:
     runs-on: "ubuntu-20.04"
+    timeout-minutes: 120
     name: Linux Unit Testing
     steps:
       - uses: actions/checkout@v3
@@ -29,7 +30,7 @@ jobs:
           sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
             libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
       - name: Load .scons_cache directory
-        id: linux-editor-cache
+        id: linux-unittests-cache
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/.scons_cache/
@@ -62,7 +63,7 @@ jobs:
           chmod +x scripts/godot/bin/godot.*
       - name: Unit Testing
         run: |
-          ./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --headless --path ./testing -s run_tests.gd > report.txt
+          ./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --headless --path ./testing -s run_tests.gd 2>&1 | tee report.txt
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
