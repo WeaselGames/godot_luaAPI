@@ -32,6 +32,7 @@ if not lua_dir.exists():
 if not godot_dir.exists():
     # Checkout Godot repository directly under the current directory.
     print("Cloning godot.")
+    run(["git", "clone", godot_url])
     run(["git", "checkout", godot_ver, "--quiet"], godot_dir.abspath)
 
 # Setup base SCons arguments to the Godot build command.
