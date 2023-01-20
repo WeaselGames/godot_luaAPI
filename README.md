@@ -15,7 +15,7 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is an **alpha** version of the module made for Godot v4-beta. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is an **alpha** version of the module made for Godot v4-beta. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
 This is a Godot engine module that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
