@@ -11,28 +11,28 @@
 	<methods>
 		<method name="new_thread" qualifiers="static">
 			<return type="LuaThread" />
-			<param index="0" name="lua" type="Lua" />
+			<param index="0" name="Lua" type="LuaAPI" />
 			<description>
 				This is a static method that exists so you dont have to call LuaThread.new() and thread.bind(lua) every time. It creates a new thread and calls bind passing lua.
 			</description>
 		</method>
 		<method name="bind">
 			<return type="void" />
-			<param index="0" name="lua" type="Lua" />
+			<param index="0" name="Lua" type="LuaAPI" />
 			<description>
 				Binds the thread to a lua object. All threads attached to the same object share resources.
 			</description>
 		</method>
 		<method name="load_file">
 			<return type="LuaError" />
-			<param index="0" name="arg0" type="String" />
+			<param index="0" name="FilePath" type="String" />
 			<description>
 				Loads a file into the threads state.
 			</description>
 		</method>
 		<method name="load_string">
 			<return type="void" />
-			<param index="0" name="arg0" type="String" />
+			<param index="0" name="Code" type="String" />
 			<description>
 				Loads a string into the threads state.
 			</description>

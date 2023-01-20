@@ -18,7 +18,7 @@
 		</method>
 		<method name="do_file">
 			<return type="LuaError" />
-			<param index="0" name="File" type="String" />
+			<param index="0" name="FilePath" type="String" />
 			<description>
 				Loads a file with luaL_laodfile() passing its absolute path.
 			</description>

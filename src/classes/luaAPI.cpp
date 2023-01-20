@@ -17,7 +17,7 @@ LuaAPI::~LuaAPI() {
 
 // Bind C++ functions to GDScript
 void LuaAPI::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("do_file", "File"), &LuaAPI::doFile);
+    ClassDB::bind_method(D_METHOD("do_file", "FilePath"), &LuaAPI::doFile);
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
 
     ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);

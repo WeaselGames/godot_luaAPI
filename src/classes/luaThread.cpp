@@ -8,8 +8,8 @@ void LuaThread::_bind_methods() {
     
     ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaThread::bind);
     ClassDB::bind_method(D_METHOD("resume"), &LuaThread::resume);
-    ClassDB::bind_method(D_METHOD("load_string"), &LuaThread::loadString);
-    ClassDB::bind_method(D_METHOD("load_file"), &LuaThread::loadFile);
+    ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaThread::loadString);
+    ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaThread::loadFile);
     ClassDB::bind_method(D_METHOD("is_done"), &LuaThread::isDone);
 
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaThread::callFunction);
