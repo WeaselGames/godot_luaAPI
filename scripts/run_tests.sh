@@ -1,5 +1,9 @@
 #!/bin/bash -e
-./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --headless --path $(dirname ../testing) -s run_tests.gd
+ls ../testing
+pwd
+
+path=$(dirname ../testing)
+./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --headless --path path -s run_tests.gd
 
 ERRFILE=testing/log.txt.error
 if test -f "$ERRFILE"; then
