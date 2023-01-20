@@ -1,8 +1,9 @@
 # Our template test class
 extends Node
 
-var done = false
 var errors: Array[LuaError]
+
+var done: bool = false
 var status: bool = true
 var time: float
 var frames: int
