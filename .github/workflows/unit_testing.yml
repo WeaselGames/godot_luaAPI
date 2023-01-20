@@ -1,0 +1,69 @@
+name: ⚙️ Unit Tests
+on:
+  pull_request:
+    branches:
+      - "*"
+    paths-ignore:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/*"
+  push:
+    branches:
+      - "dev/testing"
+    paths-ignore:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/*"
+
+jobs:
+  linux-editor:
+    runs-on: "ubuntu-20.04"
+    name: Linux Unit Testing
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Install all packages except SCons
+      - name: Configure dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
+            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
+      - name: Load .scons_cache directory
+        id: linux-editor-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+      - name: Compilation
+        working-directory: ./scripts
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons platform=linuxbsd tools=yes target=editor
+      - name: Prepare artifact
+        run: |
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
+      - name: Unit Testing
+        run: |
+          ./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --headless --path ./testing -s ./testing/run_tests.gd > report.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: report.txt

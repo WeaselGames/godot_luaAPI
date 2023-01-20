@@ -6,13 +6,17 @@ on:
     branches:
       - "*"
     paths-ignore:
-      - "**/README.md"
+      - "**/*.md"
+      - "**/*.gd"
+      - "**/*.lua"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
-      - "**/README.md"
+      - "**/*.md"
+      - "**/*.gd"
+      - "**/*.lua"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
