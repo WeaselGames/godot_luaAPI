@@ -180,7 +180,7 @@ var lua: LuaAPI
 func test(n: int):
 	if n != 5:
 		# This will raise an error in the Lua state.
-		return LuaError.new_err("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
+		return LuaError.new_error("N is not 5 but is %s" % n, LuaError.ERR_RUNTIME)
 	return n+5
 
 func _ready():
@@ -189,9 +189,8 @@ func _ready():
 	# Most methods return a LuaError
 	# Calling test with a type that is not a int would also raise an error.
 	var err = lua.do_string("test(6)")
-	# The static method is_err will check that the variant type is LuaError and that the errorType is not LuaError.ERR_NONE
 	if err is LuaError:
-		print("ERROR %d: " % err.type + err.msg)
+		print("ERROR %d: " % err.type + err.message)
 ```
 <br />
 
@@ -204,7 +203,7 @@ var lua: LuaAPI
 func _ready():
 	lua = LuaAPI.new()
 	# All libraries are available. Use OS and IO at your own risk.
-	lua.bind_libs(["base", "table", "string"])
+	lua.bind_libraries(["base", "table", "string"])
 ```
 <br />
 

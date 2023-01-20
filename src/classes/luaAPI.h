@@ -22,7 +22,7 @@ class LuaAPI : public RefCounted {
         LuaAPI();
         ~LuaAPI();
 
-        void bindLibs(Array libs);
+        void bindLibraries(Array libs);
         void addOwnedObject(void* luaPtr, Variant* obj);
         void removeOwnedObject(Variant* obj);
         void removeOwnedObject(void* luaPtr);

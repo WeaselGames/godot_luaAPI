@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="LuaAPI" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Execute Lua code at runtime and make your own API.
 	</brief_description>
 	<description>
-		Execute Lua code at runtime and make your own API.
+		TODO
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="bind_libs">
+		<method name="bind_libraries">
 			<return type="void" />
 			<param index="0" name="Array" type="Array" />
 			<description>
+				bind lua libraries.
 			</description>
 		</method>
 		<method name="do_file">

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="LuaError" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		LuaAPI Error
 	</brief_description>
 	<description>
 		LuaError contains a error message and type. If a LuaError is ever pushed to the stack it will raise a error in the lua state. Meaning if a exposed GD function returns a lua error. That will raise a error.
@@ -8,7 +9,7 @@
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="new_err" qualifiers="static">
+		<method name="new_error" qualifiers="static">
 			<return type="LuaError" />
 			<param index="0" name="Message" type="String" />
 			<param index="1" name="Type" type="int" enum="LuaError.ErrorType" default="2" />
@@ -18,7 +19,7 @@
 		</method>
 	</methods>
 	<members>
-		<member name="msg" type="String" setter="set_msg" getter="get_msg" default="&quot;&quot;">
+		<member name="message" type="String" setter="set_message" getter="get_message" default="&quot;&quot;">
 			The error message. Will also contain the stack trace if apllicable.
 		</member>
 		<member name="type" type="int" setter="set_type" getter="get_type" enum="LuaError.ErrorType" default="0">
