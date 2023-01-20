@@ -9,6 +9,8 @@ on:
       - "**/*.md"
       - "**/*.gd"
       - "**/*.lua"
+      - "**/*.sh"
+      - "**/*.ps1"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
@@ -17,6 +19,8 @@ on:
       - "**/*.md"
       - "**/*.gd"
       - "**/*.lua"
+      - "**/*.sh"
+      - "**/*.ps1"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
