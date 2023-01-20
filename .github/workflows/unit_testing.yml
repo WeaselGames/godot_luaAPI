@@ -69,6 +69,7 @@ jobs:
       - name: Unit Testing
         run: |
           /bin/bash -e ./scripts/run_tests.sh
+      - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
           name: ${{github.job}}
