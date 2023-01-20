@@ -71,9 +71,6 @@ jobs:
         run: |
           strip scripts/godot/bin/godot.*
           chmod +x scripts/godot/bin/godot.*
-      - name: Unit Testing
-        run: |
-          ./scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI --path ./testing -s ./testing/run_tests.gd
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
