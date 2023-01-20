@@ -4,7 +4,7 @@
 LuaAPI::LuaAPI() {
     lState = luaL_newstate();
 	// Createing lua state instance
-	state.setState(lState, Ref<RefCounted>(this), true);
+	state.setState(lState, this, true);
 }
 
 LuaAPI::~LuaAPI() {
@@ -82,12 +82,17 @@ LuaError* LuaAPI::doFile(String fileName) {
     lua_pushcfunction(lState, LuaState::luaErrorHandler);
 
     Error error;
-    Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
-    if (error != Error::OK) {
-        return LuaError::newErr(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
-    }
+    String path;
+    // fileAccess never unrefs without this
+    {
+        Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
+        if (error != Error::OK) {
+            return LuaError::newErr(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
+        }
 
-    String path = file->get_path_absolute();
+        path = file->get_path_absolute();
+    }
+    
     int ret = luaL_loadfile(lState, path.ascii().get_data());
     if (ret != LUA_OK) {
         return state.handleError(ret);

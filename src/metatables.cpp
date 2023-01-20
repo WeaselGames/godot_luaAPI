@@ -9,7 +9,7 @@
  [](lua_State* inner_state) -> int {                                          \
      lua_pushstring(inner_state,"__OBJECT");                                  \
      lua_rawget(inner_state,LUA_REGISTRYINDEX);                               \
-     Ref<RefCounted> OBJ = (Ref<RefCounted>) lua_touserdata(inner_state, -1); \
+     RefCounted* OBJ = (RefCounted*) lua_touserdata(inner_state, -1); \
      lua_pop(inner_state, 1);                                                 \
      Variant arg1 = LuaState::getVariant(inner_state, 1, OBJ);                \
      Variant arg2 = LuaState::getVariant(inner_state, 2, OBJ);                \

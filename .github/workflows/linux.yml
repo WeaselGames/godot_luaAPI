@@ -6,19 +6,27 @@ on:
     branches:
       - "*"
     paths-ignore:
-      - "**/README.md"
+      - "**/*.md"
+      - "**/*.gd"
+      - "**/*.lua"
+      - "**/*.sh"
+      - "**/*.ps1"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
-      - "**/README.md"
+      - "**/*.md"
+      - "**/*.gd"
+      - "**/*.lua"
+      - "**/*.sh"
+      - "**/*.ps1"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
   BASE_BRANCH: main
-  SCONSFLAGS: debug_symbols=no --jobs=4
-  SCONS_CACHE_LIMIT: 12288
+  SCONSFLAGS: debug_symbols=no
+  SCONS_CACHE_LIMIT: 7168
 
 jobs:
   linux-editor:
@@ -58,19 +66,20 @@ jobs:
           python --version
           scons --version
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=linuxbsd tools=yes target=editor
       - name: Prepare artifact
         run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
+          path: scripts/godot/bin/*
+
   linux-template-release:
     runs-on: "ubuntu-20.04"
     name: Linux Template (platform=linuxbsd tools=no target=template_release)
@@ -108,19 +117,19 @@ jobs:
           python --version
           scons --version
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=linuxbsd tools=no target=template_release
       - name: Prepare artifact
         run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
+          path: scripts/godot/bin/*
 
   linux-template-debug:
     runs-on: "ubuntu-20.04"
@@ -159,16 +168,16 @@ jobs:
           python --version
           scons --version
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=linuxbsd tools=no target=template_debug
       - name: Prepare artifact
         run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
+          path: scripts/godot/bin/*

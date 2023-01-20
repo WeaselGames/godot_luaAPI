@@ -1,7 +1,7 @@
 #include "luaState.h"
 #include <classes/luaCallable.h>
 
-void LuaState::setState(lua_State *L, Ref<RefCounted> obj, bool bindAPI) {
+void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     this->L = L;
     this->obj = obj;
     if (!bindAPI)
@@ -12,7 +12,7 @@ void LuaState::setState(lua_State *L, Ref<RefCounted> obj, bool bindAPI) {
 
     // saving the object into registry
 	lua_pushstring(L, "__OBJECT");
-	lua_pushlightuserdata(L, obj.ptr());
+	lua_pushlightuserdata(L, obj);
 	lua_rawset(L, LUA_REGISTRYINDEX);
 
     // Creating basic types metatables and saving them in registry
@@ -247,8 +247,8 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
 
             // If the object is RefCounted
             if (var.is_ref_counted()) {
-                Ref<RefCounted> temp = Object::cast_to<RefCounted>(var.operator Object*());
-                lua_pushlightuserdata(state, temp.ptr());
+                RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*());
+                lua_pushlightuserdata(state, temp);
                 luaL_setmetatable(state, "mt_RefCounted");
                 break;  
             }
@@ -364,7 +364,7 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
 }
 
 // gets a variant at a gien index
-Variant LuaState::getVariant(lua_State* state, int index, Ref<RefCounted> obj) {
+Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj) {
     Variant result;
     int type = lua_type(state, index);
     switch (type) {
@@ -414,7 +414,7 @@ Variant LuaState::getVariant(lua_State* state, int index, Ref<RefCounted> obj) {
         case LUA_TFUNCTION: {
             // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
             lua_pushvalue(state, index);
-            LuaCallable *callable = memnew(LuaCallable(obj, luaL_ref(state, LUA_REGISTRYINDEX), state));
+            LuaCallable *callable = memnew(LuaCallable(Ref<RefCounted>(obj), luaL_ref(state, LUA_REGISTRYINDEX), state));
             result = Callable(callable);
             break;
         }
@@ -473,7 +473,7 @@ int LuaState::luaPrint(lua_State* state)
 int LuaState::luaCallableCall(lua_State* state) {
     lua_pushstring(state, "__OBJECT");
     lua_rawget(state, LUA_REGISTRYINDEX);
-    Ref<RefCounted> OBJ = (Ref<RefCounted>) lua_touserdata(state, -1);
+    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
     lua_pop(state, 1);
 
     int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its self will be counted
@@ -514,7 +514,7 @@ int LuaState::luaCallableCall(lua_State* state) {
 int LuaState::luaUserdataFuncCall(lua_State* state) {
     lua_pushstring(state, "__OBJECT");
     lua_rawget(state, LUA_REGISTRYINDEX);
-    Ref<RefCounted> OBJ = (Ref<RefCounted>) lua_touserdata(state, -1);
+    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
     lua_pop(state, 1);
 
     int argc = lua_gettop(state);
@@ -556,7 +556,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
 int LuaState::luaLightUserdataFuncCall(lua_State* state) {
     lua_pushstring(state, "__OBJECT");
     lua_rawget(state, LUA_REGISTRYINDEX);
-    Ref<RefCounted> OBJ = (Ref<RefCounted>) lua_touserdata(state, -1);
+    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
     lua_pop(state, 1);
 
     int argc = lua_gettop(state);
@@ -577,7 +577,7 @@ int LuaState::luaLightUserdataFuncCall(lua_State* state) {
         args[i] = temp;
     }
 
-    Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(state, lua_upvalueindex(1)));
+    RefCounted* refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(state, lua_upvalueindex(1)));
     String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
     Callable::CallError error;
     Variant ret = refObj->callp(fName.ascii().get_data(), args, argc, error);
