@@ -27,7 +27,7 @@ env:
 jobs:
   linux-editor:
     runs-on: "ubuntu-20.04"
-    name: Linux Editor(platform=linuxbsd tools=yes target=editor) | Unit Testing
+    name: Linux Editor(platform=linuxbsd tools=yes target=editor)
     steps:
       - uses: actions/checkout@v3
         with:
