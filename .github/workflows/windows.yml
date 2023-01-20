@@ -55,7 +55,7 @@ jobs:
           python --version
           scons --version
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: /.scons_cache/
         run: |
@@ -63,11 +63,11 @@ jobs:
 
       - name: Prepare artifact
         run: |
-          Remove-Item build/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
+          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
+          path: scripts/godot/bin/*
 
   windows-template:
     runs-on: "windows-latest"
@@ -103,18 +103,18 @@ jobs:
           python --version
           scons --version
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: /.scons_cache/
         run: |
           scons platform=windows target=template_release tools=no
       - name: Prepare artifact
         run: |
-          Remove-Item build/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
+          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
+          path: scripts/godot/bin/*
 
   windows-template-debug:
     runs-on: "windows-latest"
@@ -150,15 +150,15 @@ jobs:
           python --version
           scons --version
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: /.scons_cache/
         run: |
           scons platform=windows target=template_debug tools=no
       - name: Prepare artifact
         run: |
-          Remove-Item build/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
+          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin/*
+          path: scripts/godot/bin/*

@@ -31,7 +31,7 @@ jobs:
 
       - name: Setup Vulkan SDK
         run: |
-          sh build/install_vulkan_sdk_macos.sh
+          sh scripts/install_vulkan_sdk_macos.sh
 
       - name: Load .scons_cache directory
         id: macos-editor-cache
@@ -58,19 +58,19 @@ jobs:
           scons --version
 
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos tools=yes target=editor
       - name: Prepare artifact
         run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin
+          path: scripts/godot/bin
 
   macos-template:
     runs-on: "macos-latest"
@@ -83,7 +83,7 @@ jobs:
 
       - name: Setup Vulkan SDK
         run: |
-          sh build/install_vulkan_sdk_macos.sh
+          sh scripts/install_vulkan_sdk_macos.sh
 
       - name: Load .scons_cache directory
         id: macos-template-cache
@@ -110,19 +110,19 @@ jobs:
           scons --version
 
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos target=template_release tools=no
       - name: Prepare artifact
         run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin
+          path: scripts/godot/bin
 
   macos-template-debug:
     runs-on: "macos-latest"
@@ -135,7 +135,7 @@ jobs:
 
       - name: Setup Vulkan SDK
         run: |
-          sh build/install_vulkan_sdk_macos.sh
+          sh scripts/install_vulkan_sdk_macos.sh
 
       - name: Load .scons_cache directory
         id: macos-template-debug-cache
@@ -162,16 +162,16 @@ jobs:
           scons --version
 
       - name: Compilation
-        working-directory: ./build
+        working-directory: ./scripts
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos target=template_debug tools=no
       - name: Prepare artifact
         run: |
-          strip build/godot/bin/godot.*
-          chmod +x build/godot/bin/godot.*
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
       - uses: actions/upload-artifact@v2
         with:
           name: ${{github.job}}
-          path: build/godot/bin
+          path: scripts/godot/bin

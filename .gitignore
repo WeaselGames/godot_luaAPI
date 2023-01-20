@@ -45,3 +45,4 @@ custom.py
 # Godot repository
 /godot
 /logs
+.godot
