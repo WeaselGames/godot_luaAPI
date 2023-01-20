@@ -1,4 +1,3 @@
-HARD_FAIL_TEST().val
 function Fib(n)
     local function inner(m)
       if m < 2 then
