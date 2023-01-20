@@ -3,6 +3,8 @@ extends Node
 
 var errors: Array[LuaError]
 
+# id will determine the load order
+var id: int = 0
 var done: bool = false
 var status: bool = true
 var time: float

@@ -9,46 +9,57 @@ var testCount = 0
 
 var tests: Array[Test]
 var doneTests: Array[Test]
+var currentTest: Test
+
+func sort_tests(a, b):
+	if a.id < b.id:
+		return true
+	return false
 
 func _init():
 	print("LuaAPI Testing framework for v2-alpha")
-	print("Starting time: %s\n\n" % str(time_elapsed))
+	print("Starting time: %s\n" % str(time_elapsed))
 	load_tests()
 	for test in tests:
 		test._init()
 		testCount += 1
-	print("Loaded %d tests" % testCount)
+	tests.sort_custom(sort_tests)
+	print("Loaded %d tests\n" % testCount)
 		
 func _process(delta):
 	time_elapsed += delta
 	var doneCount = 0
+	if currentTest == null:
+		currentTest = tests.pop_back()
 	
-	for test in tests:
-		test._process(delta)
-		if test.done:
-			doneTests.append(test)
-			tests.erase(test)
-			
+	currentTest._process(delta)
+	
+	if currentTest.done:
+		print("Test #%d: " % currentTest.id + currentTest.testName + " has finished.")
+		doneTests.append(currentTest)
+		currentTest = null
+	
 	if tests.size() == 0:
 		finish()
-	
+
 func finish():
-	print("Finished:")
-	print("End time: %s\n\n" % str(time_elapsed))
-	print("Report:")
+	print("\nFinished!")
+	print("End time: %s\n" % str(time_elapsed))
+	print("Report:\n")
 	var failures = 0
 	for test in doneTests:
-		print("-------------------------------")
 		print("Test Name: %s" % test.testName)
+		print("-------------------------------")
+		print("Test id(start order): %d" % test.id)
 		print("Test Description:")
 		print(test.testDescription)
 		print("Frames: %d" % test.frames)
-		print("Secounds: %s" % str(test.time))
+		print("Time: %s" % str(test.time))
 		
 		if test.status:
 			print("Test finished with no errors.")
-			print("-------------------------------")
-			doneTests.erase(test)
+			print("-------------------------------\n")
+			test._finalize()
 			test.free()
 			continue
 			
@@ -57,10 +68,11 @@ func finish():
 		print("Test finished with %d errors." % test.errors.size())
 		for err in test.errors:
 			print("\nERROR %d: " % err.type + err.msg)
-		print("-------------------------------")
-			
-		doneTests.erase(test)
+		print("-------------------------------\n")
+		test._finalize()
 		test.free()
+	
+	doneTests.clear()
 
 	quit(failures)
 

@@ -5,12 +5,12 @@ func _init():
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._init()
 	# id will determine the load order
-	id = 10000
+	id = 9000
 
 	lua = LuaAPI.new()
 	
 	# testName and testDescription are for any needed context about the test.
-	testName = "LuaAPI.do_string()"
+	testName = "LuaAPI.do_file()"
 	testDescription = "
 Runs the fibonacci sequence of 5. 
 No return value is captured as pull_variant/push_variant have not been tested yet.
@@ -20,20 +20,7 @@ func _process(delta):
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._process(delta)
 	
-	var err = lua.do_string("
-	function Fib(n)
-	  local function inner(m)
-		if m < 2 then
-		  return m
-		end
-		return inner(m-1) + inner(m-2)
-	  end
-	  return inner(n)
-	end
-	
-	result = Fib(5)
-	")
-	
+	var err = lua.do_file("res://luasrc/LuaAPI/do_file.lua")
 	if err is LuaError:
 		errors.append(err)
 		# Status is true by default, once the test determines a failure state it will set status to false.

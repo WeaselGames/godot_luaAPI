@@ -1,0 +1,1 @@
+..\..\..\bin\godot.windows.editor.x86_64.exe --verbose --path ..\testing -s run_tests.gd
