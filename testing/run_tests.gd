@@ -78,9 +78,6 @@ func finish():
 		logPrint("-------------------------------\n")
 		test._finalize()
 		test.free()
-		
-		var res = DirAccess.open("res://")
-		res.copy("res://log.txt", "res://log.txt.error")
 	
 	doneTests.clear()
 
