@@ -10,7 +10,7 @@ on:
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
-      - "main"
+      - "dev/testing"
     paths-ignore:
       - "**/README.md"
       - ".github/ISSUE_TEMPLATE/*"
