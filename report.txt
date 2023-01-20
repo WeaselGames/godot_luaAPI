@@ -1,0 +1,45 @@
+Godot Engine v4.0.beta.custom_build.91713ced8 - https://godotengine.org
+ 
+LuaAPI Testing framework for v2-alpha
+Starting time: 0
+
+Loaded 2 tests
+
+Test #10000: LuaAPI.do_string() has finished.
+Test #9000: LuaAPI.do_file() has finished.
+
+Finished!
+End time: 0.02099933333333
+
+Report:
+
+Test Name: LuaAPI.do_string()
+-------------------------------
+Test id(start order): 10000
+Test Description:
+
+Runs the fibonacci sequence of 5. 
+No return value is captured as pull_variant/push_variant have not been tested yet.
+
+Frames: 1
+Time: 0.01666666666667
+Test finished with no errors.
+-------------------------------
+
+Test Name: LuaAPI.do_file()
+-------------------------------
+Test id(start order): 9000
+Test Description:
+
+Runs the fibonacci sequence of 5. 
+No return value is captured as pull_variant/push_variant have not been tested yet.
+
+Frames: 1
+Time: 0.00433266666667
+Test finished with 1 errors.
+
+ERROR 3: [LUA_ERRSYNTAX - syntax error ]
+...s/godot/modules/luaAPI/testing/luasrc/LuaAPI/do_file.lua:2: syntax error near 'function'
+
+-------------------------------
+
