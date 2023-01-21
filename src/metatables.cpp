@@ -452,7 +452,8 @@ void LuaState::createObjectMetatable() {
     LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
         void* luaPtr = lua_touserdata(inner_state, 1);
         Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ;
-        lua->removeOwnedObject(luaPtr);
+        if (lua.is_valid())
+            lua->removeOwnedObject(luaPtr);
         return 0;
     });
 

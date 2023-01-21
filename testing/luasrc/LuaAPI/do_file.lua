@@ -8,4 +8,4 @@ function Fib(n)
     return inner(n)
   end
   
-  result = Fib(5)
+  result = Fib(15)
