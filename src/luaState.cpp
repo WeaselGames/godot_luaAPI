@@ -105,8 +105,8 @@ Variant LuaState::callFunction(String functionName, Array args) {
         pushVariant(args[i]);
     }
 
-    // error handlers index is -2
-    int ret = lua_pcall(L, args.size(), 1, -2);
+    // error handlers index is -2 - args.size()
+    int ret = lua_pcall(L, args.size(), 1, -2 - args.size());
     if (ret != LUA_OK) {
         return handleError(ret);
     }
