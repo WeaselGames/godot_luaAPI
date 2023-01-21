@@ -11,7 +11,7 @@ on:
       - "**/*.lua"
       - "**/*.sh"
       - "**/*.ps1"
-      - ".github/ISSUE_TEMPLATE/*"
+      - "**/*.godot"
   push:
     branches:
       - "main"
@@ -21,7 +21,7 @@ on:
       - "**/*.lua"
       - "**/*.sh"
       - "**/*.ps1"
-      - ".github/ISSUE_TEMPLATE/*"
+      - "**/*.godot"
 
 env:
   BASE_BRANCH: main
