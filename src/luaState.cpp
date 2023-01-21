@@ -23,7 +23,6 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     createPlaneMetatable();     // "mt_Plane"
     createObjectMetatable();    // "mt_Object"
     createCallableMetatable();  // "mt_Callable"
-    createRefCountedMetatable();// "mt_RefCounted"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -245,14 +244,6 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                 break;
             }
 
-            // If the object is RefCounted
-            if (var.is_ref_counted()) {
-                RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*());
-                lua_pushlightuserdata(state, temp);
-                luaL_setmetatable(state, "mt_RefCounted");
-                break;  
-            }
-
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state, "mt_Object");
@@ -380,10 +371,6 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
         case LUA_TUSERDATA:
             result = *(Variant*)lua_touserdata(state, index);
             break;
-        case LUA_TLIGHTUSERDATA: {
-            result = (Object*) lua_touserdata(state, index);
-            break;
-        }
         case LUA_TTABLE: {
             lua_len(state, index);
             int len = lua_tointeger(state, -1);
