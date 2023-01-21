@@ -4,22 +4,16 @@ on:
     branches:
       - "*"
     paths-ignore:
-      - "**/*.md"
-      - "**/*.gd"
-      - "**/*.lua"
-      - "**/*.sh"
-      - "**/*.ps1"
-      - "**/*.godot"
+      - "**/README.md"
+      - "testing/*"
+      - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
-      - "**/*.md"
-      - "**/*.gd"
-      - "**/*.lua"
-      - "**/*.sh"
-      - "**/*.ps1"
-      - "**/*.godot"
+      - "**/README.md"
+      - "testing/*"
+      - ".github/ISSUE_TEMPLATE/*"
 
 env:
   BASE_BRANCH: main
