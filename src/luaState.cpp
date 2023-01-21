@@ -11,13 +11,13 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     lua_register(L, "print", luaPrint);
 
     // saving the object into registry
-	lua_pushstring(L, "__OBJECT");
-	lua_pushlightuserdata(L, obj);
-	lua_rawset(L, LUA_REGISTRYINDEX);
+	  lua_pushstring(L, "__OBJECT");
+	  lua_pushlightuserdata(L, obj);
+	  lua_rawset(L, LUA_REGISTRYINDEX);
 
     // Creating basic types metatables and saving them in registry
-	createVector2Metatable();   // "mt_Vector2"
-	createVector3Metatable();   // "mt_Vector3"
+	  createVector2Metatable();   // "mt_Vector2"
+	  createVector3Metatable();   // "mt_Vector3"
     createColorMetatable();     // "mt_Color"
     createRect2Metatable();     // "mt_Rect2"
     createPlaneMetatable();     // "mt_Plane"
