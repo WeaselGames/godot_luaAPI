@@ -38,17 +38,6 @@ LuaError* LuaState::exposeObjectConstructor(String name, Object* obj) {
         Variant* var = memnew(Variant);
         *var = inner_obj->call("new");
 
-        if (var->is_ref_counted()) {
-            Ref<RefCounted> temp = Object::cast_to<RefCounted>(var->operator Object*());
-            lua_pushlightuserdata(inner_state, temp.ptr());
-            luaL_setmetatable(inner_state, "mt_RefCounted");
-
-            if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
-                lua->addOwnedObject((void*)var, var);
-
-            return 1;
-        }
-
         void* userdata = (Variant*)lua_newuserdata(inner_state, sizeof(Variant));
         memcpy(userdata, (void*)var, sizeof(Variant));
         luaL_setmetatable(inner_state, "mt_Object");
@@ -690,55 +679,6 @@ void LuaState::createObjectMetatable() {
         
         LuaState::pushVariant(inner_state, arg1.call("__le", arg2));
         return 1;        
-    });
-
-    lua_pop(L, 1);
-}
-
-// Create metatable for any Object and saves it at LUA_REGISTRYINDEX with name "mt_Object"
-void LuaState::createRefCountedMetatable() {
-    luaL_newmetatable(L, "mt_RefCounted");
-
-    LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
-        Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(inner_state, 1));
-        if (!refObj.is_valid()) {
-            LuaState::pushVariant(inner_state, LuaError::newError("during \"LuaState::createRefCountedMetatable __index metamethod\" Invalid RefCounted object.", LuaError::ERR_RUNTIME));
-            return 1;
-        }
-        
-        // If the function exists 
-        if (refObj->has_method(arg2)) {
-            lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
-            LuaState::pushVariant(inner_state, arg2);
-            lua_pushcclosure(inner_state, luaLightUserdataFuncCall, 2);
-            return 1;
-        }
-        
-        Variant var = refObj->get(arg2);
-        if(var.is_null())
-            return 0;
-
-        LuaState::pushVariant(inner_state, var);
-        return 1;
-    });
-
-    LUA_METAMETHOD_TEMPLATE(L, -1, "__newindex", {
-        Ref<RefCounted> refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(inner_state, 1));
-        if (!refObj.is_valid()) {
-            LuaState::pushVariant(inner_state, LuaError::newError("during \"LuaState::createRefCountedMetatable __index metamethod\" Invalid RefCounted object.", LuaError::ERR_RUNTIME));
-            return 1;
-        }
-
-        refObj->set(arg2, arg3);
-        return 0;
-    }); 
-
-    // Makeing sure to clean up the pointer with lua GC
-    LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-        Variant* obj = (Variant*)lua_touserdata(inner_state, 1);
-        Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ;
-        lua->removeOwnedObject(obj);
-        return 0;
     });
 
     lua_pop(L, 1);

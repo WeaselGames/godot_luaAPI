@@ -11,19 +11,18 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     lua_register(L, "print", luaPrint);
 
     // saving the object into registry
-	lua_pushstring(L, "__OBJECT");
-	lua_pushlightuserdata(L, obj);
-	lua_rawset(L, LUA_REGISTRYINDEX);
+	  lua_pushstring(L, "__OBJECT");
+	  lua_pushlightuserdata(L, obj);
+	  lua_rawset(L, LUA_REGISTRYINDEX);
 
     // Creating basic types metatables and saving them in registry
-	createVector2Metatable();   // "mt_Vector2"
-	createVector3Metatable();   // "mt_Vector3"
+	  createVector2Metatable();   // "mt_Vector2"
+	  createVector3Metatable();   // "mt_Vector3"
     createColorMetatable();     // "mt_Color"
     createRect2Metatable();     // "mt_Rect2"
     createPlaneMetatable();     // "mt_Plane"
     createObjectMetatable();    // "mt_Object"
     createCallableMetatable();  // "mt_Callable"
-    createRefCountedMetatable();// "mt_RefCounted"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -106,8 +105,8 @@ Variant LuaState::callFunction(String functionName, Array args) {
         pushVariant(args[i]);
     }
 
-    // error handlers index is -2
-    int ret = lua_pcall(L, args.size(), 1, -2);
+    // error handlers index is -2 - args.size()
+    int ret = lua_pcall(L, args.size(), 1, -2 - args.size());
     if (ret != LUA_OK) {
         return handleError(ret);
     }
@@ -245,14 +244,6 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                 break;
             }
 
-            // If the object is RefCounted
-            if (var.is_ref_counted()) {
-                RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*());
-                lua_pushlightuserdata(state, temp);
-                luaL_setmetatable(state, "mt_RefCounted");
-                break;  
-            }
-
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state, "mt_Object");
@@ -380,10 +371,6 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
         case LUA_TUSERDATA:
             result = *(Variant*)lua_touserdata(state, index);
             break;
-        case LUA_TLIGHTUSERDATA: {
-            result = (Object*) lua_touserdata(state, index);
-            break;
-        }
         case LUA_TTABLE: {
             lua_len(state, index);
             int len = lua_tointeger(state, -1);
