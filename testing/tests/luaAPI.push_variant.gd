@@ -5,7 +5,7 @@ func _init():
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._init()
 	# id will determine the load order
-	id = 9970
+	id = 9960
 
 	lua = LuaAPI.new()
 	
