@@ -29,8 +29,8 @@ func _init():
 	load_tests()
 	for test in tests:
 		test._init()
-		testCount += 1
 	tests.sort_custom(sort_tests)
+	testCount = tests.size()
 	logPrint("Loaded %d tests\n" % testCount)
 		
 func _process(delta):
@@ -39,14 +39,15 @@ func _process(delta):
 	if currentTest == null:
 		currentTest = tests.pop_back()
 	
-	currentTest._process(delta)
+	if not currentTest.done:
+		currentTest._process(delta)
 	
 	if currentTest.done:
 		logPrint("Test #%d: " % currentTest.id + currentTest.testName + " has finished.")
 		doneTests.append(currentTest)
 		currentTest = null
 	
-	if tests.size() == 0:
+	if doneTests.size() == testCount:
 		finish()
 
 func finish():
@@ -74,13 +75,12 @@ func finish():
 		
 		logPrint("Test finished with %d errors." % test.errors.size())
 		for err in test.errors:
-			logPrint("\nERROR %d: " % err.type + err.msg)
+			logPrint("\nERROR %d: " % err.type + err.message)
 		logPrint("-------------------------------\n")
 		test._finalize()
 		test.free()
 	
 	doneTests.clear()
-
 	quit(failures)
 
 

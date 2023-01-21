@@ -5,14 +5,14 @@ func _init():
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._init()
 	# id will determine the load order
-	id = 9000
+	id = 9990
 
 	lua = LuaAPI.new()
 	
 	# testName and testDescription are for any needed context about the test.
 	testName = "LuaAPI.do_file()"
 	testDescription = "
-Runs the fibonacci sequence of 5. 
+Runs the fibonacci sequence of 15. 
 No return value is captured as pull_variant/push_variant have not been tested yet.
 "
 

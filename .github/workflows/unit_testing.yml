@@ -4,13 +4,13 @@ on:
     branches:
       - "*"
     paths-ignore:
-      - "**/*.md"
+      - "**/README.md"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
-      - "**/*.md"
+      - "**/README.md"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:

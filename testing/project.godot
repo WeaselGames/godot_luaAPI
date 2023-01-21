@@ -8,16 +8,6 @@
 
 config_version=5
 
-_global_script_classes=[{
-"base": "SceneTree",
-"class": &"RunTests",
-"language": &"GDScript",
-"path": "res://run_tests.gd"
-}]
-_global_script_class_icons={
-"RunTests": ""
-}
-
 [application]
 
 config/name="Testing"

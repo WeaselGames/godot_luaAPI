@@ -11,13 +11,13 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     lua_register(L, "print", luaPrint);
 
     // saving the object into registry
-	  lua_pushstring(L, "__OBJECT");
-	  lua_pushlightuserdata(L, obj);
-	  lua_rawset(L, LUA_REGISTRYINDEX);
+	lua_pushstring(L, "__OBJECT");
+	lua_pushlightuserdata(L, obj);
+	lua_rawset(L, LUA_REGISTRYINDEX);
 
     // Creating basic types metatables and saving them in registry
-	  createVector2Metatable();   // "mt_Vector2"
-	  createVector3Metatable();   // "mt_Vector3"
+	createVector2Metatable();   // "mt_Vector2"
+	createVector3Metatable();   // "mt_Vector3"
     createColorMetatable();     // "mt_Color"
     createRect2Metatable();     // "mt_Rect2"
     createPlaneMetatable();     // "mt_Plane"
@@ -467,19 +467,18 @@ int LuaState::luaCallableCall(lua_State* state) {
     Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
    
     const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
+    Vector<Variant> p_args;
     int index = 2; // we start at 2, 1 is the callable
     for (int i = 0; i < argc; i++) {
-        Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
+        p_args.set(i, LuaState::getVariant(state, index++, OBJ));
+        args[i] = &p_args[i];
+        if (args[i]->get_type() == Variant::Type::OBJECT) {
+            if (LuaError* err = Object::cast_to<LuaError>(args[i]->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
         }
-
-        args[i] = temp;
     }
 
     Variant returned;

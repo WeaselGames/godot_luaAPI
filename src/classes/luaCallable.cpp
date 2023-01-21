@@ -56,7 +56,7 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 	int ret = lua_pcall(state, p_argcount, 1, 0);
     if (ret != LUA_OK) {
         r_return_value = LuaState::handleError(state, ret);
-    } else r_return_value = LuaState::getVariant(state, 1, obj.ptr());
+    } else r_return_value = LuaState::getVariant(state, -1, obj.ptr());
 
 	lua_pop(state, 1);
 }

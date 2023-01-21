@@ -40,16 +40,19 @@ void LuaAPI::addOwnedObject(void* luaPtr, Variant* obj) {
 
 // Adds the pointer to a object now owned by lua for cleanup later
 void LuaAPI::removeOwnedObject(Variant* obj) {
+    if (ownedObjects.empty() || ownedObjects.count((void*)obj)==0)
+        return;
     memdelete(ownedObjects[(void*)obj]);
     ownedObjects[(void*)obj] = nullptr;
 }
 
 // Adds the pointer to a object now owned by lua for cleanup later
 void LuaAPI::removeOwnedObject(void* luaPtr) {
+    if (ownedObjects.empty() || ownedObjects.count(luaPtr)==0)
+        return;
     memdelete(ownedObjects[luaPtr]);
     ownedObjects[luaPtr] = nullptr;
 }
-
 
 // Calls LuaState::luaFunctionExists()
 bool LuaAPI::luaFunctionExists(String functionName) {
