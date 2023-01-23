@@ -26,6 +26,7 @@ class LuaAPI : public RefCounted {
         void addOwnedObject(void* luaPtr, Variant* obj);
         void removeOwnedObject(Variant* obj);
         void removeOwnedObject(void* luaPtr);
+        void pushFunction(String functionName, Callable function, int argc, bool tuple);
 
         bool luaFunctionExists(String functionName);
 

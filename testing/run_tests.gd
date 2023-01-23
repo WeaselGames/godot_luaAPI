@@ -1,7 +1,7 @@
-#!/usr/bin/env -S godot -s
+#!/usr/bin/env -S godot --headless -s
 
 # This is a standalone script meant to be run via CI
-class_name RunTests
+#class_name RunTests
 extends SceneTree
 
 var time_elapsed = 0
@@ -81,6 +81,7 @@ func finish():
 		test.free()
 	
 	doneTests.clear()
+	logPrint("%d/" % failures + "%d tests failed." % testCount)
 	quit(failures)
 
 

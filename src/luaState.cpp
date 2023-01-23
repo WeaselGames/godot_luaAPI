@@ -1,5 +1,6 @@
 #include "luaState.h"
 #include <classes/luaCallable.h>
+#include <classes/luaTuple.h>
 
 void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     this->L = L;
@@ -72,6 +73,74 @@ void LuaState::bindLibraries(Array libs) {
     }
 }
 
+void LuaState::pushFunction(String functionName, Callable function, int noneMultiArg, bool isTuple) const {
+
+    auto f = [](lua_State* state) -> int{
+        lua_pushstring(state, "__OBJECT");
+        lua_rawget(state, LUA_REGISTRYINDEX);
+        RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
+        lua_pop(state, 1);
+
+        Callable innerFunction = *(Variant*)lua_touserdata(state, lua_upvalueindex(1));
+        int innerNoneMultiArg = lua_tointeger(state, lua_upvalueindex(2));
+        bool innerIsTuple = lua_toboolean(state, lua_upvalueindex(3));
+
+        int argc = lua_gettop(state);
+        int totalArgs = 0;
+
+        if (!innerIsTuple) {
+            totalArgs=argc;
+            innerNoneMultiArg=argc;
+        } else totalArgs = innerNoneMultiArg+1;
+
+        
+        const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * totalArgs);
+        Vector<Variant> p_args;
+        for (int i = 0; i < innerNoneMultiArg; i++) {
+            p_args.set(i, LuaState::getVariant(state, i+1, OBJ));
+            args[i] = &p_args[i];
+        }
+        if (innerIsTuple) {
+            Array elms;
+            for (int i = 0; i < argc-innerNoneMultiArg; i++) {
+                elms.push_back(LuaState::getVariant(state, innerNoneMultiArg+i+1, OBJ));
+            }
+            p_args.set(innerNoneMultiArg, LuaTuple::fromArray(elms));
+            args[innerNoneMultiArg] = &p_args[innerNoneMultiArg];
+        }
+
+        Variant returned;
+        Callable::CallError error;
+        innerFunction.callp(args, argc, returned, error);
+        if (error.error != error.CALL_OK) {
+            LuaError* err = LuaState::handleError(innerFunction.get_method(), error, args, argc);
+            lua_pushstring(state, err->getMessage().ascii().get_data());
+            lua_error(state);
+            return 0;
+        }
+        
+        LuaState::pushVariant(state, returned);
+        if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+            return tuple->size();
+        return 1;
+
+    };
+
+    void* userdata = (Variant*)lua_newuserdata(L, sizeof(Variant));
+    memcpy(userdata, (void*)&function, sizeof(Variant));
+
+    // Pushing the number of args before the tuple
+    lua_pushinteger(L, noneMultiArg);
+
+    // Push weather there is a tuple or not
+    lua_pushboolean(L, isTuple);
+
+    lua_pushcclosure(L, f, 3);
+
+    lua_setglobal(L, functionName.ascii().get_data());
+
+}
+
 // Returns true if a lua function exists with the given name
 bool LuaState::luaFunctionExists(String functionName) {
     int type = lua_getglobal(L, functionName.ascii().get_data());
@@ -116,7 +185,7 @@ Variant LuaState::callFunction(String functionName, Array args) {
 }
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
-LuaError* LuaState::pushVariant(Variant var) const{
+LuaError* LuaState::pushVariant(Variant var) const {
     return LuaState::pushVariant(L, var);
 }
 
@@ -241,6 +310,15 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
+                break;
+            }
+
+            // If the type being pushed is a tuple, push its content instead.
+            if (LuaTuple* tuple = Object::cast_to<LuaTuple>(var.operator Object*()); tuple != nullptr) {
+                for (int i = 0; i < tuple->size(); i++) {
+                    Variant value = tuple->get(i);
+                    pushVariant(state, value);
+                }
                 break;
             }
 
@@ -492,6 +570,8 @@ int LuaState::luaCallableCall(lua_State* state) {
     }
     
     LuaState::pushVariant(state, returned);
+    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+        return tuple->size();
     return 1;
 }
 
@@ -534,46 +614,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     }
 
     LuaState::pushVariant(state, ret);
-    return 1;
-}
-
-// This function is invoked whenever a function is called on one of the light userdata types 
-// excluding mt_Callable or mt_Object if __index is overwritten
-int LuaState::luaLightUserdataFuncCall(lua_State* state) {
-    lua_pushstring(state, "__OBJECT");
-    lua_rawget(state, LUA_REGISTRYINDEX);
-    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
-    lua_pop(state, 1);
-
-    int argc = lua_gettop(state);
-
-    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
-    int index = 1;
-    for (int i = 0; i < argc; i++) {
-        Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMessage().ascii().get_data());
-                lua_error(state);
-                return 0;
-            }
-        }
-
-        args[i] = temp;
-    }
-
-    RefCounted* refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(state, lua_upvalueindex(1)));
-    String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
-    Callable::CallError error;
-    Variant ret = refObj->callp(fName.ascii().get_data(), args, argc, error);
-    if (error.error != error.CALL_OK) {
-        LuaError* err = LuaState::handleError(fName, error, args, argc);
-        lua_pushstring(state, err->getMessage().ascii().get_data());
-        lua_error(state);
-        return 0;
-    }
-
-    LuaState::pushVariant(state, ret);
+    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(ret.operator Object*()); tuple != nullptr)
+        return tuple->size();
     return 1;
 }

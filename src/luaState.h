@@ -2,6 +2,7 @@
 #define LUASTATE_H
 
 #include "core/object/ref_counted.h"
+#include "core/variant/callable.h"
 
 #include <lua/lua.hpp>
 #include <classes/luaError.h>
@@ -10,6 +11,7 @@ class LuaState {
     public:
         void setState(lua_State* state, RefCounted* obj, bool bindAPI);
         void bindLibraries(Array libs);
+        void pushFunction(String functionName, Callable function, int argc, bool tuple) const;
 
         bool luaFunctionExists(String functionName);
 
@@ -35,7 +37,6 @@ class LuaState {
         static int luaPrint(lua_State* state);
         static int luaExposedFuncCall(lua_State* state);
         static int luaUserdataFuncCall(lua_State* state);
-        static int luaLightUserdataFuncCall(lua_State* state);
         static int luaCallableCall(lua_State* state);
     private:
         lua_State *L = nullptr;
@@ -48,7 +49,6 @@ class LuaState {
         void createRect2Metatable();
         void createPlaneMetatable();
         void createObjectMetatable();
-        void createRefCountedMetatable();
         void createCallableMetatable();
 };
 
