@@ -26,8 +26,6 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
-
-    ClassDB::bind_method(D_METHOD("push_function", "FunctionName", "Function", "noneMultiArg", "isTuple"), &LuaAPI::pushFunction);
 }
 
 // Calls LuaState::bindLibs()
@@ -54,10 +52,6 @@ void LuaAPI::removeOwnedObject(void* luaPtr) {
         return;
     memdelete(ownedObjects[luaPtr]);
     ownedObjects[luaPtr] = nullptr;
-}
-
-void LuaAPI::pushFunction(String functionName, Callable function, int argc, bool isTuple) {
-    state.pushFunction(functionName, function, argc, isTuple);
 }
 
 // Calls LuaState::luaFunctionExists()

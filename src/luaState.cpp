@@ -1,6 +1,8 @@
 #include "luaState.h"
+#include <classes/luaAPI.h>
 #include <classes/luaCallable.h>
 #include <classes/luaTuple.h>
+#include <classes/luaCallableExtra.h>
 
 void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     this->L = L;
@@ -24,6 +26,7 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     createPlaneMetatable();     // "mt_Plane"
     createObjectMetatable();    // "mt_Object"
     createCallableMetatable();  // "mt_Callable"
+    createCallableExtraMetatable();  // "mt_CallableExtra"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -71,74 +74,6 @@ void LuaState::bindLibraries(Array libs) {
             lua_pop(L, 1);
         }
     }
-}
-
-void LuaState::pushFunction(String functionName, Callable function, int noneMultiArg, bool isTuple) const {
-
-    auto f = [](lua_State* state) -> int{
-        lua_pushstring(state, "__OBJECT");
-        lua_rawget(state, LUA_REGISTRYINDEX);
-        RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
-        lua_pop(state, 1);
-
-        Callable innerFunction = *(Variant*)lua_touserdata(state, lua_upvalueindex(1));
-        int innerNoneMultiArg = lua_tointeger(state, lua_upvalueindex(2));
-        bool innerIsTuple = lua_toboolean(state, lua_upvalueindex(3));
-
-        int argc = lua_gettop(state);
-        int totalArgs = 0;
-
-        if (!innerIsTuple) {
-            totalArgs=argc;
-            innerNoneMultiArg=argc;
-        } else totalArgs = innerNoneMultiArg+1;
-
-        
-        const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * totalArgs);
-        Vector<Variant> p_args;
-        for (int i = 0; i < innerNoneMultiArg; i++) {
-            p_args.set(i, LuaState::getVariant(state, i+1, OBJ));
-            args[i] = &p_args[i];
-        }
-        if (innerIsTuple) {
-            Array elms;
-            for (int i = 0; i < argc-innerNoneMultiArg; i++) {
-                elms.push_back(LuaState::getVariant(state, innerNoneMultiArg+i+1, OBJ));
-            }
-            p_args.set(innerNoneMultiArg, LuaTuple::fromArray(elms));
-            args[innerNoneMultiArg] = &p_args[innerNoneMultiArg];
-        }
-
-        Variant returned;
-        Callable::CallError error;
-        innerFunction.callp(args, argc, returned, error);
-        if (error.error != error.CALL_OK) {
-            LuaError* err = LuaState::handleError(innerFunction.get_method(), error, args, argc);
-            lua_pushstring(state, err->getMessage().ascii().get_data());
-            lua_error(state);
-            return 0;
-        }
-        
-        LuaState::pushVariant(state, returned);
-        if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
-            return tuple->size();
-        return 1;
-
-    };
-
-    void* userdata = (Variant*)lua_newuserdata(L, sizeof(Variant));
-    memcpy(userdata, (void*)&function, sizeof(Variant));
-
-    // Pushing the number of args before the tuple
-    lua_pushinteger(L, noneMultiArg);
-
-    // Push weather there is a tuple or not
-    lua_pushboolean(L, isTuple);
-
-    lua_pushcclosure(L, f, 3);
-
-    lua_setglobal(L, functionName.ascii().get_data());
-
 }
 
 // Returns true if a lua function exists with the given name
@@ -319,6 +254,26 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                     Variant value = tuple->get(i);
                     pushVariant(state, value);
                 }
+                break;
+            }
+
+            // Temp maybe? If we do not store a referance to refCounted they will die with GDScript
+            if (var.is_ref_counted()) {
+                lua_pushstring(state, "__OBJECT");
+                lua_rawget(state, LUA_REGISTRYINDEX);
+                LuaAPI* OBJ = (LuaAPI*) lua_touserdata(state, -1);
+                lua_pop(state, 1);
+
+                if (OBJ != nullptr)
+                    OBJ->addRef(var);
+            }
+
+
+            // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
+            if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
+                void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+                memcpy(userdata, (void*)&var, sizeof(Variant));
+                luaL_setmetatable(state, "mt_CallableExtra");
                 break;
             }
 

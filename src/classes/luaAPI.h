@@ -11,7 +11,6 @@
 #include <string>
 #include <map>
 
-
 class LuaAPI : public RefCounted {
     GDCLASS(LuaAPI, RefCounted);
 
@@ -26,7 +25,6 @@ class LuaAPI : public RefCounted {
         void addOwnedObject(void* luaPtr, Variant* obj);
         void removeOwnedObject(Variant* obj);
         void removeOwnedObject(void* luaPtr);
-        void pushFunction(String functionName, Callable function, int argc, bool tuple);
 
         bool luaFunctionExists(String functionName);
 
@@ -41,9 +39,15 @@ class LuaAPI : public RefCounted {
         lua_State* newThread();
         lua_State* getState();
 
+        inline void addRef(Variant var) {
+            refs.append(var);
+        }
+
     private:
         LuaState state;
         lua_State* lState;
+        // Temp. Looking for better method
+        Array refs;
         std::map<void*, Variant*> ownedObjects;
         LuaError* execute(int handlerIndex);
 };

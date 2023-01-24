@@ -1,6 +1,7 @@
 #include "luaState.h"
 
 #include <classes/luaAPI.h>
+#include <classes/luaCallableExtra.h>
 
 // These 2 macros helps us in constructing general metamethods.
 // We can use "lua" as a "Lua" pointer and arg1, arg2, ..., arg5 as Variants objects
@@ -9,7 +10,7 @@
  [](lua_State* inner_state) -> int {                                          \
      lua_pushstring(inner_state,"__OBJECT");                                  \
      lua_rawget(inner_state,LUA_REGISTRYINDEX);                               \
-     RefCounted* OBJ = (RefCounted*) lua_touserdata(inner_state, -1); \
+     RefCounted* OBJ = (RefCounted*) lua_touserdata(inner_state, -1);         \
      lua_pop(inner_state, 1);                                                 \
      Variant arg1 = LuaState::getVariant(inner_state, 1, OBJ);                \
      Variant arg2 = LuaState::getVariant(inner_state, 2, OBJ);                \
@@ -691,6 +692,17 @@ void LuaState::createCallableMetatable() {
 
     lua_pushstring(L, "__call"); 
     lua_pushcfunction(L, luaCallableCall);
+    lua_settable(L, -3);
+    
+    lua_pop(L, 1);
+}
+
+// Create metatable for any Callable and saves it at LUA_REGISTRYINDEX with name "mt_Callable"
+void LuaState::createCallableExtraMetatable() {
+    luaL_newmetatable(L, "mt_CallableExtra");
+
+    lua_pushstring(L, "__call"); 
+    lua_pushcfunction(L, LuaCallableExtra::call);
     lua_settable(L, -3);
     
     lua_pop(L, 1);

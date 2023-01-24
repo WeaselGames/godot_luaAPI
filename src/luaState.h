@@ -50,6 +50,7 @@ class LuaState {
         void createPlaneMetatable();
         void createObjectMetatable();
         void createCallableMetatable();
+        void createCallableExtraMetatable();
 };
 
 #endif

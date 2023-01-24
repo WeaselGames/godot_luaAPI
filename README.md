@@ -30,7 +30,7 @@ If you are looking to make your game using Lua or would like to support Modding 
 - [godot-lua-pluginscript](https://github.com/gilzoide/godot-lua-pluginscript) by [gilzoide](https://github.com/gilzoide)
 <br />
 
-We will supply a brief overview here. But for more info check out the [wiki](https://luaapi.weaselgames.info/2.0a).
+We will supply a brief overview here. But for more info check out the [wiki](https://luaapi.weaselgames.info/latest).
 
 Features
 --------------------------------
@@ -85,7 +85,7 @@ This build is for godot 4.0.0-beta. Will not be supporting older beta builds, we
 
 Examples
 ------------
-If you are looking for more in depth information please refer to our [wiki](https://luaapi.weaselgames.info/2.0a).
+If you are looking for more in depth information please refer to our [wiki](https://luaapi.weaselgames.info/latest).
 
 **Running Lua from a string:**
 ```gdscript

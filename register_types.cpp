@@ -4,6 +4,7 @@
 #include "src/classes/luaThread.h"
 #include "src/classes/luaCallable.h"
 #include "src/classes/luaTuple.h"
+#include "src/classes/luaCallableExtra.h"
 
 void initialize_luaAPI_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
@@ -13,6 +14,7 @@ void initialize_luaAPI_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<LuaThread>();
 	ClassDB::register_class<LuaError>();
 	ClassDB::register_class<LuaTuple>();
+	ClassDB::register_class<LuaCallableExtra>();
 }
 
 void uninitialize_luaAPI_module(ModuleInitializationLevel p_level) {
