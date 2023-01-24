@@ -38,7 +38,7 @@ void LuaTuple::clear() {
 }
 
 bool LuaTuple::isEmpty() {
-    elements.is_empty();
+    return elements.is_empty();
 }
 
 int LuaTuple::size() {
