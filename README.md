@@ -215,12 +215,9 @@ var lua: LuaAPI
 
 class Player:
 	var pos = Vector2(0, 0)
-	# If lua_funcs is not defined or returns a empty array, all functions will be aval.
-	func lua_funcs():
-		return ["move_forward"]
-	# lua_fields behaves the same as lua_funcs but for fields.
+	# If lua_fields is not defined or returns a empty array, all functions and fields will be aval.
 	func lua_fields():
-		return ["pos"]
+		return ["pos", "move_forward"]
 	func move_forward():
 		pos.x+=1
 
@@ -247,7 +244,7 @@ var lua: LuaAPI
 class Player:
 	var pos = Vector2(1, 0)
 	# Most metamethods can be overriden. The function names are the same as the metamethods.
-	func __index(index):
+	func __index(ref: LuaAPI, index):
 		if index=="pos":
 			return pos
 		else:

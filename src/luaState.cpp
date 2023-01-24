@@ -500,18 +500,19 @@ int LuaState::luaCallableCall(lua_State* state) {
     Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
    
     const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
-    Vector<Variant> p_args;
     int index = 2; // we start at 2, 1 is the callable
     for (int i = 0; i < argc; i++) {
-        p_args.set(i, LuaState::getVariant(state, index++, OBJ));
-        args[i] = &p_args[i];
-        if (args[i]->get_type() == Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(args[i]->operator Object*()); err != nullptr) {
+        Variant* temp = memnew(Variant);
+        *temp = LuaState::getVariant(state, index++, OBJ);
+        if ((*temp).get_type() != Variant::Type::OBJECT) {
+            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
         }
+
+        args[i] = temp;
     }
 
     Variant returned;
