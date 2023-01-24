@@ -21,10 +21,9 @@ func _init():
 	lua.push_variant("testObj", testObj)
 	
 	# testName and testDescription are for any needed context about the test.
-	testName = "General.gdfunction_call"
+	testName = "General.object_metamethod"
 	testDescription = "
-Runs the fibonacci sequence of 15 and verifies the result.
-Number is passed via push_variant.
+Tests objects overiding lua metamethods.
 "
 
 func fail():
