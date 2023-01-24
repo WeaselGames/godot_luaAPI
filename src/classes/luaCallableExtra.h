@@ -5,8 +5,6 @@
 
 #include <lua/lua.hpp>
 
-#include "LuaError.h"
-
 class LuaCallableExtra : public RefCounted {
     GDCLASS(LuaCallableExtra, RefCounted);
 
