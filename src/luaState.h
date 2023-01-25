@@ -38,7 +38,7 @@ class LuaState {
         #ifndef LAPI_GODOT_EXTENSION
         static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
         #else
-        static LuaError* handleError(const StringName &func, GDExtensionCallError error, const Variant** p_arguments, int argc);
+        static LuaError* handleError(const StringName &func, int error, int expected, int argument, const Variant** p_arguments, int argc);
         #endif
 
         static Variant getVariant(lua_State* state, int index, const RefCounted* obj);

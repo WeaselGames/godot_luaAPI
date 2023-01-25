@@ -395,15 +395,15 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
     }
 }
 #else
-LuaError* LuaState::handleError(const StringName &func, GDExtensionCallError error, const Variant** p_arguments, int argc) {
-    switch (error.error) {
+LuaError* LuaState::handleError(const StringName &func, int error, int expected, int argument, const Variant** p_arguments, int argc) {
+    switch (error) {
         case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
             return LuaError::newError(
                 vformat("Error calling function: %s - Invalid type for argument %s, expected %s but is %s.", 
                     String(func), 
-                    itos(error.argument+1), // lua indexes by 1 so this should be more correct
-                    Variant::get_type_name(Variant::Type(error.expected)),
-                    Variant::get_type_name(p_arguments[error.argument]->get_type())), 
+                    itos(argument+1), // lua indexes by 1 so this should be more correct
+                    Variant::get_type_name(Variant::Type(expected)),
+                    Variant::get_type_name(p_arguments[argument]->get_type())), 
                 LuaError::ERR_RUNTIME);
          }
         case GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS: {
@@ -418,7 +418,7 @@ LuaError* LuaState::handleError(const StringName &func, GDExtensionCallError err
             return LuaError::newError(
                 vformat("Error calling function: %s - Too few arguments, expected %d but got $d.", 
                     String(func),
-                    error.argument,
+                    argument,
                     argc), 
                 LuaError::ERR_RUNTIME);
         }
@@ -626,7 +626,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     GDExtensionCallError error;
     obj->call(fName.ascii().get_data(), args, argc, returned, error);
     if (error.error != GDEXTENSION_CALL_OK) {
-        LuaError* err = LuaState::handleError(fName, error, args, argc);
+        LuaError* err = LuaState::handleError(fName, error.error, error.expected, error.argument, args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;

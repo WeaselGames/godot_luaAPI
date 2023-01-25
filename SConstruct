@@ -9,6 +9,7 @@ env.tools=['mingw']
 libraries 		= []
 library_paths 	= ''
 cppDefines 		= ['LAPI_GODOT_EXTENSION']
+cppPath        = [Dir('src').abspath, Dir('external').abspath]
 cppFlags 		= ['-Wall']
 cxxFlags 		= []
 if not env["platform"] == "windows":
@@ -19,10 +20,10 @@ else:
 env.Append(LIBS 			= libraries)
 env.Append(LIBPATH 		    = library_paths)
 env.Append(CPPDEFINES 	    = cppDefines)
+env.Append(CPPPATH 	        = cppPath)
 env.Append(CPPFLAGS 		= cppFlags)
 env.Append(CXXFLAGS 		= cxxFlags)
-sources = []
-
+sources = Glob('src/*.cpp')
 for root, dirnames, filenames in os.walk('src'):
   for filename in fnmatch.filter(filenames, '*.cpp'):
     sources.append(Glob(os.path.join(root, filename)[len(root)+1:]))

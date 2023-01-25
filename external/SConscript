@@ -9,8 +9,8 @@ if env_lua["platform"] == 'linux':
     env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
 
 libraries 		= []
-library_paths 	= 'MAKE_LIB'
-cppDefines 		= {}
+library_paths 	= ''
+cppDefines 		= ['MAKE_LIB']
 cppFlags 		= ['-Wall']#, '-Werror']
 cxxFlags 		= ['-std=c++17']
 
@@ -20,7 +20,6 @@ env_lua.Append(LIBPATH 		= library_paths)
 env_lua.Append(CPPDEFINES 	= cppDefines)
 env_lua.Append(CPPFLAGS 		= cppFlags)
 env_lua.Append(CXXFLAGS 		= cxxFlags)
-env.Append(CPPPATH=[Dir('lua').abspath])
 
 sources = ['lua/onelua.c']
 library_name = "liblua{}{}".format(env['suffix'], env["LIBSUFFIX"])
