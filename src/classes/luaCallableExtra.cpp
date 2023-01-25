@@ -2,7 +2,12 @@
 
 #include "luaState.h"
 #include "luaTuple.h"
+
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/variant/callable.h"
+#else
+#include <godot_cpp/variant/callable.hpp>
+#endif
 
 void LuaCallableExtra::_bind_methods() {
     ClassDB::bind_static_method("LuaCallableExtra", D_METHOD("with_tuple", "Callable", "argc"), &LuaCallableExtra::withTuple);
@@ -31,7 +36,7 @@ int LuaCallableExtra::call(lua_State *state) {
     if (func->isTuple)
         noneMulty=func->argc-1; // We subtract one becuase the tuple is countedA
     
-    Vector<Variant> p_args;
+    Array p_args;
 
     if (func->wantsRef)
         p_args.append(OBJ);
@@ -55,6 +60,7 @@ int LuaCallableExtra::call(lua_State *state) {
     }
 
     Variant returned;
+    #ifndef LAPI_GODOT_EXTENSION
     Callable::CallError error;
     func->function.callp(args, p_args.size(), returned, error);
     if (error.error != error.CALL_OK) {
@@ -63,6 +69,9 @@ int LuaCallableExtra::call(lua_State *state) {
         lua_error(state);
         return 0;
     }
+    #else
+    returned = func->function.callv(p_args);
+    #endif
 
     LuaState::pushVariant(state, returned);
     if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)

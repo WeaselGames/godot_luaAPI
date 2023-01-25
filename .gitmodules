@@ -2,3 +2,6 @@
 	path = external/lua
 	url = https://github.com/lua/lua
 	branch = 5d708c3
+[submodule "external/godot-cpp"]
+	path = external/godot-cpp
+	url = https://github.com/godotengine/godot-cpp

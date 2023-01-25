@@ -1,4 +1,4 @@
-
+# Used for module builds
 Import('env')
 Import('env_lua')
 

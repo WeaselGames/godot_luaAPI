@@ -5,6 +5,7 @@
 *.obj
 *.pyc
 *.bc
+*.os
 
 # Compiled Dynamic libraries
 *.so

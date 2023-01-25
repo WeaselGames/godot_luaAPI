@@ -1,11 +1,19 @@
 #ifndef LUASTATE_H
 #define LUASTATE_H
 
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/object/ref_counted.h"
 #include "core/variant/callable.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
 
 #include <lua/lua.hpp>
 #include <classes/luaError.h>
+
+#ifdef LAPI_GODOT_EXTENSION
+using namespace godot;
+#endif
 
 class LuaState {
     public:
@@ -28,7 +36,11 @@ class LuaState {
         
         static LuaError* pushVariant(lua_State* state, Variant var);
         static LuaError* handleError(lua_State* state, int lua_error);
+        #ifndef LAPI_GODOT_EXTENSION
         static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
+        #else
+        static LuaError* handleError(const StringName &func, GDExtensionCallError error, const Variant** p_arguments, int argc);
+        #endif
 
         static Variant getVariant(lua_State* state, int index, const RefCounted* obj);
 
