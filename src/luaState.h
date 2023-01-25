@@ -19,7 +19,6 @@ class LuaState {
     public:
         void setState(lua_State* state, RefCounted* obj, bool bindAPI);
         void bindLibraries(Array libs);
-        void pushFunction(String functionName, Callable function, int argc, bool tuple) const;
 
         bool luaFunctionExists(String functionName);
 
@@ -47,7 +46,6 @@ class LuaState {
         // Lua functions
         static int luaErrorHandler(lua_State* state);
         static int luaPrint(lua_State* state);
-        static int luaExposedFuncCall(lua_State* state);
         static int luaUserdataFuncCall(lua_State* state);
         static int luaCallableCall(lua_State* state);
     private:

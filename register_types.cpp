@@ -3,7 +3,6 @@
 #include "src/classes/luaAPI.h"
 #include "src/classes/luaError.h"
 #include "src/classes/luaThread.h"
-#include "src/classes/luaCallable.h"
 #include "src/classes/luaTuple.h"
 #include "src/classes/luaCallableExtra.h"
 

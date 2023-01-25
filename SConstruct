@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import fnmatch
 
 env = SConscript("external/SConscript")
 env.tools=['mingw']
@@ -13,20 +14,18 @@ cxxFlags 		= []
 if not env["platform"] == "windows":
     cxxFlags=['-std=c++17']
 else:
-    cxxFlags=['/std:c++17']
-
-env['tools']=['mingw']
+    cxxFlags=['-std=c++17']
 
 env.Append(LIBS 			= libraries)
 env.Append(LIBPATH 		    = library_paths)
 env.Append(CPPDEFINES 	    = cppDefines)
 env.Append(CPPFLAGS 		= cppFlags)
 env.Append(CXXFLAGS 		= cxxFlags)
+sources = []
 
-env.Append(CPPPATH=["src/", "external/"])
-sources = Glob("*.cpp")
-sources = Glob("src/*.cpp")
-sources = Glob("src/classes/*.cpp")
+for root, dirnames, filenames in os.walk('src'):
+  for filename in fnmatch.filter(filenames, '*.cpp'):
+    sources.append(Glob(os.path.join(root, filename)[len(root)+1:]))
 
 
 

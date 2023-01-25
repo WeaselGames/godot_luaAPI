@@ -5,12 +5,13 @@
 *.obj
 *.pyc
 *.bc
-*.os
 
 # Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
+*.os
+*.exp
 
 # Compiled Static libraries
 *.lai
@@ -47,3 +48,6 @@ custom.py
 /godot
 /logs
 .godot
+
+#dirs
+bin/
