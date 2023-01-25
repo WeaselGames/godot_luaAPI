@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="LuaCallableExtra" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		A tuple.
+	</brief_description>
+	<description>
+		TODO
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="with_tuple" qualifiers="static">
+			<return type="LuaCallableExtra" />
+			<param index="0" name="function" type="Callable" />
+			<param index="1" name="argc" type="int" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="with_ref" qualifiers="static">
+			<return type="LuaCallableExtra" />
+			<param index="0" name="function" type="Callable" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="set_info">
+			<return type="void" />
+			<param index="0" name="function" type="Callable" />
+			<param index="1" name="argc" type="int" />
+			<param index="2" name="isTuple" type="bool" />
+			<param index="3" name="wantsRef" type="bool" />
+			<description>
+				TODO
+			</description>
+		</method>
+	</methods>
+</class>

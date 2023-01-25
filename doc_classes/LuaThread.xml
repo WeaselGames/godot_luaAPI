@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="LuaThread" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-	</brief_description>
 		A coroutine.
+	</brief_description>
 	<description>
 		Binds to a existing Lua object and creates a new lua thread with lua_newthread. This is not a typical thread but a coroutine. Instead of executing a file or string directly you load it into the state. Every time the resume method is caleld the lua code will execute untill yield is called from lua.
 	</description>

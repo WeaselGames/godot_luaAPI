@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="LuaTuple" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		A tuple.
+	</brief_description>
+	<description>
+		TODO
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="from_array" qualifiers="static">
+			<return type="LuaTuple" />
+			<param index="0" name="elms" type="Array" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="push_back">
+			<return type="void" />
+			<param index="0" name="var" type="Variant" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="push_front">
+			<return type="void" />
+			<param index="0" name="var" type="Variant" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="set_value">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="var" type="Variant" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="is_empty">
+			<return type="bool" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="pop_back">
+			<return type="Variant" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="pop_front">
+			<return type="Variant" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="get_value">
+			<return type="Variant" />
+			<param index="0" name="index" type="int" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="to_array">
+			<return type="Array" />
+			<description>
+				TODO
+			</description>
+		</method>
+	</methods>
+</class>
