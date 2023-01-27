@@ -30,7 +30,7 @@ If you are looking to make your game using Lua or would like to support Modding 
 - [godot-lua-pluginscript](https://github.com/gilzoide/godot-lua-pluginscript) by [gilzoide](https://github.com/gilzoide)
 <br />
 
-We will supply a brief overview here. But for more info check out the [wiki](https://luaapi.weaselgames.info/2.0a).
+We will supply a brief overview here. But for more info check out the [wiki](https://luaapi.weaselgames.info/latest).
 
 Features
 --------------------------------
@@ -85,7 +85,7 @@ This build is for godot 4.0.0-beta. Will not be supporting older beta builds, we
 
 Examples
 ------------
-If you are looking for more in depth information please refer to our [wiki](https://luaapi.weaselgames.info/2.0a).
+If you are looking for more in depth information please refer to our [wiki](https://luaapi.weaselgames.info/latest).
 
 **Running Lua from a string:**
 ```gdscript
@@ -215,12 +215,9 @@ var lua: LuaAPI
 
 class Player:
 	var pos = Vector2(0, 0)
-	# If lua_funcs is not defined or returns a empty array, all functions will be aval.
-	func lua_funcs():
-		return ["move_forward"]
-	# lua_fields behaves the same as lua_funcs but for fields.
+	# If lua_fields is not defined or returns a empty array, all functions and fields will be aval.
 	func lua_fields():
-		return ["pos"]
+		return ["pos", "move_forward"]
 	func move_forward():
 		pos.x+=1
 
@@ -247,7 +244,7 @@ var lua: LuaAPI
 class Player:
 	var pos = Vector2(1, 0)
 	# Most metamethods can be overriden. The function names are the same as the metamethods.
-	func __index(index):
+	func __index(ref: LuaAPI, index):
 		if index=="pos":
 			return pos
 		else:

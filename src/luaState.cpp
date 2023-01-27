@@ -1,5 +1,8 @@
 #include "luaState.h"
+#include <classes/luaAPI.h>
 #include <classes/luaCallable.h>
+#include <classes/luaTuple.h>
+#include <classes/luaCallableExtra.h>
 
 void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     this->L = L;
@@ -23,6 +26,7 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     createPlaneMetatable();     // "mt_Plane"
     createObjectMetatable();    // "mt_Object"
     createCallableMetatable();  // "mt_Callable"
+    createCallableExtraMetatable();  // "mt_CallableExtra"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -116,7 +120,7 @@ Variant LuaState::callFunction(String functionName, Array args) {
 }
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
-LuaError* LuaState::pushVariant(Variant var) const{
+LuaError* LuaState::pushVariant(Variant var) const {
     return LuaState::pushVariant(L, var);
 }
 
@@ -241,6 +245,35 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
+                break;
+            }
+
+            // If the type being pushed is a tuple, push its content instead.
+            if (LuaTuple* tuple = Object::cast_to<LuaTuple>(var.operator Object*()); tuple != nullptr) {
+                for (int i = 0; i < tuple->size(); i++) {
+                    Variant value = tuple->get(i);
+                    pushVariant(state, value);
+                }
+                break;
+            }
+
+            // Temp maybe? If we do not store a referance to refCounted they will die with GDScript
+            if (var.is_ref_counted()) {
+                lua_pushstring(state, "__OBJECT");
+                lua_rawget(state, LUA_REGISTRYINDEX);
+                LuaAPI* OBJ = (LuaAPI*) lua_touserdata(state, -1);
+                lua_pop(state, 1);
+
+                if (OBJ != nullptr)
+                    OBJ->addRef(var);
+            }
+
+
+            // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
+            if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
+                void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+                memcpy(userdata, (void*)&var, sizeof(Variant));
+                luaL_setmetatable(state, "mt_CallableExtra");
                 break;
             }
 
@@ -467,18 +500,19 @@ int LuaState::luaCallableCall(lua_State* state) {
     Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
    
     const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
-    Vector<Variant> p_args;
     int index = 2; // we start at 2, 1 is the callable
     for (int i = 0; i < argc; i++) {
-        p_args.set(i, LuaState::getVariant(state, index++, OBJ));
-        args[i] = &p_args[i];
-        if (args[i]->get_type() == Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(args[i]->operator Object*()); err != nullptr) {
+        Variant* temp = memnew(Variant);
+        *temp = LuaState::getVariant(state, index++, OBJ);
+        if ((*temp).get_type() != Variant::Type::OBJECT) {
+            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
         }
+
+        args[i] = temp;
     }
 
     Variant returned;
@@ -492,6 +526,8 @@ int LuaState::luaCallableCall(lua_State* state) {
     }
     
     LuaState::pushVariant(state, returned);
+    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+        return tuple->size();
     return 1;
 }
 
@@ -534,46 +570,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     }
 
     LuaState::pushVariant(state, ret);
-    return 1;
-}
-
-// This function is invoked whenever a function is called on one of the light userdata types 
-// excluding mt_Callable or mt_Object if __index is overwritten
-int LuaState::luaLightUserdataFuncCall(lua_State* state) {
-    lua_pushstring(state, "__OBJECT");
-    lua_rawget(state, LUA_REGISTRYINDEX);
-    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
-    lua_pop(state, 1);
-
-    int argc = lua_gettop(state);
-
-    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
-    int index = 1;
-    for (int i = 0; i < argc; i++) {
-        Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMessage().ascii().get_data());
-                lua_error(state);
-                return 0;
-            }
-        }
-
-        args[i] = temp;
-    }
-
-    RefCounted* refObj = Object::cast_to<RefCounted>((Object*) lua_touserdata(state, lua_upvalueindex(1)));
-    String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
-    Callable::CallError error;
-    Variant ret = refObj->callp(fName.ascii().get_data(), args, argc, error);
-    if (error.error != error.CALL_OK) {
-        LuaError* err = LuaState::handleError(fName, error, args, argc);
-        lua_pushstring(state, err->getMessage().ascii().get_data());
-        lua_error(state);
-        return 0;
-    }
-
-    LuaState::pushVariant(state, ret);
+    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(ret.operator Object*()); tuple != nullptr)
+        return tuple->size();
     return 1;
 }
