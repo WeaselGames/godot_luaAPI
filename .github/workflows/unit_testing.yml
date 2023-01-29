@@ -3,7 +3,6 @@ on:
   pull_request:
     branches:
       - "*"
-      - "!dev/54"
     paths-ignore:
       - "**/README.md"
       - ".github/ISSUE_TEMPLATE/*"
@@ -21,6 +20,7 @@ env:
 
 jobs:
   unit-tests:
+    if: '! github.event.pull_request.draft'
     runs-on: "ubuntu-20.04"
     timeout-minutes: 120
     name: Linux Unit Testing
