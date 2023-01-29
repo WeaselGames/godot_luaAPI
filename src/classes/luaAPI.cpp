@@ -87,11 +87,11 @@ LuaError* LuaAPI::doFile(String fileName) {
     // push the error handler onto the stack
     lua_pushcfunction(lState, LuaState::luaErrorHandler);
 
-    Error error;
     String path;
     // fileAccess never unrefs without this
     {
         #ifndef LAPI_GODOT_EXTENSION
+        Error error;
         Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
         if (error != Error::OK) {
             return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);

@@ -546,9 +546,9 @@ int LuaState::luaPrint(lua_State* state)
     return 0;
 }
 
-#ifndef LAPI_GODOT_EXTENSION
 // Used as the __call metamethod for mt_Callable. 
 // All exposed gdscript functions are called vis this method.
+#ifndef LAPI_GODOT_EXTENSION
 int LuaState::luaCallableCall(lua_State* state) {
     lua_pushstring(state, "__OBJECT");
     lua_rawget(state, LUA_REGISTRYINDEX);
@@ -563,7 +563,7 @@ int LuaState::luaCallableCall(lua_State* state) {
     for (int i = 0; i < argc; i++) {
         Variant* temp = memnew(Variant);
         *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
+        if ((*temp).get_type() == Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
@@ -584,11 +584,59 @@ int LuaState::luaCallableCall(lua_State* state) {
         return 0;
     }
     
-    LuaState::pushVariant(state, returned);
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
     if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
 }
+
+#else
+
+int LuaState::luaCallableCall(lua_State* state) {
+    lua_pushstring(state, "__OBJECT");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its self will be counted
+    Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
+   
+    Array args;
+    int index = 2; // we start at 2, 1 is the callable
+    for (int i = 0; i < argc; i++) {
+        
+        Variant var = LuaState::getVariant(state, index++, OBJ);
+        if (var.get_type() == Variant::Type::OBJECT) {
+            if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+                lua_pushstring(state, err->getMessage().ascii().get_data());
+                lua_error(state);
+                return 0;
+            }
+        }
+
+        args.append(var);
+    }
+
+    Variant returned = callable.callv(args);
+    
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
+    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+        return tuple->size();
+    return 1;
+}
+
 #endif
 
 // This function is invoked whenever a function is called on one of the userdata types 
@@ -624,7 +672,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     }
     #else
     GDExtensionCallError error;
-    obj->call(fName.ascii().get_data(), args, argc, returned, error);
+    obj->callp(fName.ascii().get_data(), args, argc, returned, error);
     if (error.error != GDEXTENSION_CALL_OK) {
         LuaError* err = LuaState::handleError(fName, error.error, error.expected, error.argument, args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());

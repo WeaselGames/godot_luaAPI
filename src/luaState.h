@@ -6,6 +6,7 @@
 #include "core/variant/callable.h"
 #else
 #include <godot_cpp/classes/ref.hpp>
+#include <array>
 #endif
 
 #include <lua/lua.hpp>

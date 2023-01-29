@@ -12,10 +12,6 @@ cppDefines 		= ['LAPI_GODOT_EXTENSION']
 cppPath        = [Dir('src').abspath, Dir('external').abspath]
 cppFlags 		= ['-Wall']
 cxxFlags 		= []
-if not env["platform"] == "windows":
-    cxxFlags=['-std=c++17']
-else:
-    cxxFlags=['-std=c++17']
 
 env.Append(LIBS 			= libraries)
 env.Append(LIBPATH 		    = library_paths)
@@ -23,12 +19,9 @@ env.Append(CPPDEFINES 	    = cppDefines)
 env.Append(CPPPATH 	        = cppPath)
 env.Append(CPPFLAGS 		= cppFlags)
 env.Append(CXXFLAGS 		= cxxFlags)
-sources = Glob('src/*.cpp')
-for root, dirnames, filenames in os.walk('src'):
-  for filename in fnmatch.filter(filenames, '*.cpp'):
-    sources.append(Glob(os.path.join(root, filename)[len(root)+1:]))
-
-
+sources = Glob('*.cpp')
+sources.append(Glob('src/*.cpp'))
+sources.append(Glob('src/classes/*.cpp'))
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
@@ -44,3 +37,5 @@ else:
     )
 
 env.Default(library)
+
+
