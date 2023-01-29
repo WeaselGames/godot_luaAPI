@@ -9,6 +9,8 @@ def get_doc_classes():
         "LuaAPI",
         "LuaThread",
         "LuaError",
+        "LuaTuple",
+        "LuaCallableExtra",
     ]
 
 def get_doc_path():
