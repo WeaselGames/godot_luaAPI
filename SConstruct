@@ -10,7 +10,7 @@ libraries 		= []
 library_paths 	= ''
 cppDefines 		= ['LAPI_GODOT_EXTENSION']
 cppPath        = [Dir('src').abspath, Dir('external').abspath]
-cppFlags 		= ['-Wall']
+cppFlags 		= []
 cxxFlags 		= []
 
 env.Append(LIBS 			= libraries)
@@ -24,14 +24,14 @@ sources.append(Glob('src/classes/*.cpp'))
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "bin/luaapi/libluaapi.{}.{}.framework/libluaapi.{}.{}".format(
+        "project/addons/luaAPI/bin/libluaapi.{}.{}.framework/libluaapi.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
     )
 else:
     library = env.SharedLibrary(
-        "bin/luaapi/libluaapi{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "project/addons/luaAPI/bin/libluaapi{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

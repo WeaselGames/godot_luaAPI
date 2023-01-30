@@ -1,0 +1,15 @@
+[configuration]
+entry_symbol = "luaAPI_library_init"
+
+[libraries]
+windows.x86_64.debug = "bin/libluaapi.windows.template_debug.x86_64.dll"
+windows.x86_64.release = "bin/libluaapi.windows.template_release.x86_64.dll"
+windows.x86_64.editor = "bin/libluaapi.windows.editor.x86_64.dll"
+
+linux.x86_64.debug = "bin/libluaapi.linux.template_debug.x86_64.so"
+linux.x86_64.release = "bin/libluaapi.linux.template_release.x86_64.so"
+linux.debug.arm64 = "bin/libluaapi.linux.template_debug.arm64.so"
+linux.release.arm64 = "bin/libluaapi.linux.template_release.arm64.so"
+
+macos.debug = "bin/libluaapi.macos.template_debug.framework"
+macos.release = "bin/libluaapi.macos.template_release.framework"

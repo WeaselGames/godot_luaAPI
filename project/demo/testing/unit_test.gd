@@ -14,7 +14,7 @@ var testName = "Test"
 var testDescription = "Base test for all other test's to inhirt from for poly"
 
 # Called when the node enters the scene tree for the first time.
-func _init():
+func _ready():
 	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

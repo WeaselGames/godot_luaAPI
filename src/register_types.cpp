@@ -1,10 +1,10 @@
 #include "register_types.h"
 
-#include "src/classes/luaAPI.h"
-#include "src/classes/luaError.h"
-#include "src/classes/luaThread.h"
-#include "src/classes/luaTuple.h"
-#include "src/classes/luaCallableExtra.h"
+#include "classes/luaAPI.h"
+#include "classes/luaError.h"
+#include "classes/luaThread.h"
+#include "classes/luaTuple.h"
+#include "classes/luaCallableExtra.h"
 
 #ifdef LAPI_GODOT_EXTENSION
 using namespace godot;
@@ -32,7 +32,7 @@ extern "C"
 {
 	// Initialization.
 
-	GDExtensionBool GDE_EXPORT luaapi_library_init(const GDExtensionInterface *p_interface, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization)
+	GDExtensionBool GDE_EXPORT luaAPI_library_init(const GDExtensionInterface *p_interface, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization)
 	{
 		GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
 

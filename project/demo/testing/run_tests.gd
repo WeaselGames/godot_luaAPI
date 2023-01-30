@@ -1,8 +1,4 @@
-#!/usr/bin/env -S godot --headless -s
-
-# This is a standalone script meant to be run via CI
-#class_name RunTests
-extends SceneTree
+extends Node2D
 
 var time_elapsed = 0
 var testCount = 0
@@ -22,13 +18,14 @@ func sort_tests(a, b):
 		return true
 	return false
 
-func _init():
+func _ready():
 	logFile = FileAccess.open("res://log.txt", FileAccess.WRITE_READ)
 	logPrint("LuaAPI Testing framework for v2-alpha")
 	logPrint("Starting time: %s\n" % str(time_elapsed))
 	load_tests()
 	for test in tests:
-		test._init()
+		print(test.get_meta("file"))
+		test._ready()
 	tests.sort_custom(sort_tests)
 	testCount = tests.size()
 	logPrint("Loaded %d tests\n" % testCount)
@@ -82,11 +79,11 @@ func finish():
 	
 	doneTests.clear()
 	logPrint("%d/" % failures + "%d tests failed." % testCount)
-	quit(failures)
+	get_tree().quit(failures)
 
 
 func load_tests():
-	var dir = DirAccess.open("res://tests")
+	var dir = DirAccess.open("res://demo/testing/tests")
 	dir.list_dir_begin()
 
 	while true:
@@ -94,7 +91,8 @@ func load_tests():
 		if file == "":
 			break
 		elif not file.begins_with(".") and  file.ends_with(".gd"):
-			var test = load("res://tests/%s" % file).new()
+			var test = load("res://demo/testing/tests/%s" % file).new()
+			test.set_meta("file", file)
 			tests.append(test)
 	
 	dir.list_dir_end()
