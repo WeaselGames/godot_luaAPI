@@ -77,7 +77,6 @@ LuaError* LuaAPI::pushGlobalVariant(String name, Variant var) {
     return state.pushGlobalVariant(name, var);
 }
 
-// Calls LuaState::exposeObjectConstructor()
 LuaError* LuaAPI::exposeObjectConstructor(String name, Object* obj) {
     return state.exposeObjectConstructor(name, obj);
 }

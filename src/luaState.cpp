@@ -247,18 +247,41 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
         }
         case Variant::Type::OBJECT: {
             // If the type being pushed is a lua error, Raise a error
+            #ifndef LAPI_GODOT_EXTENSION
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaError* err = dynamic_cast<LuaError*>(var.operator Object*()); err != nullptr) {
+            #endif
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 break;
             }
-
+    
             // If the type being pushed is a tuple, push its content instead.
+            #ifndef LAPI_GODOT_EXTENSION
             if (LuaTuple* tuple = Object::cast_to<LuaTuple>(var.operator Object*()); tuple != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(var.operator Object*()); tuple != nullptr) {
+            #endif
                 for (int i = 0; i < tuple->size(); i++) {
                     Variant value = tuple->get(i);
                     pushVariant(state, value);
                 }
+                break;
+            }
+
+            // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
+            #ifndef LAPI_GODOT_EXTENSION
+            if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaCallableExtra* func = dynamic_cast<LuaCallableExtra*>(var.operator Object*()); func != nullptr) {
+            #endif
+                void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+                memcpy(userdata, (void*)&var, sizeof(Variant));
+                luaL_setmetatable(state, "mt_CallableExtra");
                 break;
             }
 
@@ -271,15 +294,6 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
 
                 if (OBJ != nullptr)
                     OBJ->addRef(var);
-            }
-
-
-            // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
-            if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
-                void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
-                memcpy(userdata, (void*)&var, sizeof(Variant));
-                luaL_setmetatable(state, "mt_CallableExtra");
-                break;
             }
 
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
@@ -613,7 +627,7 @@ int LuaState::luaCallableCall(lua_State* state) {
         
         Variant var = LuaState::getVariant(state, index++, OBJ);
         if (var.get_type() == Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+            if (LuaError* err = dynamic_cast<LuaError*>(var.operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
@@ -632,7 +646,7 @@ int LuaState::luaCallableCall(lua_State* state) {
         return 0;
     }
 
-    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+    if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
 }
@@ -682,7 +696,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     #endif
 
     LuaState::pushVariant(state, returned);
-    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+    if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
 }

@@ -47,6 +47,9 @@ func _process(delta):
 		
 	var testCallable = lua.pull_variant("test")
 	if testCallable is LuaError:
+		if testCallable.type == LuaError.ERR_RUNTIME:
+			done = true # This is becuase GDExtension does not support luaCallables
+			return
 		errors.append(testCallable)
 		return fail()
 	

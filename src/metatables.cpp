@@ -10,7 +10,7 @@
 #define LUA_LAMBDA_TEMPLATE(_f_)                                              \
  [](lua_State* inner_state) -> int {                                          \
      lua_pushstring(inner_state,"__OBJECT");                                  \
-     lua_rawget(inner_state,LUA_REGISTRYINDEX);                               \
+     lua_rawget(inner_state, LUA_REGISTRYINDEX);                               \
      RefCounted* OBJ = (RefCounted*) lua_touserdata(inner_state, -1);         \
      lua_pop(inner_state, 1);                                                 \
      Variant arg1 = LuaState::getVariant(inner_state, 1, OBJ);                \

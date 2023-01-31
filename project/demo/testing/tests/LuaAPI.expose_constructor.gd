@@ -1,5 +1,6 @@
 extends UnitTest
-var lua: LuaAPI
+# cannot type this becuase of https://github.com/godotengine/godot-cpp/issues/1025
+var lua
 
 class TestObject:
 	var a: String
