@@ -3,10 +3,10 @@
 #include <classes/luaTuple.h>
 #include <classes/luaCallableExtra.h>
 
+#include <util/print_string.h>
+
 #ifndef LAPI_GODOT_EXTENSION
 #include <classes/luaCallable.h>
-#else
-#include <godot_cpp/variant/utility_functions.hpp>
 #endif
 
 void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
@@ -24,14 +24,14 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
 	lua_rawset(L, LUA_REGISTRYINDEX);
 
     // Creating basic types metatables and saving them in registry
-	createVector2Metatable();   // "mt_Vector2"
-	createVector3Metatable();   // "mt_Vector3"
-    createColorMetatable();     // "mt_Color"
-    createRect2Metatable();     // "mt_Rect2"
-    createPlaneMetatable();     // "mt_Plane"
-    createObjectMetatable();    // "mt_Object"
-    createCallableMetatable();  // "mt_Callable"
-    createCallableExtraMetatable();  // "mt_CallableExtra"
+	createVector2Metatable();       // "mt_Vector2"
+	createVector3Metatable();       // "mt_Vector3"
+    createColorMetatable();         // "mt_Color"
+    createRect2Metatable();         // "mt_Rect2"
+    createPlaneMetatable();         // "mt_Plane"
+    createObjectMetatable();        // "mt_Object"
+    createCallableMetatable();      // "mt_Callable"
+    createCallableExtraMetatable(); // "mt_CallableExtra"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -551,11 +551,7 @@ int LuaState::luaPrint(lua_State* state)
 		final_string += it_string;
 		if (n < args) final_string += ", ";
     }
-    #ifndef LAPI_GODOT_EXTENSION
 	print_line(final_string);
-    #else
-    UtilityFunctions::print(final_string);
-    #endif
 
     return 0;
 }
