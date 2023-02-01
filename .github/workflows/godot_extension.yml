@@ -12,8 +12,6 @@ on:
     paths-ignore:
       - "**/README.md"
       - ".github/ISSUE_TEMPLATE/*"
-env:
-  BASE_BRANCH: main
 
 jobs:
   build:
@@ -166,11 +164,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Install gcc-multilib
+        if: ${{ startsWith(matrix.arch, 'x86_32') }}
+        shell: sh
+        run: |
+          sudo apt install gcc-multilib
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
         run: |
-          sudo apt-get install mingw-w64 
+          sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
       - name: (Android) Set up Java 11
@@ -200,21 +203,8 @@ jobs:
           python -c "import sys; print(sys.version)"
           python -m pip install scons
           scons --version
-      - name: Load .scons_cache directory
-        id: linux-editor-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{github.workspace}}/.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{ matrix.arch }}-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{ matrix.arch }}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{ matrix.arch }}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{env.BASE_BRANCH}}-${{ matrix.arch }}
       - name: Compile extension
         shell: sh
-        env:
-          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
-          SCONS_CACHE_LIMIT: 7168
         run: |
           scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' -j2
           ls -l project/addons/luaAPI/bin/
