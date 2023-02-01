@@ -25,6 +25,14 @@ jobs:
     name: Module Unit Testing
     steps:
       - uses: actions/checkout@v3
+      - name: Wait for editor to build
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'Linux Editor(platform=linuxbsd tools=yes target=editor)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success
       - name: Download editor
         id: download-editor
         uses: dawidd6/action-download-artifact@v2
@@ -35,7 +43,7 @@ jobs:
       - name: Unit Testing
         run: |
           rm -rf project/addons
-          godot.linuxbsd.editor.x86_64.luaAPI --headless --path project/
+          ./godot.linuxbsd.editor.x86_64.luaAPI --headless --path project/
           mv project/log.txt project/module-log.txt
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
@@ -57,6 +65,14 @@ jobs:
         run: |
           7z x godot.zip
           mv *_linux.x86_64 godot
+      - name: Wait for extension to build
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          ref: ${{ github.ref }}
+          running-workflow-name: '🛠️ GDExtension'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          allowed-conclusions: success
       - name: Download Extension
         id: download-extension
         uses: dawidd6/action-download-artifact@v2
@@ -67,7 +83,7 @@ jobs:
           path: project/
       - name: Unit Testing
         run: |
-          godot --headless --path project/
+          ./godot --headless --path project/
           mv project/log.txt project/extension-log.txt
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
