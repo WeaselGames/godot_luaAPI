@@ -5,14 +5,12 @@ on:
       - "*"
     paths-ignore:
       - "**/README.md"
-      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
       - "**/README.md"
-      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
