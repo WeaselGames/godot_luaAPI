@@ -145,7 +145,7 @@ jobs:
         shell: sh
         run: |
           for addon in ${{ github.workspace }}/project/addons/*/; do
-            cp --no-clobber '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' "$addon"
+            cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' "$addon"
           done
       - name: Upload artifact
         uses: actions/upload-artifact@v2
