@@ -1,4 +1,4 @@
-name: ⚙️ Module Unit Tests
+name: Module Unit Tests
 on:
   workflow_run:
     workflows: ["Linux"]

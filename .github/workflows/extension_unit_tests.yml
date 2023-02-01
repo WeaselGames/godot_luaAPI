@@ -1,4 +1,4 @@
-name: ⚙️ Extension Unit Tests
+name: Extension Unit Tests
 on:
   workflow_run:
     workflows: ["GDExtension"]
