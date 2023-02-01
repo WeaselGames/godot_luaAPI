@@ -141,15 +141,11 @@ jobs:
         run: |
           scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' -j2
           ls -l project/addons/luaAPI/bin/
-      - name: Copy extra files to addon
+      - name: Prepare artifact
         shell: sh
         run: |
-          for addon in ${{ github.workspace }}/project/addons/*/; do
-            cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' "$addon"
-          done
-      - name: Prepare artifact
-        run: |
-          rm -rf ${{ github.workspace }}/project/.g* ${{ github.workspace }}/project/project.godot ${{ github.workspace }}/project/demo/testing
+          rm -rf ${{ github.workspace }}/project/.g* ${{ github.workspace }}/project/project.godot ${{ github.workspace }}/project/demo/testing ${{ github.workspace }}/project/addons/LuaAPI/bin/.gitignore
+          cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/project/addons/luaAPI
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
