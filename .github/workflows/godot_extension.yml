@@ -73,19 +73,6 @@ jobs:
             platform: windows
             arch: x86_32
           
-          - identifier: macos-release (x86_64)
-            name: MacOS (x86_64) - template_release
-            runner: macos-latest
-            target: template_release
-            platform: macos
-            arch: x86_64
-          - identifier: macos-debug (x86_64)
-            name: MacOS (x86_64) - template_debug
-            runner: macos-latest
-            target: template_debug
-            platform: macos
-            arch: x86_64
-          
           - identifier: android-release (x86_64)
             name: Android (arm64) - template_release
             runner: ubuntu-20.04
@@ -135,7 +122,32 @@ jobs:
             target: template_debug
             platform: android
             arch: arm32
+
+          - identifier: macos-release (x86_64)
+            name: MacOS (x86_64) - template_release
+            runner: macos-latest
+            target: template_release
+            platform: macos
+            arch: x86_64
+          - identifier: macos-debug (x86_64)
+            name: MacOS (x86_64) - template_debug
+            runner: macos-latest
+            target: template_debug
+            platform: macos
+            arch: x86_64
           
+          - identifier: ios-release (x86_64)
+            name: IOS (x86_64) - template_release
+            runner: macos-latest
+            target: template_release
+            platform: ios
+            arch: x86_64
+          - identifier: ios-debug (x86_64)
+            name: IOS (x86_64) - template_debug
+            runner: macos-latest
+            target: template_debug
+            platform: ios
+            arch: x86_64
           - identifier: ios-release (arm64)
             name: IOS (arm64) - template_release
             runner: macos-latest
@@ -148,18 +160,6 @@ jobs:
             target: template_debug
             platform: ios
             arch: arm64
-          - identifier: ios-release (arm32)
-            name: IOS (arm32) - template_release
-            runner: macos-latest
-            target: template_release
-            platform: ios
-            arch: arm32
-          - identifier: ios-debug (arm32)
-            name: IOS (arm32) - template_debug
-            runner: macos-latest
-            target: template_debug
-            platform: ios
-            arch: arm32
 
     steps:
       - name: Checkout project
