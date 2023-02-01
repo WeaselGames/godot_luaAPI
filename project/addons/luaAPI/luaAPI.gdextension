@@ -25,7 +25,5 @@ android.release.arm32 = "bin/libluaapi.android.template_release.arm32.so"
 macos.debug = "bin/libluaapi.macos.template_debug.framework"
 macos.release = "bin/libluaapi.macos.template_release.framework"
 
-ios.debug.x86_64 = "bin/libluaapi.ios.template_debug.arm32.so"
-ios.release.x86_64 = "bin/libluaapi.ios.template_release.arm32.so"
 ios.debug.arm64 = "bin/libluaapi.ios.template_debug.arm64.so"
 ios.release.arm64 = "bin/libluaapi.ios.template_release.arm64.so"

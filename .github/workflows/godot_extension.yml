@@ -12,6 +12,8 @@ on:
     paths-ignore:
       - "**/README.md"
       - ".github/ISSUE_TEMPLATE/*"
+env:
+  BASE_BRANCH: main
 
 jobs:
   build:
@@ -72,19 +74,19 @@ jobs:
             arch: x86_32
           
           - identifier: android-release (x86_64)
-            name: Android (arm64) - template_release
+            name: Android (x86_64) - template_release
             runner: ubuntu-20.04
             target: template_release
             platform: android
             arch: x86_64
           - identifier: android-debug (x86_64)
-            name: Android (arm64) - template_debug
+            name: Android (x86_64) - template_debug
             runner: ubuntu-20.04
             target: template_debug
             platform: android
             arch: x86_64
           - identifier: android-release (x86_32)
-            name: Android (arm64) - template_release
+            name: Android (x86_32) - template_release
             runner: ubuntu-20.04
             target: template_release
             platform: android
@@ -134,18 +136,6 @@ jobs:
             platform: macos
             arch: x86_64
           
-          - identifier: ios-release (x86_64)
-            name: IOS (x86_64) - template_release
-            runner: macos-latest
-            target: template_release
-            platform: ios
-            arch: x86_64
-          - identifier: ios-debug (x86_64)
-            name: IOS (x86_64) - template_debug
-            runner: macos-latest
-            target: template_debug
-            platform: ios
-            arch: x86_64
           - identifier: ios-release (arm64)
             name: IOS (arm64) - template_release
             runner: macos-latest
@@ -168,7 +158,7 @@ jobs:
         if: ${{ startsWith(matrix.arch, 'x86_32') }}
         shell: sh
         run: |
-          sudo apt install gcc-multilib
+          sudo apt install gcc-multilib g++-multilib
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
@@ -203,6 +193,17 @@ jobs:
           python -c "import sys; print(sys.version)"
           python -m pip install scons
           scons --version
+      - name: Load .scons_cache directory
+        id: linux-editor-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{env.BASE_BRANCH}}
+
       - name: Compile extension
         shell: sh
         run: |
@@ -210,6 +211,9 @@ jobs:
           ls -l project/addons/luaAPI/bin/
       - name: Prepare artifact
         shell: sh
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+          SCONS_CACHE_LIMIT: 7168
         run: |
           rm -rf ${{ github.workspace }}/project/.g* ${{ github.workspace }}/project/project.godot ${{ github.workspace }}/project/demo/testing ${{ github.workspace }}/project/addons/luaAPI/bin/.gitignore
           cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/project/addons/luaAPI
