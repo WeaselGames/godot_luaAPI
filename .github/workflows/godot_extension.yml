@@ -169,7 +169,7 @@ jobs:
           python -m pip install scons
           scons --version
       - name: Load .scons_cache directory
-        id: linux-editor-cache
+        id: godot-extension-cache
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/.scons_cache/
