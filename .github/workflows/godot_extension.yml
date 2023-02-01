@@ -180,7 +180,7 @@ jobs:
         if: ${{ startsWith(matrix.identifier, 'android-') }}
         shell: sh
         run: |
-          "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "build-tools;30.0.3" "platforms;android-29" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;21.4.7075529"
+          "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "build-tools;30.0.3" "platforms;android-23" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;21.4.7075529"
       - name: Set up Python
         uses: actions/setup-python@v2
           
