@@ -1,7 +1,7 @@
-name: ⚙️ Unit Tests
+name: ⚙️ Extension Unit Tests
 on:
   workflow_run:
-    workflows: ["🛠️ GDExtension"]
+    workflows: ["GDExtension"]
     types:
       - completed
 

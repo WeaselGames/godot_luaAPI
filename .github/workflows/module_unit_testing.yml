@@ -1,7 +1,7 @@
-name: ⚙️ Unit Tests
+name: ⚙️ Module Unit Tests
 on:
   workflow_run:
-    workflows: ["🐧 Linux"]
+    workflows: ["Linux"]
     types:
       - completed
 
