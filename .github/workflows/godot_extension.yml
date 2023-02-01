@@ -92,7 +92,7 @@ jobs:
             platform: android
             arch: x86_32
           - identifier: android-debug (x86_32)
-            name: Android (arm64) - template_debug
+            name: Android (x86_32) - template_debug
             runner: ubuntu-20.04
             target: template_debug
             platform: android
