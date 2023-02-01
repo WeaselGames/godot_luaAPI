@@ -11,12 +11,12 @@ config_version=5
 [application]
 
 config/name="LuaAPI Test Project"
-run/main_scene="res://demo/testing/run_tests.tscn"
+run/main_scene="res://testing/run_tests.tscn"
 config/features=PackedStringArray("4.0", "Mobile")
 
 [autoload]
 
-UnitTest="*res://demo/testing/unit_test.gd"
+UnitTest="*res://testing/unit_test.gd"
 
 [rendering]
 

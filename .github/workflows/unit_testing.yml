@@ -19,59 +19,58 @@ env:
   SCONS_CACHE_LIMIT: 7168
 
 jobs:
-  unit-tests:
-    if: '! github.event.pull_request.draft'
+  module-unit-tests:
     runs-on: "ubuntu-20.04"
     timeout-minutes: 120
-    name: Linux Unit Testing
+    name: Module Unit Testing
     steps:
       - uses: actions/checkout@v3
+      - name: Download editor
+        id: download-editor
+        uses: dawidd6/action-download-artifact@v2
         with:
-          submodules: recursive
-
-      # Install all packages except SCons
-      - name: Configure dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
-            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
-      - name: Load .scons_cache directory
-        id: linux-unittests-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{github.workspace}}/.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64"
-
-      - name: Configuring Python packages
-        run: |
-          python -c "import sys; print(sys.version)"
-          python -m pip install scons
-          python --version
-          scons --version
-      - name: Compilation
-        working-directory: ./scripts
-        env:
-          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
-        run: |
-          scons platform=linuxbsd tools=yes target=editor
-      - name: Prepare artifact
-        run: |
-          strip scripts/godot/bin/godot.*
-          chmod +x scripts/godot/bin/godot.*
+          workflow: linux.yml
+          workflow_conclusion: success
+          name: linux-editor
       - name: Unit Testing
         run: |
-          /bin/bash -e ./scripts/run_tests.sh
+          rm -rf project/addons
+          godot.linuxbsd.editor.x86_64.luaAPI --headless --path project/
+          mv project/log.txt project/module-log.txt
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: ${{github.job}}
-          path: project/log.txt
+          name: test-results
+          path: project/module-log.txt
+          
+  extension-unit-tests:
+    runs-on: "ubuntu-20.04"
+    timeout-minutes: 120
+    name: GDExtension Unit Testing
+    steps:
+      - uses: actions/checkout@v3 # we save some time by not recursing here since we dont need to.
+      - name: Download godot beta 16
+        uses: wei/wget@v1
+        with:
+          args: -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0/beta16/Godot_v4.0-beta16_linux.x86_64.zip
+      - name: Extract godot
+          run: |
+          7z x godot.zip
+          mv *_linux.x86_64 godot
+      - name: Download Extension
+        id: download-extension
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: godot_extension.yml
+          workflow_conclusion: success
+          name: godot_luaAPI
+          path: project/
+      - name: Unit Testing
+        run: |
+          godot --headless --path project/
+          mv project/log.txt project/extension-log.txt
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: test-results
+          path: project/extension-log.txt

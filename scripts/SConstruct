@@ -17,6 +17,8 @@ godot_dir = Dir("godot")
 
 lua_dir = Dir("luaAPI")
 
+buildModule = os.environ.get("MODULE", 'true').lower() in ('true', '1', 't')
+
 # A method which allows us to run `git`, `scons`, and other commands.
 def run(args, dir="."):
     if sys.platform.startswith("win32"):
@@ -24,7 +26,7 @@ def run(args, dir="."):
     else:
         return subprocess.run(args, check=True, cwd=dir).returncode
 
-if not lua_dir.exists():
+if not lua_dir.exists() and buildModule:
     print("Copying over source files.")
     copytree("../", lua_dir.abspath, 
         ignore=ignore_patterns('.github*', 'scripts*', 'testing*'))
@@ -41,7 +43,8 @@ for arg in ARGLIST:
     opt = "%s=%s" % (arg[0], arg[1])
     args.append(opt)
 
-args.append("custom_modules=%s" % lua_dir.abspath)
+if buildModule:
+    args.append("custom_modules=%s" % lua_dir.abspath)
 
 # Append the default `extra_suffix` to distinguish between other builds.
 args.append("extra_suffix=luaAPI")

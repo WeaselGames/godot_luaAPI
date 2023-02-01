@@ -20,7 +20,7 @@ func _process(delta):
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._process(delta)
 	
-	var err = lua.do_file("res://demo/testing/luasrc/LuaAPI/do_file.lua")
+	var err = lua.do_file("res://testing/luasrc/LuaAPI/do_file.lua")
 	if err is LuaError:
 		errors.append(err)
 		# Status is true by default, once the test determines a failure state it will set status to false.

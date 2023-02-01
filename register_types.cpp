@@ -1,10 +1,10 @@
 #include "register_types.h"
 
-#include "classes/luaAPI.h"
-#include "classes/luaError.h"
-#include "classes/luaThread.h"
-#include "classes/luaTuple.h"
-#include "classes/luaCallableExtra.h"
+#include "src/classes/luaAPI.h"
+#include "src/classes/luaError.h"
+#include "src/classes/luaThread.h"
+#include "src/classes/luaTuple.h"
+#include "src/classes/luaCallableExtra.h"
 
 #ifdef LAPI_GODOT_EXTENSION
 using namespace godot;

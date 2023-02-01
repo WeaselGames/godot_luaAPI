@@ -88,7 +88,7 @@ func finish():
 
 
 func load_tests():
-	var dir = DirAccess.open("res://demo/testing/tests")
+	var dir = DirAccess.open("res://testing/tests")
 	dir.list_dir_begin()
 
 	while true:
@@ -96,7 +96,7 @@ func load_tests():
 		if file == "":
 			break
 		elif not file.begins_with(".") and  file.ends_with(".gd"):
-			var test = load("res://demo/testing/tests/%s" % file).new()
+			var test = load("res://testing/tests/%s" % file).new()
 			tests.append(test)
 	
 	dir.list_dir_end()

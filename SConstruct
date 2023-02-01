@@ -19,7 +19,8 @@ env.Append(CPPDEFINES 	    = cppDefines)
 env.Append(CPPPATH 	        = cppPath)
 env.Append(CPPFLAGS 		= cppFlags)
 env.Append(CXXFLAGS 		= cxxFlags)
-sources = Glob('src/*.cpp')
+sources = Glob('*.cpp')
+sources.append(Glob('src/*.cpp'))
 sources.append(Glob('src/classes/*.cpp'))
 
 if env["platform"] == "macos":

@@ -24,7 +24,6 @@ env:
 
 jobs:
   linux-editor:
-    if: '! github.event.pull_request.draft'
     runs-on: "ubuntu-20.04"
     name: Linux Editor(platform=linuxbsd tools=yes target=editor)
     steps:
