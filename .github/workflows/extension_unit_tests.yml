@@ -1,0 +1,45 @@
+name: ⚙️ Unit Tests
+on:
+  workflow_run:
+    workflows: ["🛠️ GDExtension"]
+    types:
+      - completed
+
+env:
+  BASE_BRANCH: main
+  SCONSFLAGS: debug_symbols=no
+  SCONS_CACHE_LIMIT: 7168
+
+jobs:
+  extension-unit-tests:
+    runs-on: "ubuntu-20.04"
+    timeout-minutes: 30
+    name: GDExtension Unit Testing
+    steps:
+      - uses: actions/checkout@v3 # we save some time by not recursing here since we dont need to.
+      - name: Download godot beta 16
+        uses: wei/wget@v1
+        with:
+          args: -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0/beta16/Godot_v4.0-beta16_linux.x86_64.zip
+      - name: Extract godot
+        run: |
+          7z x godot.zip
+          mv *_linux.x86_64 godot
+      - name: Download Extension
+        id: download-extension
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: godot_extension.yml
+          workflow_conclusion: success
+          name: godot_luaAPI
+      - name: Run Unit Tests
+        run: |
+          rm -rf project/addons
+          mv addons/ project/addons
+          ./godot --headless --path project/
+          mv project/log.txt project/extension-log.txt
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: test-results
+          path: project/extension-log.txt
