@@ -54,7 +54,7 @@ jobs:
         with:
           args: -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0/beta16/Godot_v4.0-beta16_linux.x86_64.zip
       - name: Extract godot
-          run: |
+        run: |
           7z x godot.zip
           mv *_linux.x86_64 godot
       - name: Download Extension
