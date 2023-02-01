@@ -5,15 +5,15 @@ on:
       - "*"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
       - ".github/ISSUE_TEMPLATE/*"
+env:
+  BASE_BRANCH: main
 
 jobs:
   build:
