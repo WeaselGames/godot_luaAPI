@@ -35,18 +35,18 @@ jobs:
             target: template_release
             platform: linux
             arch: x86_64
-          - identifier: linux-debug(x86)
-            name: Linux (x86) - template_debug
+          - identifier: linux-debug (x86_32)
+            name: Linux (x86_32) - template_debug
             runner: ubuntu-20.04
             target: template_debug
             platform: linux
-            arch: x86
-          - identifier: linux-release (x86)
-            name: Linux (x86) - template_release
+            arch: x86_32
+          - identifier: linux-release (x86_32)
+            name: Linux (x86_32) - template_release
             runner: ubuntu-20.04
             target: template_release
             platform: linux
-            arch: x86
+            arch: x86_32
 
           - identifier: windows-debug (x86_64)
             name: Windows (x86_64) - template_debug
@@ -60,18 +60,18 @@ jobs:
             target: template_release
             platform: windows
             arch: x86_64
-          - identifier: windows-debug (x86)
-            name: Windows (x86) - template_debug
+          - identifier: windows-debug (x86_32)
+            name: Windows (x86_32) - template_debug
             runner: ubuntu-20.04
             target: template_debug
             platform: windows
-            arch: x86
-          - identifier: windows-release (x86)
-            name: Windows (x86) - template_release
+            arch: x86_32
+          - identifier: windows-release (x86_32)
+            name: Windows (x86_32) - template_release
             runner: ubuntu-20.04
             target: template_release
             platform: windows
-            arch: x86
+            arch: x86_32
           
           - identifier: macos-release (x86_64)
             name: MacOS (x86_64) - template_release
@@ -98,18 +98,18 @@ jobs:
             target: template_debug
             platform: android
             arch: x86_64
-          - identifier: android-release (x86)
+          - identifier: android-release (x86_32)
             name: Android (arm64) - template_release
             runner: ubuntu-20.04
             target: template_release
             platform: android
-            arch: x86
-          - identifier: android-debug (x86)
+            arch: x86_32
+          - identifier: android-debug (x86_32)
             name: Android (arm64) - template_debug
             runner: ubuntu-20.04
             target: template_debug
             platform: android
-            arch: x86
+            arch: x86_32
 
           - identifier: android-release (arm64)
             name: Android (arm64) - template_release
@@ -124,7 +124,7 @@ jobs:
             platform: android
             arch: arm64
           - identifier: android-release (arm32)
-            name: Android (arm64) - template_release
+            name: Android (arm32) - template_release
             runner: ubuntu-20.04
             target: template_release
             platform: android
@@ -170,7 +170,7 @@ jobs:
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
         run: |
-          sudo apt-get install mingw-w64
+          sudo apt-get install mingw-w64 
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
       - name: (Android) Set up Java 11
