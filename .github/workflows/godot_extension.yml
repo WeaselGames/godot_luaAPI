@@ -85,19 +85,6 @@ jobs:
             target: template_debug
             platform: android
             arch: x86_64
-          - identifier: android-release (x86_32)
-            name: Android (x86_32) - template_release
-            runner: ubuntu-20.04
-            target: template_release
-            platform: android
-            arch: x86_32
-          - identifier: android-debug (x86_32)
-            name: Android (x86_32) - template_debug
-            runner: ubuntu-20.04
-            target: template_debug
-            platform: android
-            arch: x86_32
-
           - identifier: android-release (arm64)
             name: Android (arm64) - template_release
             runner: ubuntu-20.04
@@ -110,18 +97,6 @@ jobs:
             target: template_debug
             platform: android
             arch: arm64
-          - identifier: android-release (arm32)
-            name: Android (arm32) - template_release
-            runner: ubuntu-20.04
-            target: template_release
-            platform: android
-            arch: arm32
-          - identifier: android-debug (arm32)
-            name: Android (arm32) - template_debug
-            runner: ubuntu-20.04
-            target: template_debug
-            platform: android
-            arch: arm32
 
           - identifier: macos-release (x86_64)
             name: MacOS (x86_64) - template_release
@@ -180,7 +155,7 @@ jobs:
         if: ${{ startsWith(matrix.identifier, 'android-') }}
         shell: sh
         run: |
-          "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "build-tools;30.0.3" "platforms;android-23" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;21.4.7075529"
+          "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "build-tools;30.0.3" "platforms;android-29" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;21.4.7075529"
       - name: Set up Python
         uses: actions/setup-python@v2
           
