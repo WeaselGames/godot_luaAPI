@@ -4,4 +4,5 @@
 	branch = 5d708c3
 [submodule "external/godot-cpp"]
 	path = external/godot-cpp
-	url = https://github.com/godotengine/godot-cpp
+	url = https://github.com/mashumafi/godot-cpp
+	branch = patch-1
