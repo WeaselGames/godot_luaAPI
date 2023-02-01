@@ -7,6 +7,8 @@ env_lua = env.Clone()
 
 if env_lua["platform"] == 'linux':
     env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+elif env_lua["platform"] == "ios":
+    env_lua.Append(CPPDEFINES='TARGET_OS_IOS')
 
 libraries 		= []
 library_paths 	= ''

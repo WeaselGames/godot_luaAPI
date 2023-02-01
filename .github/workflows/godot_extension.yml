@@ -85,6 +85,10 @@ jobs:
             arch: arm64
 
     steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
@@ -125,10 +129,6 @@ jobs:
           python -c "import sys; print(sys.version)"
           python -m pip install scons
           scons --version
-      - name: Checkout project
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Load .scons_cache directory
         id: linux-editor-cache
         uses: actions/cache@v2
