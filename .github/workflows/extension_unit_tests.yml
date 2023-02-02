@@ -32,6 +32,7 @@ jobs:
           workflow: godot_extension.yml
           workflow_conclusion: success
           name: godot_luaAPI
+          path: project/
       - name: Run Unit Tests
         run: |
           ./godot --headless --path project/ --editor --quit
