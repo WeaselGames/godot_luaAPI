@@ -11,7 +11,11 @@
 
 About
 -------
-[![🛠️ GDExtension](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/godot_extension.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/godot_extension.yml) [![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml) [![⚙️ Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unit_testing.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unit_testing.yml)
+[![🛠️ GDExtension](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/godot_extension.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/godot_extension.yml) [![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml)
+
+[![⚙️ Module Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/module_unit_tests.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/module_unit_tests.yml)
+[![⚙️ Extension Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unite.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/extension_unit_tests.yml)
+
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 

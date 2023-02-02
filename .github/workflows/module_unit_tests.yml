@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 30
     name: Module Unit Testing
     steps:
-      - uses: actions/checkout@v3'
+      - uses: actions/checkout@v3
       - name: Download editor
         id: download-editor
         uses: dawidd6/action-download-artifact@v2
