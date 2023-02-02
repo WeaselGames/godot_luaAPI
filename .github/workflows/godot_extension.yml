@@ -191,7 +191,7 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
           SCONS_CACHE_LIMIT: 7168
         run: |
-          rm -rf ${{ github.workspace }}/project/.g* ${{ github.workspace }}/project/project.godot ${{ github.workspace }}/project/demo/testing ${{ github.workspace }}/project/addons/luaAPI/bin/.gitignore
+          rm -rf ${{ github.workspace }}/project/.g* ${{ github.workspace }}/project/project.godot ${{ github.workspace }}/project/testing ${{ github.workspace }}/project/addons/luaAPI/bin/.gitignore
           cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/project/addons/luaAPI
       - name: Upload artifact
         uses: actions/upload-artifact@v2
