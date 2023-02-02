@@ -40,5 +40,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: test-results
-          path: project/*
+          name: extension-test-results
+          path: project/extension-log.txt
