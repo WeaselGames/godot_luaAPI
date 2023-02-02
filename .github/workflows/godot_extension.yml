@@ -17,6 +17,7 @@ env:
 
 jobs:
   build:
+    if: '! github.event.pull_request.draft'
     runs-on: ${{ matrix.runner }}
     name: ${{ matrix.name }}
     strategy:
