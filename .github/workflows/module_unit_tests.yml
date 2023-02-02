@@ -28,10 +28,11 @@ jobs:
       - name: Unit Testing
         run: |
           rm -rf project/addons
+          chmod +x godot.linuxbsd.editor.x86_64.luaAPI
           ./godot.linuxbsd.editor.x86_64.luaAPI --headless --path project/
           mv project/log.txt project/module-log.txt
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: module-test-results
+          name: test-results
           path: project/module-log.txt
