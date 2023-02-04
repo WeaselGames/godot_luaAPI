@@ -447,15 +447,6 @@ void LuaState::createObjectMetatable() {
         return 0;
     }); 
 
-    // Makeing sure to clean up the pointer with lua GC
-    LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-        void* luaPtr = lua_touserdata(inner_state, 1);
-        Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ;
-        if (lua.is_valid())
-            lua->removeOwnedObject(luaPtr);
-        return 0;
-    });
-
     LUA_METAMETHOD_TEMPLATE(L, -1, "__call", {
         if (!arg1.has_method("__call")) {
                 return 0;
