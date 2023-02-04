@@ -1,10 +1,18 @@
 #ifndef LUAERROR_H
 #define LUAERROR_H
 
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
 
 #include <lua/lua.hpp>
+
+#ifdef LAPI_GODOT_EXTENSION
+using namespace godot;
+#endif
 
 class LuaError : public RefCounted {
     GDCLASS(LuaError, RefCounted);
@@ -37,6 +45,10 @@ class LuaError : public RefCounted {
         String errMsg;
 };
 
+#ifndef LAPI_GODOT_EXTENSION
 VARIANT_ENUM_CAST(LuaError::ErrorType)
+#else
+VARIANT_ENUM_CAST(LuaError, LuaError::ErrorType)
+#endif
 
 #endif

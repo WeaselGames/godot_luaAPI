@@ -1,3 +1,4 @@
+#ifndef LAPI_GODOT_EXTENSION
 #include "luaCallable.h"
 #include "luaAPI.h"
 
@@ -64,3 +65,4 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 int LuaCallable::getFuncRef() {
 	return funcRef;
 }
+#endif

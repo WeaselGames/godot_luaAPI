@@ -1,11 +1,10 @@
-#!/usr/bin/env -S godot --headless -s
-
-# This is a standalone script meant to be run via CI
-#class_name RunTests
-extends SceneTree
+extends Node2D
 
 var time_elapsed = 0
+
+var done = false
 var testCount = 0
+var failures = 0
 
 var tests: Array[UnitTest]
 var doneTests: Array[UnitTest]
@@ -22,18 +21,22 @@ func sort_tests(a, b):
 		return true
 	return false
 
-func _init():
+func _ready():
 	logFile = FileAccess.open("res://log.txt", FileAccess.WRITE_READ)
 	logPrint("LuaAPI Testing framework for v2-alpha")
 	logPrint("Starting time: %s\n" % str(time_elapsed))
 	load_tests()
 	for test in tests:
-		test._init()
+		test._ready()
 	tests.sort_custom(sort_tests)
 	testCount = tests.size()
 	logPrint("Loaded %d tests\n" % testCount)
 		
 func _process(delta):
+	if done:
+		get_tree().quit(failures)
+		return
+		
 	time_elapsed += delta
 	var doneCount = 0
 	if currentTest == null:
@@ -54,7 +57,6 @@ func finish():
 	logPrint("\nFinished!")
 	logPrint("End time: %s\n" % str(time_elapsed))
 	logPrint("Report:\n")
-	var failures = 0
 	for test in doneTests:
 		logPrint("Test Name: %s" % test.testName)
 		logPrint("-------------------------------")
@@ -82,11 +84,11 @@ func finish():
 	
 	doneTests.clear()
 	logPrint("%d/" % failures + "%d tests failed." % testCount)
-	quit(failures)
+	done=true
 
 
 func load_tests():
-	var dir = DirAccess.open("res://tests")
+	var dir = DirAccess.open("res://testing/tests")
 	dir.list_dir_begin()
 
 	while true:
@@ -94,7 +96,7 @@ func load_tests():
 		if file == "":
 			break
 		elif not file.begins_with(".") and  file.ends_with(".gd"):
-			var test = load("res://tests/%s" % file).new()
+			var test = load("res://testing/tests/%s" % file).new()
 			tests.append(test)
 	
 	dir.list_dir_end()

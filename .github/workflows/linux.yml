@@ -1,20 +1,20 @@
 # # Huge credit to https://github.com/goostengine/goost
 # this action was made by them and only modified to my needs
-name: 🐧 Linux
+name: Linux
 on:
   pull_request:
     branches:
       - "*"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
+      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
+      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
@@ -24,6 +24,7 @@ env:
 
 jobs:
   linux-editor:
+    if: '! github.event.pull_request.draft'
     runs-on: "ubuntu-20.04"
     name: Linux Editor(platform=linuxbsd tools=yes target=editor)
     steps:
@@ -75,6 +76,7 @@ jobs:
           path: scripts/godot/bin/*
 
   linux-template-release:
+    if: '! github.event.pull_request.draft'
     runs-on: "ubuntu-20.04"
     name: Linux Template (platform=linuxbsd tools=no target=template_release)
     steps:
@@ -126,6 +128,7 @@ jobs:
           path: scripts/godot/bin/*
 
   linux-template-debug:
+    if: '! github.event.pull_request.draft'
     runs-on: "ubuntu-20.04"
     name: Linux Template Debug (platform=linuxbsd tools=no target=template_debug)
     steps:

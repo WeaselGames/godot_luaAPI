@@ -1,20 +1,20 @@
 # # Huge credit to https://github.com/goostengine/goost
 # this action was made by them and only modified to my needs
-name: 🎨 Windows
+name: Windows
 on:
   pull_request:
     branches:
       - "*"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
+      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
+      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
@@ -25,6 +25,7 @@ env:
 
 jobs:
   windows-editor:
+    if: '! github.event.pull_request.draft'
     runs-on: "windows-latest"
     name: Windows Editor (target=editor, tools=yes)
     steps:
@@ -72,6 +73,7 @@ jobs:
           path: scripts/godot/bin/*
 
   windows-template:
+    if: '! github.event.pull_request.draft'
     runs-on: "windows-latest"
     name: Windows Template (target=template_release, tools=no)
 
@@ -119,6 +121,7 @@ jobs:
           path: scripts/godot/bin/*
 
   windows-template-debug:
+    if: '! github.event.pull_request.draft'
     runs-on: "windows-latest"
     name: Windows Template Debug (target=template_debug, tools=no)
 

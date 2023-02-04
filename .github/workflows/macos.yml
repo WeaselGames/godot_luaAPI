@@ -1,18 +1,18 @@
-name: 🍎 macOS
+name: MacOS
 on:
   pull_request:
     branches:
       - "*"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
+      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
   push:
     branches:
       - "main"
     paths-ignore:
       - "**/README.md"
-      - "testing/*"
+      - "project/*"
       - ".github/ISSUE_TEMPLATE/*"
 
 env:
@@ -22,6 +22,7 @@ env:
 
 jobs:
   macos-editor:
+    if: '! github.event.pull_request.draft'
     runs-on: "macos-latest"
 
     name: MacOS Editor (target=editor, tools=yes)
@@ -75,6 +76,7 @@ jobs:
           path: scripts/godot/bin
 
   macos-template:
+    if: '! github.event.pull_request.draft'
     runs-on: "macos-latest"
     name: MacOS Template (target=template_release, tools=no)
 
@@ -127,6 +129,7 @@ jobs:
           path: scripts/godot/bin
 
   macos-template-debug:
+    if: '! github.event.pull_request.draft'
     runs-on: "macos-latest"
     name: MacOS Template Debug (target=template_debug, tools=no)
 

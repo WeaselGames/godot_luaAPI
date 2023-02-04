@@ -1,8 +1,13 @@
 #ifndef LUAAPI_H
 #define LUAAPI_H
 
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
+
 #include "luaError.h"
 
 #include <lua/lua.hpp>
@@ -10,6 +15,10 @@
 
 #include <string>
 #include <map>
+
+#ifdef LAPI_GODOT_EXTENSION
+using namespace godot;
+#endif
 
 class LuaAPI : public RefCounted {
     GDCLASS(LuaAPI, RefCounted);

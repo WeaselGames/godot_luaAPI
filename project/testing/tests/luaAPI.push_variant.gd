@@ -1,18 +1,19 @@
 extends UnitTest
 var lua: LuaAPI
 
-func _init():
+func _ready():
 	# Since we are using poly here, we need to make sure to call super for _methods
-	super._init()
+	super._ready()
 	# id will determine the load order
-	id = 9980
+	id = 9960
 
 	lua = LuaAPI.new()
 	
 	# testName and testDescription are for any needed context about the test.
-	testName = "LuaAPI.pull_variant()"
+	testName = "LuaAPI.push_variant()"
 	testDescription = "
-Runs the fibonacci sequence of 15 and verifies the result
+Runs a function that returns the number of frames it has run for so far.
+Result is verified. Runs for 200 frames.
 "
 
 func fail():
@@ -23,7 +24,12 @@ func _process(delta):
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._process(delta)
 	
-	var err = lua.do_string("
+	var err = lua.push_variant("num", 15)
+	if err is LuaError:
+		errors.append(err)
+		return fail()
+	
+	err = lua.do_string("
 	function Fib(n)
 	  local function inner(m)
 		if m < 2 then
@@ -34,7 +40,7 @@ func _process(delta):
 	  return inner(n)
 	end
 	
-	result = Fib(15)
+	result = Fib(num)
 	")
 	
 	if err is LuaError:

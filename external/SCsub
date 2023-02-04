@@ -1,4 +1,4 @@
-
+# Used for module builds
 Import('env')
 Import('env_lua')
 
@@ -8,6 +8,8 @@ env_lua.Append(CPPDEFINES='MAKE_LIB')
 
 if env_lua['PLATFORM'] == 'posix' and env["platform"] == 'linuxbsd':
     env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+elif env_lua["platform"] == "ios":
+    env_lua.Append(CPPDEFINES='LUA_USE_IOS')
 
 if not env_lua.msvc:
     env_lua['CFLAGS'].remove('-std=gnu11')

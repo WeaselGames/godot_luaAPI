@@ -1,0 +1,38 @@
+name: Module Unit Tests
+on:
+  workflow_run:
+    workflows: ["Linux"]
+    types:
+      - completed
+
+env:
+  BASE_BRANCH: main
+  SCONSFLAGS: debug_symbols=no
+  SCONS_CACHE_LIMIT: 7168
+
+jobs:
+  module-unit-tests:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: "ubuntu-20.04"
+    timeout-minutes: 30
+    name: Module Unit Testing
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download editor
+        id: download-editor
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: linux.yml
+          workflow_conclusion: success
+          name: linux-editor
+      - name: Unit Testing
+        run: |
+          rm -rf project/addons
+          chmod +x godot.linuxbsd.editor.x86_64.luaAPI
+          ./godot.linuxbsd.editor.x86_64.luaAPI --headless --path project/
+          mv project/log.txt project/module-log.txt
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: test-results
+          path: project/module-log.txt

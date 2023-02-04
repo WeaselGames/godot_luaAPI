@@ -1,9 +1,18 @@
 #ifndef LUACALLABLEEXTRA_H
 #define LUACALLABLEEXTRA_H
+
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
 
 #include <lua/lua.hpp>
+
+#ifdef LAPI_GODOT_EXTENSION
+using namespace godot;
+#endif
 
 class LuaCallableExtra : public RefCounted {
     GDCLASS(LuaCallableExtra, RefCounted);

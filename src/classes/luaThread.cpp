@@ -1,7 +1,10 @@
 #include "luaThread.h"
 
 #include "luaAPI.h"
-#include "luaCallable.h"
+
+#ifdef LAPI_GODOT_EXTENSION
+#include <godot_cpp/classes/file_access.hpp>
+#endif
 
 void LuaThread::_bind_methods() {
     ClassDB::bind_static_method("LuaThread", D_METHOD("new_thread", "lua"), &LuaThread::newThread);
@@ -69,12 +72,20 @@ void LuaThread::loadString(String code) {
 
 
 LuaError* LuaThread::loadFile(String fileName) {
+    #ifndef LAPI_GODOT_EXTENSION
     done = false;
     Error error;
     Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
     if (error != Error::OK) {
         return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
     }
+    #else
+    done = false;
+    Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ);
+    if (file.is_valid()) {
+        return LuaError::newError(vformat("error while opening file '%s'", fileName), LuaError::ERR_FILE);
+    }
+    #endif
 
     String path = file->get_path_absolute();
     int ret = luaL_loadfile(tState, path.ascii().get_data());

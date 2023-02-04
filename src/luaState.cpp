@@ -1,8 +1,13 @@
 #include "luaState.h"
 #include <classes/luaAPI.h>
-#include <classes/luaCallable.h>
 #include <classes/luaTuple.h>
 #include <classes/luaCallableExtra.h>
+
+#include <util/print_string.h>
+
+#ifndef LAPI_GODOT_EXTENSION
+#include <classes/luaCallable.h>
+#endif
 
 void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     this->L = L;
@@ -19,14 +24,14 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
 	lua_rawset(L, LUA_REGISTRYINDEX);
 
     // Creating basic types metatables and saving them in registry
-	createVector2Metatable();   // "mt_Vector2"
-	createVector3Metatable();   // "mt_Vector3"
-    createColorMetatable();     // "mt_Color"
-    createRect2Metatable();     // "mt_Rect2"
-    createPlaneMetatable();     // "mt_Plane"
-    createObjectMetatable();    // "mt_Object"
-    createCallableMetatable();  // "mt_Callable"
-    createCallableExtraMetatable();  // "mt_CallableExtra"
+	createVector2Metatable();       // "mt_Vector2"
+	createVector3Metatable();       // "mt_Vector3"
+    createColorMetatable();         // "mt_Color"
+    createRect2Metatable();         // "mt_Rect2"
+    createPlaneMetatable();         // "mt_Plane"
+    createObjectMetatable();        // "mt_Object"
+    createCallableMetatable();      // "mt_Callable"
+    createCallableExtraMetatable(); // "mt_CallableExtra"
 
     // Exposing basic types constructors
 	exposeConstructors();
@@ -39,7 +44,7 @@ lua_State* LuaState::getState() const {
 // Binds lua librares with the lua state
 void LuaState::bindLibraries(Array libs) {
     for (int i = 0; i < libs.size(); i++) {
-        String lib = ((String)libs.get(i)).to_lower();
+        String lib = ((String)libs[i]).to_lower();
         if (lib=="base") {
             luaL_requiref(L, "", luaopen_base, 1);
    	        lua_pop(L, 1);
@@ -242,14 +247,24 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
         }
         case Variant::Type::OBJECT: {
             // If the type being pushed is a lua error, Raise a error
+            #ifndef LAPI_GODOT_EXTENSION
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaError* err = dynamic_cast<LuaError*>(var.operator Object*()); err != nullptr) {
+            #endif
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 break;
             }
-
+    
             // If the type being pushed is a tuple, push its content instead.
+            #ifndef LAPI_GODOT_EXTENSION
             if (LuaTuple* tuple = Object::cast_to<LuaTuple>(var.operator Object*()); tuple != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(var.operator Object*()); tuple != nullptr) {
+            #endif
                 for (int i = 0; i < tuple->size(); i++) {
                     Variant value = tuple->get(i);
                     pushVariant(state, value);
@@ -257,8 +272,21 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                 break;
             }
 
+            // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
+            #ifndef LAPI_GODOT_EXTENSION
+            if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaCallableExtra* func = dynamic_cast<LuaCallableExtra*>(var.operator Object*()); func != nullptr) {
+            #endif
+                void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+                memcpy(userdata, (void*)&var, sizeof(Variant));
+                luaL_setmetatable(state, "mt_CallableExtra");
+                break;
+            }
+
             // Temp maybe? If we do not store a referance to refCounted they will die with GDScript
-            if (var.is_ref_counted()) {
+            if (RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*()); temp != nullptr) {
                 lua_pushstring(state, "__OBJECT");
                 lua_rawget(state, LUA_REGISTRYINDEX);
                 LuaAPI* OBJ = (LuaAPI*) lua_touserdata(state, -1);
@@ -268,21 +296,13 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                     OBJ->addRef(var);
             }
 
-
-            // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
-            if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
-                void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
-                memcpy(userdata, (void*)&var, sizeof(Variant));
-                luaL_setmetatable(state, "mt_CallableExtra");
-                break;
-            }
-
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
             luaL_setmetatable(state, "mt_Object");
             break;  
         }
         case Variant::Type::CALLABLE: {
+            #ifndef LAPI_GODOT_EXTENSION
             // If the callable type is a luaCallable, just push the actual lua function onto the stack.
             Callable callable = var.operator Callable();
             if (callable.is_custom()) {
@@ -293,6 +313,7 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                     break;
                 }
             }
+            #endif
 
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
@@ -343,6 +364,7 @@ LuaError* LuaState::handleError(lua_State* state, int lua_error) {
 }
 
 // for handling callable errors.
+#ifndef LAPI_GODOT_EXTENSION
 LuaError* LuaState::handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc) {
     switch (error.error) {
         case Callable::CallError::CALL_ERROR_INVALID_ARGUMENT: {
@@ -386,6 +408,51 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
             return nullptr;
     }
 }
+#else
+LuaError* LuaState::handleError(const StringName &func, int error, int expected, int argument, const Variant** p_arguments, int argc) {
+    switch (error) {
+        case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
+            return LuaError::newError(
+                vformat("Error calling function: %s - Invalid type for argument %s, expected %s but is %s.", 
+                    String(func), 
+                    itos(argument+1), // lua indexes by 1 so this should be more correct
+                    Variant::get_type_name(Variant::Type(expected)),
+                    Variant::get_type_name(p_arguments[argument]->get_type())), 
+                LuaError::ERR_RUNTIME);
+         }
+        case GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS: {
+            return LuaError::newError(
+                vformat("Error calling function: %s - Too many arguments, expected %d but got %d.", 
+                    String(func), 
+                    argc),
+                    
+                LuaError::ERR_RUNTIME);
+        }
+        case GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS: {
+            return LuaError::newError(
+                vformat("Error calling function: %s - Too few arguments, expected %d but got $d.", 
+                    String(func),
+                    argument,
+                    argc), 
+                LuaError::ERR_RUNTIME);
+        }
+        case GDEXTENSION_CALL_ERROR_INVALID_METHOD: {
+            return LuaError::newError(
+                vformat("Error calling function: %s - Method is invalid.", 
+                    String(func)), 
+                LuaError::ERR_RUNTIME);
+        }
+        case GDEXTENSION_CALL_ERROR_INSTANCE_IS_NULL: {
+            return LuaError::newError(
+                vformat("Error calling function: %s - Instance is null.", 
+                    String(func)), 
+                LuaError::ERR_RUNTIME);
+        }
+        default:
+            return nullptr;
+    }
+}
+#endif
 
 // gets a variant at a gien index
 Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj) {
@@ -431,6 +498,7 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
             result = dict;
             break;
         }
+        #ifndef LAPI_GODOT_EXTENSION
         case LUA_TFUNCTION: {
             // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
             lua_pushvalue(state, index);
@@ -438,6 +506,7 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
             result = Callable(callable);
             break;
         }
+        #endif
         case LUA_TNIL: {
             break;
         }
@@ -482,7 +551,6 @@ int LuaState::luaPrint(lua_State* state)
 		final_string += it_string;
 		if (n < args) final_string += ", ";
     }
-
 	print_line(final_string);
 
     return 0;
@@ -490,6 +558,7 @@ int LuaState::luaPrint(lua_State* state)
 
 // Used as the __call metamethod for mt_Callable. 
 // All exposed gdscript functions are called vis this method.
+#ifndef LAPI_GODOT_EXTENSION
 int LuaState::luaCallableCall(lua_State* state) {
     lua_pushstring(state, "__OBJECT");
     lua_rawget(state, LUA_REGISTRYINDEX);
@@ -504,7 +573,7 @@ int LuaState::luaCallableCall(lua_State* state) {
     for (int i = 0; i < argc; i++) {
         Variant* temp = memnew(Variant);
         *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
+        if ((*temp).get_type() == Variant::Type::OBJECT) {
             if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
@@ -525,11 +594,60 @@ int LuaState::luaCallableCall(lua_State* state) {
         return 0;
     }
     
-    LuaState::pushVariant(state, returned);
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
     if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
 }
+
+#else
+
+int LuaState::luaCallableCall(lua_State* state) {
+    lua_pushstring(state, "__OBJECT");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its self will be counted
+    Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
+   
+    Array args;
+    int index = 2; // we start at 2, 1 is the callable
+    for (int i = 0; i < argc; i++) {
+        
+        Variant var = LuaState::getVariant(state, index++, OBJ);
+        if (var.get_type() == Variant::Type::OBJECT) {
+            if (LuaError* err = dynamic_cast<LuaError*>(var.operator Object*()); err != nullptr) {
+                lua_pushstring(state, err->getMessage().ascii().get_data());
+                lua_error(state);
+                return 0;
+            }
+        }
+
+        args.append(var);
+    }
+
+    Variant returned = callable.callv(args);
+    
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
+    if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(returned.operator Object*()); tuple != nullptr)
+        return tuple->size();
+    return 1;
+}
+
+#endif
 
 // This function is invoked whenever a function is called on one of the userdata types 
 // excluding mt_Callable or mt_Object if __index is overwritten
@@ -541,36 +659,40 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
 
     int argc = lua_gettop(state);
 
+    Array p_args;
     const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
     int index = 1;
     for (int i = 0; i < argc; i++) {
-        Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
-                lua_pushstring(state, err->getMessage().ascii().get_data());
-                lua_error(state);
-                return 0;
-            }
-        }
-
-        args[i] = temp;
+        p_args.append(LuaState::getVariant(state, index++, OBJ));
+        args[i] = &p_args[i];
     }
 
     Variant* obj  = (Variant*)lua_touserdata(state, lua_upvalueindex(1));
     String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
+    
+    Variant returned;
+    #ifndef LAPI_GODOT_EXTENSION
     Callable::CallError error;
-    Variant ret;
-    obj->callp(fName.ascii().get_data(), args, argc, ret, error);
+    obj->callp(fName.ascii().get_data(), args, argc, returned, error);
     if (error.error != error.CALL_OK) {
         LuaError* err = LuaState::handleError(fName, error, args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
     }
+    #else
+    GDExtensionCallError error;
+    obj->callp(fName.ascii().get_data(), args, argc, returned, error);
+    if (error.error != GDEXTENSION_CALL_OK) {
+        LuaError* err = LuaState::handleError(fName, error.error, error.expected, error.argument, args, argc);
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+    #endif
 
-    LuaState::pushVariant(state, ret);
-    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(ret.operator Object*()); tuple != nullptr)
+    LuaState::pushVariant(state, returned);
+    if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
 }

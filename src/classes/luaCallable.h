@@ -1,10 +1,19 @@
 #ifndef LUACALLABLE_H
 #define LUACALLABLE_H
 
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/object/ref_counted.h"
-#include "core/variant/callable.h"
+#include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/variant/callable.hpp>
+#endif
 
 #include <lua/lua.hpp>
+
+#ifdef LAPI_GODOT_EXTENSION
+using namespace godot;
+#endif
 
 class LuaCallable : public CallableCustom {
     static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);

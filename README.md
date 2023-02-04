@@ -11,13 +11,17 @@
 
 About
 -------
-[![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml) [![⚙️ Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unit_testing.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unit_testing.yml)
+[![🛠️ GDExtension](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/godot_extension.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/godot_extension.yml) [![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml)
+
+[![⚙️ Module Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/module_unit_tests.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/module_unit_tests.yml)
+[![⚙️ Extension Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unite.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/extension_unit_tests.yml)
+
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
 ***WARNING!!!*** this is an **alpha** version of the module made for Godot v4-beta. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
-This is a Godot engine module that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
+This is a Godot engine module (or extension) that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
 To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
 
@@ -58,6 +62,8 @@ If a feature is missing that you would like to see feel free to create a [Featur
 
 Nightly Builds
 ---------------
+- [🛠️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/godot_extension/main/godot_luaAPI.zip)
+
 - [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
 - [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-release.zip)
 - [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-debug.zip)
@@ -78,10 +84,18 @@ TODO
 Compiling
 ------------
 This build is for godot 4.0.0-beta. Will not be supporting older beta builds, we currently track the master branch.
+
+Compiling as a engine module:
 - Start by cloning the Godot 4.0.0-beta [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 - Next change directories into the modules folder and clone this repo into a folder named luaAPI with this command `git clone --recurse-submodules https://github.com/WeaselGames/godot_luaAPI luaAPI`. Make sure to use --recurse-submodules to pull the submodules as well.
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/latest/development/compiling).
+
+Compiling as a Godot Extension:
+- Start by cloning this repo with this command `git clone --recurse-submodules https://github.com/WeaselGames/godot_luaAPI` Make sure to use --recurse-submodules to pull the submodules as well.
+- Next make sure you have the required tooling for your platform. This will be pretty much the same as mentioned [here](https://docs.godotengine.org/en/latest/development/compiling).
+- To compile simply run `scons platform={yourPlatform} target=template_{release/debug}`
+- The generated binary file will be places in repo_root/project/addons/luaAPI/bin 
 
 Examples
 ------------

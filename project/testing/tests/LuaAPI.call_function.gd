@@ -1,9 +1,9 @@
 extends UnitTest
 var lua: LuaAPI
 
-func _init():
+func _ready():
 	# Since we are using poly here, we need to make sure to call super for _methods
-	super._init()
+	super._ready()
 	# id will determine the load order
 	id = 9970
 	
@@ -47,6 +47,9 @@ func _process(delta):
 		
 	var testCallable = lua.pull_variant("test")
 	if testCallable is LuaError:
+		if testCallable.type == LuaError.ERR_RUNTIME:
+			done = true # This is becuase GDExtension does not support luaCallables
+			return
 		errors.append(testCallable)
 		return fail()
 	

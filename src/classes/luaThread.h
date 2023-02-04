@@ -1,15 +1,23 @@
 #ifndef LUATHREAD_H
 #define LUATHREAD_H
 
-#include "luaError.h" 
-
+#ifndef LAPI_GODOT_EXTENSION
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
+
+#include "luaError.h" 
 
 #include <lua/lua.hpp>
 #include <luaState.h>
 
 class LuaAPI;
+
+#ifdef LAPI_GODOT_EXTENSION
+using namespace godot;
+#endif
 
 class LuaThread : public RefCounted {
     GDCLASS(LuaThread, RefCounted);
