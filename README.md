@@ -70,9 +70,8 @@ Nightly Builds
 
 TODO
 -----
-- Bug fixes
 - Finish v2 documentation
-- Stability testing
+- Support for GDExtension
 - More up to date todo list on the v2 [project](https://github.com/WeaselGames/lua/projects/1) 
 
 Compiling
