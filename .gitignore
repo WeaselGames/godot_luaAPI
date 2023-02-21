@@ -28,6 +28,10 @@
 
 # Editors
 .vscode
+.clangd
+.cache
+
+compile_commands.json
 
 # Godot files
 *.import
