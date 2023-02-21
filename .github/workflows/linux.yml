@@ -9,6 +9,7 @@ on:
       - "**/README.md"
       - "testing/*"
       - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
   push:
     branches:
       - "main"
@@ -16,6 +17,7 @@ on:
       - "**/README.md"
       - "testing/*"
       - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
 
 env:
   BASE_BRANCH: main

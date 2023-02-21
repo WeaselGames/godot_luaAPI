@@ -5,13 +5,17 @@ on:
       - "*"
     paths-ignore:
       - "**/README.md"
+      - "testing/*"
       - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
   push:
     branches:
       - "main"
     paths-ignore:
       - "**/README.md"
+      - "testing/*"
       - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
 
 env:
   BASE_BRANCH: main
