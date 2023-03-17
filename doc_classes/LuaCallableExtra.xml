@@ -8,6 +8,17 @@
 	</description>
 	<tutorials>
 	</tutorials>
+	<members>
+		<member name="tuple" type="bool" setter="set_tuple" getter="get_tuple" default="false">
+			TODO
+		</member>
+		<member name="wants_ref" type="bool" setter="set_wants_ref" getter="get_wants_ref" default="false">
+			TODO
+		</member>
+		<member name="argc" type="int" setter="set_argc" getter="get_argc" default="0">
+			TODO
+		</member>
+	</members>
 	<methods>
 		<method name="with_tuple" qualifiers="static">
 			<return type="LuaCallableExtra" />
@@ -20,6 +31,14 @@
 		<method name="with_ref" qualifiers="static">
 			<return type="LuaCallableExtra" />
 			<param index="0" name="function" type="Callable" />
+			<description>
+				TODO
+			</description>
+		</method>
+		<method name="with_ref_and_tuple" qualifiers="static">
+			<return type="LuaCallableExtra" />
+			<param index="0" name="function" type="Callable" />
+			<param index="1" name="argc" type="int" />
 			<description>
 				TODO
 			</description>

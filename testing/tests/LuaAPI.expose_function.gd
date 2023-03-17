@@ -41,7 +41,7 @@ func _init():
 	
 	lua = LuaAPI.new()
 	lua.set_meta("isValid", true)
-	var err = lua.push_variant("test1", LuaCallableExtra.with_tuple(testFuncTuple, 2))
+	var err = lua.push_variant("test1", LuaCallableExtra.with_tuple(testFuncTuple, 1))
 	if err is LuaError:
 		errors.append(err)
 		fail()
