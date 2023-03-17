@@ -7,7 +7,22 @@
 void LuaCallableExtra::_bind_methods() {
     ClassDB::bind_static_method("LuaCallableExtra", D_METHOD("with_tuple", "Callable", "argc"), &LuaCallableExtra::withTuple);
     ClassDB::bind_static_method("LuaCallableExtra", D_METHOD("with_ref", "Callable"), &LuaCallableExtra::withRef);
+    ClassDB::bind_static_method("LuaCallableExtra", D_METHOD("with_ref_and_tuple", "Callable", "argc"), &LuaCallableExtra::withRefAndTuple);
+    
     ClassDB::bind_method(D_METHOD("set_info", "Callable", "argc", "isTuple", "wantsRef"), &LuaCallableExtra::setInfo);
+
+    ClassDB::bind_method(D_METHOD("set_tuple", "isTuple"), &LuaCallableExtra::setTuple);
+    ClassDB::bind_method(D_METHOD("get_tuple"), &LuaCallableExtra::getTuple);
+
+    ClassDB::bind_method(D_METHOD("set_wants_ref", "wantsRef"), &LuaCallableExtra::setWantsRef);
+    ClassDB::bind_method(D_METHOD("get_wants_ref"), &LuaCallableExtra::getWantsRef);
+
+    ClassDB::bind_method(D_METHOD("set_argc", "argc"), &LuaCallableExtra::setArgc);
+    ClassDB::bind_method(D_METHOD("get_argc"), &LuaCallableExtra::getArgc);
+
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "tuple", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_tuple", "get_tuple");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "wants_ref", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_wants_ref", "get_wants_ref");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "argc", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_argc", "get_argc");
 }
 
 void LuaCallableExtra::setInfo(Callable function, int argc, bool isTuple, bool wantsRef) {
@@ -15,6 +30,30 @@ void LuaCallableExtra::setInfo(Callable function, int argc, bool isTuple, bool w
     this->argc = argc;
     this->isTuple = isTuple;
     this->wantsRef = wantsRef;
+}
+
+void LuaCallableExtra::setTuple(bool isTuple) {
+    this->isTuple = isTuple;
+}
+
+void LuaCallableExtra::setWantsRef(bool wantsRef) {
+    this->wantsRef = wantsRef;
+}
+
+void LuaCallableExtra::setArgc(int argc) {
+    this->argc = argc;
+}
+
+bool LuaCallableExtra::getTuple() {
+    return this->isTuple;
+}
+
+bool LuaCallableExtra::getWantsRef() {
+    return this->wantsRef;
+}
+
+int LuaCallableExtra::getArgc() {
+    return this->argc;
 }
 
 // Used for the __call metamethod
@@ -26,13 +65,18 @@ int LuaCallableExtra::call(lua_State *state) {
 
     int argc = lua_gettop(state)-1; // We subtract 1 becuase the LuaCallableExtra is counted
     int noneMulty = argc;
-    // TODO: Check if func is null
-    LuaCallableExtra* func = (LuaCallableExtra*) LuaState::getVariant(state, 1, OBJ).operator Object*();
-    if (func->isTuple)
-        noneMulty=func->argc-1; // We subtract one becuase the tuple is countedA
     
+    LuaCallableExtra* func = (LuaCallableExtra*) LuaState::getVariant(state, 1, OBJ).operator Object*();
+    if (func == nullptr) {
+        lua_pushstring(state, "Invalid Callable instance");
+        lua_error(state);
+        return 0;
+    }
+
     Vector<Variant> p_args;
 
+    if (func->isTuple)
+        noneMulty=func->argc; 
     if (func->wantsRef)
         p_args.append(OBJ);
 
@@ -79,5 +123,11 @@ LuaCallableExtra* LuaCallableExtra::withTuple(Callable func, int argc) {
 LuaCallableExtra* LuaCallableExtra::withRef(Callable func) {
     LuaCallableExtra* toReturn = memnew(LuaCallableExtra);
     toReturn->setInfo(func, 0, false, true);
+    return toReturn;
+}
+
+LuaCallableExtra* LuaCallableExtra::withRefAndTuple(Callable func, int argc) {
+    LuaCallableExtra* toReturn = memnew(LuaCallableExtra);
+    toReturn->setInfo(func, argc, true, true);
     return toReturn;
 }
