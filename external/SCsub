@@ -2,15 +2,49 @@
 Import('env')
 Import('env_lua')
 
+import sys
+import os
+import SCons.Script
+
+def run(cmd):
+    res = os.system(cmd)
+    if (os.WIFEXITED(res)):
+        code = os.WEXITSTATUS(res)
+        if code != 0:
+            print("Error: return code: " + str(code))
+            if SCons.Script.keep_going_on_error == 0:
+                sys.exit(code)
+
+def build_luajit():
+    if not env_lua.msvc:
+        os.chdir("luaJIT")
+        run("make clean")
+
+        if env['PLATFORM'] == 'posix' and env["platform"] == 'windows':
+            run('make HOST_CC="%s" CROSS="%s" TARGET_SYS=Windows BUILDMODE="static"' % (env['luaapi_host_cc'], env['CC'].replace("gcc", "")))
+        else:
+            run('make CC="%s" BUILDMODE="static"' % env['CC'])
+    else:
+        os.chdir("luaJIT/src")
+        run("msvcbuild static")
+
 env_lua = env_lua.Clone()
 
-env_lua.Append(CPPDEFINES='MAKE_LIB')
+if env["luaapi_luajit"]:
+    if env["luaapi_luajit_build"]:
+        build_luajit()
+    env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
+    env.Append(LIBS=['libluajit'])
+    
+else:
+    env_lua.Append(CPPDEFINES='MAKE_LIB')
 
-if env_lua['PLATFORM'] == 'posix' and env["platform"] == 'linuxbsd':
-    env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+    if env['PLATFORM'] == 'posix' and env["platform"] == 'linuxbsd':
+        env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
 
-if not env_lua.msvc:
-    env_lua['CFLAGS'].remove('-std=gnu11')
-    env_lua.Append(CFLAGS=['-std=c99'])
+    if not env_lua.msvc:
+        env_lua['CFLAGS'].remove('-std=gnu11')
+        env_lua.Append(CFLAGS=['-std=c99'])
 
-env_lua.add_source_files(env.modules_sources,'lua/onelua.c')
+    env_lua.add_source_files(env.modules_sources,'lua/onelua.c')
+

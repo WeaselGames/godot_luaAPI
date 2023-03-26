@@ -36,6 +36,8 @@ lua_State* LuaState::getState() const {
     return L;
 }
 
+#ifndef LAPI_LUAJIT
+
 // Binds lua librares with the lua state
 void LuaState::bindLibraries(Array libs) {
     for (int i = 0; i < libs.size(); i++) {
@@ -76,9 +78,58 @@ void LuaState::bindLibraries(Array libs) {
     }
 }
 
+#else
+
+// Binds lua librares with the lua state
+void LuaState::bindLibraries(Array libs) {
+
+    for (int i = 0; i < libs.size(); i++) {
+        String lib = ((String)libs.get(i)).to_lower();
+        if (lib=="base") {
+            lua_pushcfunction(L, luaopen_base);
+            lua_pushstring(L, "");
+            lua_call(L, 1, 0);
+
+            lua_register(L, "print", luaPrint);
+        } else if (lib=="table") {
+            lua_pushcfunction(L, luaopen_table);
+            lua_pushstring(L, LUA_TABLIBNAME);
+            lua_call(L, 1, 0);
+        } else if (lib=="string") {
+            lua_pushcfunction(L, luaopen_string);
+            lua_pushstring(L, LUA_STRLIBNAME);
+            lua_call(L, 1, 0);
+        } else if (lib=="math") {
+            lua_pushcfunction(L, luaopen_math);
+            lua_pushstring(L, LUA_MATHLIBNAME);
+            lua_call(L, 1, 0);
+        } else if (lib=="os") {
+            lua_pushcfunction(L, luaopen_os);
+            lua_pushstring(L, LUA_OSLIBNAME);
+            lua_call(L, 1, 0);
+        } else if (lib=="io") {
+            lua_pushcfunction(L, luaopen_io);
+            lua_pushstring(L, LUA_IOLIBNAME);
+            lua_call(L, 1, 0);
+        } else if (lib=="debug") {
+            lua_pushcfunction(L, luaopen_debug);
+            lua_pushstring(L, LUA_DBLIBNAME);
+            lua_call(L, 1, 0);
+        } else if (lib=="package") {
+            lua_pushcfunction(L, luaopen_package);
+            lua_pushstring(L, LUA_LOADLIBNAME);
+            lua_call(L, 1, 0);
+        }
+    }
+}
+
+#endif
+
 // Returns true if a lua function exists with the given name
 bool LuaState::luaFunctionExists(String functionName) {
-    int type = lua_getglobal(L, functionName.ascii().get_data());
+    // LuaJIT does not return a type here
+    lua_getglobal(L, functionName.ascii().get_data());
+    int type = lua_type(L, -1);
     lua_pop(L, 1);
     return type == LUA_TFUNCTION;
 }
@@ -405,14 +456,23 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
             result = *(Variant*)lua_touserdata(state, index);
             break;
         case LUA_TTABLE: {
+            #ifndef LAPI_LUAJIT
             lua_len(state, index);
+            #else
+            lua_objlen(state, index);
+            #endif
+
             int len = lua_tointeger(state, -1);
             lua_pop(state, 1);
             // len should be 0 if the type is table and not a array
             if (len) {
                 Array array;
                 for (int i = 1; i <= len; i++) {
+                    #ifndef LAPI_LUAJIT
                     lua_geti(state, index, i);
+                    #else
+                    lua_rawgeti(state, index, i);
+                    #endif
                     array.push_back(getVariant(state, -1, obj));
                     lua_pop(state, 1);
                 }

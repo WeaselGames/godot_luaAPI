@@ -6,15 +6,17 @@ Import('env_modules')
 env_lua = env_modules.Clone()
 
 if not env.msvc:
-    CXXFLAGS='-std=c++17'
+    CXXFLAGS=['-std=c++17']
 else:
-    CXXFLAGS='/std:c++17'
+    CXXFLAGS=['/std:c++17']
 
-env_lua['CXXFLAGS'] = [CXXFLAGS]
+env_lua.Append(CXXFLAGS=CXXFLAGS)
 
 Export('env_lua')
-
 SConscript('external/SCsub')
+
+if env["luaapi_luajit"]:
+    env_lua.Append(CPPDEFINES=['LAPI_LUAJIT'])
 
 env_lua.Append(CPPPATH=[Dir('src').abspath])
 env_lua.Append(CPPPATH=[Dir('external').abspath])
