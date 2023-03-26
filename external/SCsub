@@ -4,6 +4,7 @@ Import('env_lua')
 
 import sys
 import os
+import platform
 import SCons.Script
 
 def run(cmd):
@@ -21,11 +22,15 @@ def run(cmd):
 def build_luajit():
     if not env_lua.msvc:
         os.chdir("luaJIT")
-        run("make clean")
-
+        # cross compile linux->windows
         if env['PLATFORM'] == 'posix' and env['platform'] == 'windows':
+            run("make clean")
             run('make HOST_CC="%s" CROSS="%s" TARGET_SYS=Windows BUILDMODE="static"' % (env['luaapi_host_cc'], env['CC'].replace("gcc", "")))
+        elif env['platform']=='macos':
+            run("make clean MACOSX_DEPLOYMENT_TARGET=10.12")
+            run('make CC="%s" BUILDMODE="static" MACOSX_DEPLOYMENT_TARGET=10.12' % env['CC'])
         else:
+            run("make clean")
             run('make CC="%s" BUILDMODE="static"' % env['CC'])
     else:
         os.chdir("luaJIT/src")

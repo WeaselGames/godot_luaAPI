@@ -67,7 +67,59 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos tools=yes target=editor extra_suffix=luaAPI 
-          scons platform=macos tools=yes target=editor luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
+      - name: Prepare artifact
+        run: |
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: scripts/godot/bin
+  
+  macos-editor-luajit:
+    runs-on: "macos-latest"
+
+    name: MacOS Editor LuaJIT (target=editor, tools=yes)
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Vulkan SDK
+        run: |
+          sh scripts/install_vulkan_sdk_macos.sh
+
+      - name: Load .scons_cache directory
+        id: macos-editor-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Compilation
+        working-directory: ./scripts
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons platform=macos tools=yes target=editor extra_suffix=luaAPI luaapi_luajit=yes
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -120,7 +172,6 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos target=template_release tools=no extra_suffix=luaAPI
-          scons platform=macos target=template_release tools=no luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -173,7 +224,6 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=macos target=template_debug tools=no extra_suffix=luaAPI
-          scons platform=macos target=template_debug tools=no luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*

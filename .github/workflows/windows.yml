@@ -64,7 +64,52 @@ jobs:
           SCONS_CACHE: /.scons_cache/
         run: |
           scons platform=windows tools=yes target=editor extra_suffix=luaAPI
-          scons platform=windows tools=yes target=editor luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
+      - name: Prepare artifact
+        run: |
+          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: scripts/godot/bin/*
+
+  windows-editor-luajit:
+    runs-on: "windows-latest"
+    name: Windows Editor LuaJIT (target=editor, tools=yes)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Editing this is pretty dangerous for Windows since it can break.
+      # Needs to be properly tested with a fresh cache.
+      - name: Load .scons_cache directory
+        id: windows-editor-cache
+        uses: RevoluPowered/cache@v2.1
+        with:
+          path: /.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons pywin32
+          python --version
+          scons --version
+      - name: Compilation
+        working-directory: ./scripts
+        env:
+          SCONS_CACHE: /.scons_cache/
+        run: |
+          scons platform=windows tools=yes target=editor extra_suffix=luaAPI luaapi_luajit=yes
       - name: Prepare artifact
         run: |
           Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
@@ -112,7 +157,6 @@ jobs:
           SCONS_CACHE: /.scons_cache/
         run: |
           scons platform=windows target=template_release tools=no extra_suffix=luaAPI
-          scons platform=windows target=template_release tools=no luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
@@ -160,7 +204,6 @@ jobs:
           SCONS_CACHE: /.scons_cache/
         run: |
           scons platform=windows target=template_debug tools=no extra_suffix=luaAPI
-          scons platform=windows target=template_debug tools=no luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
