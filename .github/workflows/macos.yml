@@ -66,7 +66,8 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=macos tools=yes target=editor
+          scons platform=macos tools=yes target=editor extra_suffix=luaAPI 
+          scons platform=macos tools=yes target=editor luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -118,7 +119,8 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=macos target=template_release tools=no
+          scons platform=macos target=template_release tools=no extra_suffix=luaAPI
+          scons platform=macos target=template_release tools=no luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -170,7 +172,8 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=macos target=template_debug tools=no
+          scons platform=macos target=template_debug tools=no extra_suffix=luaAPI
+          scons platform=macos target=template_debug tools=no luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*

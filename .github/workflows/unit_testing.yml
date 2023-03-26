@@ -65,7 +65,8 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linuxbsd tools=yes target=editor
+          scons platform=linuxbsd tools=yes target=editor extra_suffix=luaAPI
+          scons platform=linuxbsd tools=yes target=editor luaapi_luajit=yes extra_suffix=luaAPI.LuaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -77,4 +78,4 @@ jobs:
         if: ${{ always() }}
         with:
           name: ${{github.job}}
-          path: testing/log.txt
+          path: testing/*.txt

@@ -38,14 +38,12 @@ if not godot_dir.exists():
 # Setup base SCons arguments to the Godot build command.
 args = ["scons"]
 for arg in ARGLIST:
+    if arg[0] == 'extra_suffix':
+        os.environ["BUILD_NAME"] = arg[1]
     opt = "%s=%s" % (arg[0], arg[1])
     args.append(opt)
 
 args.append("custom_modules=%s" % lua_dir.abspath)
-
-# Append the default `extra_suffix` to distinguish between other builds.
-args.append("extra_suffix=luaAPI")
-os.environ["BUILD_NAME"] = "luaAPI"
 
 # Avoid issues when building with different versions of Python.
 SConsignFile(".sconsign{0}.dblite".format(pickle.HIGHEST_PROTOCOL))

@@ -8,19 +8,22 @@ import SCons.Script
 
 def run(cmd):
     res = os.system(cmd)
-    if (os.WIFEXITED(res)):
+    code = 0
+    if (os.name == 'nt'):
+        code = res
+    else:
         code = os.WEXITSTATUS(res)
-        if code != 0:
-            print("Error: return code: " + str(code))
-            if SCons.Script.keep_going_on_error == 0:
-                sys.exit(code)
+    if code != 0:
+        print("Error: return code: " + str(code))
+        if SCons.Script.keep_going_on_error == 0:
+            sys.exit(code)
 
 def build_luajit():
     if not env_lua.msvc:
         os.chdir("luaJIT")
         run("make clean")
 
-        if env['PLATFORM'] == 'posix' and env["platform"] == 'windows':
+        if env['PLATFORM'] == 'posix' and env['platform'] == 'windows':
             run('make HOST_CC="%s" CROSS="%s" TARGET_SYS=Windows BUILDMODE="static"' % (env['luaapi_host_cc'], env['CC'].replace("gcc", "")))
         else:
             run('make CC="%s" BUILDMODE="static"' % env['CC'])
@@ -33,13 +36,18 @@ env_lua = env_lua.Clone()
 if env["luaapi_luajit"]:
     if env["luaapi_luajit_build"]:
         build_luajit()
-    env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
-    env.Append(LIBS=['libluajit'])
+    if env_lua.msvc:
+        # hack for msvc builds. See https://github.com/godotengine/godot/issues/23687
+        env.Append(LIBS=[File('luaJIT/src/luajit.lib')])
+        env.Append(LIBS=[File('luaJIT/src/lua51.lib')])
+    else:
+        env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
+        env.Append(LIBS=['libluajit'])
     
 else:
     env_lua.Append(CPPDEFINES='MAKE_LIB')
 
-    if env['PLATFORM'] == 'posix' and env["platform"] == 'linuxbsd':
+    if env['PLATFORM'] == 'posix' and env['platform'] == 'linuxbsd':
         env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
 
     if not env_lua.msvc:
