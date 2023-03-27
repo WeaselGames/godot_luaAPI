@@ -5,7 +5,6 @@ Import('env_lua')
 import sys
 import os
 import platform
-import SCons.Script
 
 def run(cmd):
     print("Running: %s" % cmd)
@@ -41,14 +40,14 @@ def build_luajit():
 
                 else:
                     print("ERROR: Unsupported cross compile!")
-                    os.exit(-1)
+                    sys.exit(-1)
 
             else:
                 run('make CC="%s" BUILDMODE="static"' % env['CC'])
 
         else:
-            print("ERROR: Unsupported platform!")
-            os.exit(-1)
+            print("ERROR: Unsupported platform '%s'." % env['platform'])
+            sys.exit(-1)
     else:
         os.chdir("luaJIT/src")
         run("msvcbuild static")

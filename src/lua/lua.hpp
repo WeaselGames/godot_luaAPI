@@ -22,13 +22,6 @@ extern "C" {
 
 #include <luaJIT/src/lua.hpp>
 
-#define LUA_OK 0
-
-inline void luaL_setmetatable(lua_State *L, const char *tname) {
-    luaL_getmetatable(L, tname);
-    lua_setmetatable(L, -2);
-}
-
 #endif
 #endif
 
