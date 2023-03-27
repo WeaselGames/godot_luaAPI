@@ -11,7 +11,6 @@ class LuaState {
     public:
         void setState(lua_State* state, RefCounted* obj, bool bindAPI);
         void bindLibraries(Array libs);
-        void pushFunction(String functionName, Callable function, int argc, bool tuple) const;
 
         bool luaFunctionExists(String functionName);
 

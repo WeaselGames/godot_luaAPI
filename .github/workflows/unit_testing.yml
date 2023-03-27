@@ -65,16 +65,22 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linuxbsd tools=yes target=editor
+          scons platform=linuxbsd tools=yes target=editor extra_suffix=luaAPI
+          mv godot/bin/godot.linuxbsd.editor.x86_64.luaAPI godot/bin/godot.linuxbsd.editor.x86_64.luaAPI.lua
+          scons platform=linuxbsd tools=yes target=editor luaapi_luajit=yes extra_suffix=luaAPI
+          mv godot/bin/godot.linuxbsd.editor.x86_64.luaAPI godot/bin/godot.linuxbsd.editor.x86_64.luaAPI.luaJIT
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
           chmod +x scripts/godot/bin/godot.*
       - name: Unit Testing
         run: |
-          /bin/bash -e ./scripts/run_tests.sh
+          scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI.lua --headless --path testing/ -s run_tests.gd
+          mv testing/log.txt lua-log.txt
+          scripts/godot/bin/godot.linuxbsd.editor.x86_64.luaAPI.luaJIT --headless --path testing/ -s run_tests.gd
+          mv testing/log.txt luaJIT-log.txt
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
           name: ${{github.job}}
-          path: testing/log.txt
+          path: testing/*.txt

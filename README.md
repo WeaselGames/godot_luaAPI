@@ -59,12 +59,15 @@ If a feature is missing that you would like to see feel free to create a [Featur
 Nightly Builds
 ---------------
 - [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
+- [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor-luajit.zip)
 - [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-release.zip)
 - [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-debug.zip)
 - [🎨 Windows Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor.zip)
+- [🎨 Windows Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor-luajit.zip)
 - [🎨 Windows Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template.zip)
 - [🎨 Windows Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template-debug.zip)
 - [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor.zip)
+- [🍎 MacOS Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor-luajit.zip)
 - [🍎 MacOS Templates](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template.zip)
 - [🍎 MacOS Templates Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template-debug.zip)
 

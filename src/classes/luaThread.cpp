@@ -92,12 +92,20 @@ Variant LuaThread::resume() {
     }
 
     int argc;
+    #ifndef LAPI_LUAJIT
     int ret = lua_resume(tState, NULL, 0, &argc);
+    #else
+    int ret = lua_resume(tState, 0);
+    #endif
     if (ret == LUA_OK) done = true; // thread is finished
     else if (ret != LUA_YIELD) {
         done = true;
         return state.handleError(ret);
     }
+
+    #ifdef LAPI_LUAJIT
+    argc = lua_gettop(tState);
+    #endif
     
     Array toReturn;
     for (int i = 1; i <= argc; i++) {

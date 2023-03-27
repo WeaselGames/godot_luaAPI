@@ -27,7 +27,7 @@ env:
 jobs:
   linux-editor:
     runs-on: "ubuntu-20.04"
-    name: Linux Editor(platform=linuxbsd tools=yes target=editor)
+    name: Linux Editor (platform=linuxbsd tools=yes target=editor)
     steps:
       - uses: actions/checkout@v3
         with:
@@ -66,7 +66,58 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linuxbsd tools=yes target=editor
+          scons platform=linuxbsd tools=yes target=editor extra_suffix=luaAPI
+      - name: Prepare artifact
+        run: |
+          strip scripts/godot/bin/godot.*
+          chmod +x scripts/godot/bin/godot.*
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{github.job}}
+          path: scripts/godot/bin/*
+
+  linux-editor-luajit:
+    runs-on: "ubuntu-20.04"
+    name: Linux Editor LuaJIT (platform=linuxbsd tools=yes target=editor)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Install all packages except SCons
+      - name: Configure dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
+            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
+      - name: Load .scons_cache directory
+        id: linux-editor-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{env.BASE_BRANCH}}
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+      - name: Compilation
+        working-directory: ./scripts
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons platform=linuxbsd tools=yes target=editor extra_suffix=luaAPI luaapi_luajit=yes
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -117,7 +168,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linuxbsd tools=no target=template_release
+          scons platform=linuxbsd tools=no target=template_release extra_suffix=luaAPI
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*
@@ -168,7 +219,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linuxbsd tools=no target=template_debug
+          scons platform=linuxbsd tools=no target=template_debug extra_suffix=luaAPI
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*

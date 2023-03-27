@@ -2,7 +2,22 @@ def can_build(env, platform):
     return True
 
 def configure(env):
-    pass
+    from SCons.Script import BoolVariable, EnumVariable, Variables, Help
+
+    env_vars = Variables()
+
+    env_vars.Add(BoolVariable("luaapi_luajit", 
+    "Build the LuaAPI module with luaJIT v2.0 instead of Lua v5.4", False))
+
+    env_vars.Add(BoolVariable("luaapi_luajit_build", 
+    "When LuaAPI is using luaJIT, be defualt it will attempt to build it automatically. if you prefer you can build it manually and disable auto building with this flag. Make sure to build staticly and that the libs are in external/luaJIT/src", 
+    True))
+
+    env_vars.Add(EnumVariable("luaapi_host_cc", 
+    "LuaJIT builds some tools to assit with the rest of the build. You can set the host CC to be used here in the case of cross compilation.", "gcc", ("gcc", "clang")))
+    
+    env_vars.Update(env)
+    Help(env_vars.GenerateHelpText(env))
 
 def get_doc_classes():
     return [
