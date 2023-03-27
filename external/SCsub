@@ -8,6 +8,7 @@ import platform
 import SCons.Script
 
 def run(cmd):
+    print("Running: %s" % cmd)
     res = os.system(cmd)
     code = 0
     if (os.name == 'nt'):
@@ -20,18 +21,36 @@ def run(cmd):
             sys.exit(code)
 
 def build_luajit():
+    host_arch = platform.machine()
     if not env_lua.msvc:
+        command = ""
+        if (env['arch'] != host_arch or (env['PLATFORM'] == 'posix' and env['platform'] != 'linuxbsd')):
+            host_cc = env['luaapi_host_cc']
+            cc = ""
+            cross_cc = env['CC'].replace("-gcc", "-").replace("-clang", "-")
+            if (env['arch'] != host_arch):
+                if (env['arch'] == 'x86_32' and host_arch == 'x86_64'):
+                    host_cc += ' -m32'
+                if (env['arch'] == 'arm64' and host_arch == 'x86_64' and env['platform'] == 'macos'):
+                    host_cc = env['CC']
+                    cc = env['CC'] + ' -target arm64-apple-macos11'
+            if cc == "":
+                command = 'make HOST_CC="%s" CROSS="%s" BUILDMODE="static"' % (host_cc, cross_cc)
+            else:
+                command = 'make HOST_CC="%s" CC="%s" BUILDMODE="static"' % (host_cc, cc)
+        else:
+            command = 'make CC="%s" BUILDMODE="static"' % env['CC']
         os.chdir("luaJIT")
         # cross compile linux->windows
         if env['PLATFORM'] == 'posix' and env['platform'] == 'windows':
             run("make clean")
-            run('make HOST_CC="%s" CROSS="%s" TARGET_SYS=Windows BUILDMODE="static"' % (env['luaapi_host_cc'], env['CC'].replace("gcc", "")))
+            run('%s TARGET_SYS=Windows' % command)
         elif env['platform']=='macos':
             run("make clean MACOSX_DEPLOYMENT_TARGET=10.12")
-            run('make CC="%s" BUILDMODE="static" MACOSX_DEPLOYMENT_TARGET=10.12' % env['CC'])
+            run('%s MACOSX_DEPLOYMENT_TARGET=10.12' % command)
         else:
             run("make clean")
-            run('make CC="%s" BUILDMODE="static"' % env['CC'])
+            run(command)
     else:
         os.chdir("luaJIT/src")
         run("msvcbuild static")
