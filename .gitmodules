@@ -6,3 +6,7 @@
 	path = external/luaJIT
 	url = https://github.com/luaJIT/luaJIT
 	branch = v2.1
+[submodule "external/lua51"]
+	path = external/lua51
+	url = https://github.com/lua/lua
+	branch = c4b71b7b
