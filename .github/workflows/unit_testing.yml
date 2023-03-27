@@ -67,7 +67,7 @@ jobs:
         run: |
           scons platform=linuxbsd tools=yes target=editor extra_suffix=luaAPI
           mv godot/bin/godot.linuxbsd.editor.x86_64.luaAPI godot/bin/godot.linuxbsd.editor.x86_64.luaAPI.lua
-          scons platform=linuxbsd tools=yes target=editor luaapi_luajit=yes extra_suffix=luaAPI
+          scons platform=linuxbsd tools=yes target=editor luaapi_luaver=jit extra_suffix=luaAPI
           mv godot/bin/godot.linuxbsd.editor.x86_64.luaAPI godot/bin/godot.linuxbsd.editor.x86_64.luaAPI.luaJIT
       - name: Prepare artifact
         run: |

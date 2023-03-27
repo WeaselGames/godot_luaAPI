@@ -119,7 +119,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=macos tools=yes target=editor extra_suffix=luaAPI luaapi_luajit=yes
+          scons platform=macos tools=yes target=editor extra_suffix=luaAPI luaapi_luaver=jit
       - name: Prepare artifact
         run: |
           strip scripts/godot/bin/godot.*

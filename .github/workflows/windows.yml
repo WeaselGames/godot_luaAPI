@@ -109,7 +109,7 @@ jobs:
         env:
           SCONS_CACHE: /.scons_cache/
         run: |
-          scons platform=windows tools=yes target=editor extra_suffix=luaAPI luaapi_luajit=yes
+          scons platform=windows tools=yes target=editor extra_suffix=luaAPI luaapi_luaver=jit
       - name: Prepare artifact
         run: |
           Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
