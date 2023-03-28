@@ -1,10 +1,18 @@
 #ifndef LUAERROR_H
 #define LUAERROR_H
 
+#ifndef LAPI_GDEXTENSION
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
 
 #include <lua/lua.hpp>
+
+#ifdef LAPI_GDEXTENSION
+using namespace godot;
+#endif
 
 class LuaError : public RefCounted {
     GDCLASS(LuaError, RefCounted);

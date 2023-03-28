@@ -3,11 +3,19 @@
 
 #include "luaError.h" 
 
+#ifndef LAPI_GDEXTENSION
 #include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#endif
 
 #include <lua/lua.hpp>
 #include <luaState.h>
+
+#ifdef LAPI_GDEXTENSION
+using namespace godot;
+#endif
 
 class LuaAPI;
 

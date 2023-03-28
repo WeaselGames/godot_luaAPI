@@ -1,0 +1,27 @@
+# Used for extension builds
+import os
+import sys
+
+env = SConscript("godot-cpp/SConstruct")
+env_lua = env.Clone()
+
+if env_lua["platform"] == 'linux':
+    env_lua.Append(CPPDEFINES=['LUA_USE_POSIX'])
+elif env_lua["platform"] == "ios":
+    env_lua.Append(CPPDEFINES=['LUA_USE_IOS'])
+
+
+env_lua.Append(CPPDEFINES = ['MAKE_LIB'])
+env_lua.Append(CXXFLAGS = ['-std=c++17'])
+env_lua.Append(CFLAGS = ['-std=c99'])
+
+sources = ['lua/onelua.c']
+library_name = "liblua{}{}".format(env['suffix'], env["LIBSUFFIX"])
+library = env_lua.StaticLibrary("bin/{}".format(library_name), source=sources)
+Default(library)
+
+env.Append(LIBPATH=[Dir("bin").abspath])
+env.Append(LIBS=[library_name])
+
+
+Return('env')

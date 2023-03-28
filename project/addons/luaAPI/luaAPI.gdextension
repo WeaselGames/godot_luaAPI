@@ -1,0 +1,24 @@
+[configuration]
+entry_symbol = "luaAPI_library_init"
+
+[libraries]
+linux.x86_64.debug = "bin/libluaapi.linux.template_debug.x86_64.so"
+linux.x86_64.release = "bin/libluaapi.linux.template_release.x86_64.so"
+linux.x86_32.debug = "bin/libluaapi.linux.template_debug.x86_32.so"
+linux.x86_32.release = "bin/libluaapi.linux.template_release.x86_32.so"
+
+windows.x86_64.debug = "bin/libluaapi.windows.template_debug.x86_64.dll"
+windows.x86_64.release = "bin/libluaapi.windows.template_release.x86_64.dll"
+windows.x86_32.debug = "bin/libluaapi.windows.template_debug.x86_32.dll"
+windows.x86_32.release = "bin/libluaapi.windows.template_release.x86_32.dll"
+
+android.debug.x86_64 = "bin/libluaapi.android.template_debug.x86_64.so"
+android.release.x86_64 = "bin/libluaapi.android.template_release.x86_64.so"
+android.debug.arm64 = "bin/libluaapi.android.template_debug.arm64.so"
+android.release.arm64 = "bin/libluaapi.android.template_release.arm64.so"
+
+macos.debug = "bin/libluaapi.macos.template_debug.framework"
+macos.release = "bin/libluaapi.macos.template_release.framework"
+
+ios.debug.arm64 = "bin/libluaapi.ios.template_debug.arm64.dylib"
+ios.release.arm64 = "bin/libluaapi.ios.template_release.arm64.dylib"
