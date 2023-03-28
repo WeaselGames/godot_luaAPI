@@ -5,9 +5,9 @@ Import('env_lua')
 import sys
 import os
 import platform
-import SCons.Script
 
 def run(cmd):
+    print("Running: %s" % cmd)
     res = os.system(cmd)
     code = 0
     if (os.name == 'nt'):
@@ -16,8 +16,7 @@ def run(cmd):
         code = os.WEXITSTATUS(res)
     if code != 0:
         print("Error: return code: " + str(code))
-        if SCons.Script.keep_going_on_error == 0:
-            sys.exit(code)
+        sys.exit(code)
 
 def build_luajit():
     if not env_lua.msvc:
@@ -25,20 +24,38 @@ def build_luajit():
         # cross compile linux->windows
         if env['PLATFORM'] == 'posix' and env['platform'] == 'windows':
             run("make clean")
-            run('make HOST_CC="%s" CROSS="%s" TARGET_SYS=Windows BUILDMODE="static"' % (env['luaapi_host_cc'], env['CC'].replace("gcc", "")))
+            run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_SYS=Windows' % (env['luaapi_host_cc'], env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+
         elif env['platform']=='macos':
             run("make clean MACOSX_DEPLOYMENT_TARGET=10.12")
-            run('make CC="%s" BUILDMODE="static" MACOSX_DEPLOYMENT_TARGET=10.12' % env['CC'])
-        else:
+            run('make CC="%s" TARGET_FLAGS="-arch %s" MACOSX_DEPLOYMENT_TARGET=10.12' % (env['CC'], env['arch']))
+
+        elif env['platform']=='linuxbsd':
+            host_arch = platform.machine()
             run("make clean")
-            run('make CC="%s" BUILDMODE="static"' % env['CC'])
+            if (host_arch != env['arch']):
+                if (host_arch == 'x86_64' and env['arch'] == 'x86_32'):
+                    host_cc = env['luaapi_host_cc'] + ' -m32'
+                    run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static"' % (host_cc, env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+
+                else:
+                    print("ERROR: Unsupported cross compile!")
+                    sys.exit(-1)
+
+            else:
+                run('make CC="%s" BUILDMODE="static"' % env['CC'])
+
+        else:
+            print("ERROR: Unsupported platform '%s'." % env['platform'])
+            sys.exit(-1)
     else:
         os.chdir("luaJIT/src")
         run("msvcbuild static")
 
 env_lua = env_lua.Clone()
+luaver = env["luaapi_luaver"]
 
-if env["luaapi_luajit"]:
+if luaver == "jit":
     if env["luaapi_luajit_build"]:
         build_luajit()
     if env_lua.msvc:
@@ -48,7 +65,19 @@ if env["luaapi_luajit"]:
     else:
         env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
         env.Append(LIBS=['libluajit'])
-    
+
+elif luaver == "5.1":
+    env_lua.Append(CPPDEFINES='MAKE_LIB')
+
+    if env['PLATFORM'] == 'posix' and env['platform'] == 'linuxbsd':
+        env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+
+    if not env_lua.msvc:
+        env_lua['CFLAGS'].remove('-std=gnu11')
+        env_lua.Append(CFLAGS=['-std=c99'])
+
+    env_lua.add_source_files(env.modules_sources,'lua/*.c')
+
 else:
     env_lua.Append(CPPDEFINES='MAKE_LIB')
 

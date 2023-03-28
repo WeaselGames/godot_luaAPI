@@ -36,7 +36,7 @@ lua_State* LuaState::getState() const {
     return L;
 }
 
-#ifndef LAPI_LUAJIT
+#ifndef LAPI_51
 
 // Binds lua librares with the lua state
 void LuaState::bindLibraries(Array libs) {

@@ -12,11 +12,17 @@ else:
 
 env_lua.Append(CXXFLAGS=CXXFLAGS)
 
+if env["luaapi_luaver"] == "jit" and env['platform']=='javascript':
+    print("WARNING: LuaJIT can not build for a web target. Falling back to lua 5.1")
+    env["luaapi_luaver"] = '5.1'
+
 Export('env_lua')
 SConscript('external/SCsub')
 
-if env["luaapi_luajit"]:
-    env_lua.Append(CPPDEFINES=['LAPI_LUAJIT'])
+if env["luaapi_luaver"] == 'jit':
+    env_lua.Append(CPPDEFINES=['LAPI_LUAJIT', 'LAPI_51'])
+elif env["luaapi_luaver"] == '5.1':
+    env_lua.Append(CPPDEFINES=['LAPI_51'])
 
 env_lua.Append(CPPPATH=[Dir('src').abspath])
 env_lua.Append(CPPPATH=[Dir('external').abspath])
