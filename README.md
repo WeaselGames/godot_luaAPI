@@ -11,13 +11,13 @@
 
 About
 -------
-[![🐧 Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![🎨 Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![🍎 MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml) [![⚙️ Unit Tests](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unit_testing.yml/badge.svg)](https://github.com/WeaselGames/godot_luaAPI/actions/workflows/unit_testing.yml)
+[![Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml) [![GDExtension](https://github.com/WeaselGames/lua/actions/workflows/gdextension.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/gdextension.yml)
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is an **alpha** version of the module made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is an **alpha** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
-This is a Godot engine module that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This module provides no functionality to program your game out of the box. This module allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
+This is a Godot addon that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
 To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
 
@@ -39,7 +39,7 @@ Features
 - Call Lua functions from GDScript.
 - Choose which libraries you want Lua to have access to.
 - Custom LuaCallable type which allows you to get a Lua function as a Callable. See [wiki](https://luaapi.weaselgames.info/v2.0-alpha/examples/lua_callable/).
-- LuaError type which is used to report any errors this module or Lua run into.
+- LuaError type which is used to report any errors this addon or Lua run into.
 - LuaThread type which creates a Lua thread. This is not a OS thread but a coroutine. 
 - Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-alpha/examples/objects/).
 - Objects can override most of the Lua metamethods. I.E. __index by defining a function with the same name.
@@ -58,6 +58,7 @@ If a feature is missing that you would like to see feel free to create a [Featur
 
 Nightly Builds
 ---------------
+- [⚙️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/gdextension/main/godot_luaAPI.zip)
 - [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
 - [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor-luajit.zip)
 - [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-release.zip)
@@ -74,7 +75,6 @@ Nightly Builds
 TODO
 -----
 - Finish v2 documentation
-- Support for GDExtension
 - More up to date todo list on the v2 [project](https://github.com/WeaselGames/lua/projects/1) 
 
 Compiling
