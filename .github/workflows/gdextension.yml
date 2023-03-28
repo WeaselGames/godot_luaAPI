@@ -98,18 +98,18 @@ jobs:
             platform: android
             arch: arm64
 
-          - identifier: macos-release (x86_64)
-            name: MacOS (x86_64) - template_release
+          - identifier: macos-release (universal)
+            name: MacOS (universal) - template_release
             runner: macos-latest
             target: template_release
             platform: macos
-            arch: x86_64
-          - identifier: macos-debug (x86_64)
-            name: MacOS (x86_64) - template_debug
+            arch: universal
+          - identifier: macos-debug (universal)
+            name: MacOS (universal) - template_debug
             runner: macos-latest
             target: template_debug
             platform: macos
-            arch: x86_64
+            arch: universal
           
           - identifier: ios-release (arm64)
             name: IOS (arm64) - template_release
