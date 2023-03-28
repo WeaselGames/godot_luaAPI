@@ -12,6 +12,7 @@ env:
 
 jobs:
   extension-unit-tests:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: "ubuntu-20.04"
     timeout-minutes: 30
     name: GDExtension Unit Testing
@@ -29,7 +30,7 @@ jobs:
         id: download-extension
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: godot_extension.yml
+          workflow: gdextension.yml
           workflow_conclusion: success
           name: godot_luaAPI
           path: project/
