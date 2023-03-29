@@ -15,7 +15,7 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is an **alpha** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is a **beta** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
 
 This is a Godot addon that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
@@ -38,10 +38,10 @@ Features
 - Push any Variant as a global.
 - Call Lua functions from GDScript.
 - Choose which libraries you want Lua to have access to.
-- Custom LuaCallable type which allows you to get a Lua function as a Callable. See [wiki](https://luaapi.weaselgames.info/v2.0-alpha/examples/lua_callable/).
+- Custom LuaCallable type which allows you to get a Lua function as a Callable. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/lua_callable/).
 - LuaError type which is used to report any errors this addon or Lua run into.
 - LuaThread type which creates a Lua thread. This is not a OS thread but a coroutine. 
-- Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-alpha/examples/objects/).
+- Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/objects/).
 - Objects can override most of the Lua metamethods. I.E. __index by defining a function with the same name.
 - Callables passed as userdata, which allows you to push a Callable as a Lua function.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
