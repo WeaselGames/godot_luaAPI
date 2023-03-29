@@ -2,8 +2,9 @@ extends Node
 
 var lua: LuaAPI = LuaAPI.new()
 
-func _lua_print(message: String) -> void:
+func _lua_print(message: String):
 	print(message)
+	return LuaError.new_error("test", LuaError.ERR_RUNTIME)
 
 func _ready():
 	lua.push_variant("print", _lua_print)
@@ -21,14 +22,10 @@ func _ready():
 		return "Hello gdScript!"
 	end
 	""")
+	print(err)
 	if err is LuaError:
 		print("ERROR %d: %s" % [err.type, err.message])
 		return
 	
-	var val = lua.pull_variant("get_message")
-	if val is LuaError:
-		print("ERROR %d: %s" % [err.type, err.message])
-		return
 	
-	var message = val.call()
-	print(message)
+	

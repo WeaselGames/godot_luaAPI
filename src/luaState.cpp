@@ -509,7 +509,7 @@ LuaError* LuaState::handleError(const StringName &func, int error, int expected,
 #endif
 
 
-// gets a variant at a gien index
+// gets a variant at a given index
 Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj) {
     Variant result;
     int type = lua_type(state, index);
@@ -562,20 +562,22 @@ Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj)
             result = dict;
             break;
         }
-        #ifndef LAPI_GDEXTENSION
         case LUA_TFUNCTION: {
+            #ifndef LAPI_GDEXTENSION
             // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
             lua_pushvalue(state, index);
             LuaCallable *callable = memnew(LuaCallable(Ref<RefCounted>(obj), luaL_ref(state, LUA_REGISTRYINDEX), state));
             result = Callable(callable);
+            #else
+            result = LuaError::newError("LuaCallable's are not supported with GDExtension.", LuaError::ERR_RUNTIME);
+            #endif
             break;
         }
-        #endif
         case LUA_TNIL: {
             break;
         }
         default:
-            result = LuaError::newError(vformat("unkown lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
+            result = LuaError::newError(vformat("Unsupported lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
     }
     return result;
 }
@@ -752,7 +754,12 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     #endif
 
     LuaState::pushVariant(state, returned);
+    #ifndef LAPI_GDEXTENSION
+    if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
+    #else
+    // blame this on https://github.com/godotengine/godot-cpp/issues/995
     if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(returned.operator Object*()); tuple != nullptr)
+    #endif
         return tuple->size();
     return 1;
 }
