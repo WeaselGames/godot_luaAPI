@@ -183,6 +183,11 @@ jobs:
         run: |
           scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' -j2
           ls -l project/addons/luaAPI/bin/
+      - name: Strip bins
+        if: "!startsWith(matrix.identifier, 'windows-') && startsWith(matrix.arch, 'x86_')"
+        shell: sh
+        run: |
+          strip project/addons/luaAPI/bin/*
       - name: Prepare artifact
         shell: sh
         env:
