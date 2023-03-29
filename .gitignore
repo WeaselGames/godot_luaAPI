@@ -2,9 +2,12 @@
 *.slo
 *.lo
 *.o
+*.os
 *.obj
 *.pyc
 *.bc
+*.dylib
+*.universal
 
 # Compiled Dynamic libraries
 *.so
@@ -50,3 +53,5 @@ custom.py
 /godot
 /logs
 .godot
+
+/external/bin

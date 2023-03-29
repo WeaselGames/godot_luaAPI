@@ -1,3 +1,4 @@
+#ifndef LAPI_GDEXTENSION
 #ifndef LUACALLABLE_H
 #define LUACALLABLE_H
 
@@ -5,6 +6,10 @@
 #include "core/variant/callable.h"
 
 #include <lua/lua.hpp>
+
+#ifdef LAPI_GDEXTENSION
+using namespace godot;
+#endif
 
 class LuaCallable : public CallableCustom {
     static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);
@@ -28,4 +33,5 @@ class LuaCallable : public CallableCustom {
         lua_State *state = nullptr;
 };
 
+#endif
 #endif

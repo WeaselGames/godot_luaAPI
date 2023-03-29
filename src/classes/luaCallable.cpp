@@ -1,5 +1,7 @@
+#ifndef LAPI_GDEXTENSION
 #include "luaCallable.h"
 #include "luaAPI.h"
+
 
 #include "core/templates/hashfuncs.h"
 
@@ -64,3 +66,4 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 int LuaCallable::getFuncRef() {
 	return funcRef;
 }
+#endif

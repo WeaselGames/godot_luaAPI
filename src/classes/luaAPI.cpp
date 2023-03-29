@@ -1,5 +1,9 @@
 #include "luaAPI.h"
-#include "luaCallable.h"
+
+
+#ifdef LAPI_GDEXTENSION
+#include <godot_cpp/classes/file_access.hpp>
+#endif
 
 LuaAPI::LuaAPI() {
     lState = luaL_newstate();
@@ -72,10 +76,18 @@ LuaError* LuaAPI::doFile(String fileName) {
     String path;
     // fileAccess never unrefs without this
     {
+        #ifndef LAPI_GDEXTENSION
+        Error error;
         Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ, &error);
         if (error != Error::OK) {
             return LuaError::newError(vformat("error '%s' while opening file '%s'", error_names[error], fileName), LuaError::ERR_FILE);
         }
+        #else
+        Ref<FileAccess> file = FileAccess::open(fileName, FileAccess::READ);
+        if (!file.is_valid()) {
+            return LuaError::newError(vformat("error while opening file '%s'", fileName), LuaError::ERR_FILE);
+        }
+        #endif
 
         path = file->get_path_absolute();
     }

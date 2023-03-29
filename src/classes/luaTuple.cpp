@@ -30,7 +30,7 @@ void LuaTuple::pushFront(Variant var) {
 }
 
 void LuaTuple::set(int i, Variant var) {
-    elements.set(i, var);
+    elements[i] = var;
 }
 
 void LuaTuple::clear() {
@@ -54,7 +54,7 @@ Variant LuaTuple::popFront() {
 }
 
 Variant LuaTuple::get(int i) {
-    return elements.get(i);
+    return elements[i];
 }
 
 Array LuaTuple::toArray() {
