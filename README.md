@@ -75,6 +75,8 @@ Nightly Builds
 TODO
 -----
 - Finish v2 documentation
+- LuaJIT and Lua 5.1 support for GDExtension
+- Workaround for lack of CallableCustoms in GDExtension
 - More up to date todo list on the v2 [project](https://github.com/WeaselGames/lua/projects/1) 
 
 Compiling
