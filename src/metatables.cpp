@@ -394,6 +394,25 @@ void LuaState::createColorMetatable() {
     lua_pop(L, 1); // Stack is now unmodified
 }
 
+// Create metatable for Signal and saves it at LUA_REGISTRYINDEX with name "mt_Signal"
+void LuaState::createSignalMetatable() {
+    luaL_newmetatable(L, "mt_Signal");
+
+    LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
+        if (arg1.has_method(arg2)) {
+            lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
+            LuaState::pushVariant(inner_state, arg2);
+            lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
+            return 1;
+        }
+        
+        LuaState::pushVariant(inner_state, arg1.get(arg2));
+        return 1;
+    });
+ 
+    lua_pop(L, 1); // Stack is now unmodified
+}
+
 // Create metatable for any Object and saves it at LUA_REGISTRYINDEX with name "mt_Object"
 void LuaState::createObjectMetatable() {
     luaL_newmetatable(L, "mt_Object");

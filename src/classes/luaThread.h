@@ -30,6 +30,7 @@ class LuaThread : public RefCounted {
 
         void bind(Ref<LuaAPI> lua);
         void loadString(String code);
+        Signal yieldAwait(Array args);
 
         bool luaFunctionExists(String functionName);
 
