@@ -67,10 +67,9 @@ Nightly Builds
 - [🎨 Windows Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor-luajit.zip)
 - [🎨 Windows Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template.zip)
 - [🎨 Windows Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template-debug.zip)
-- [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor.zip)
-- [🍎 MacOS Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor-luajit.zip)
-- [🍎 MacOS Templates](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template.zip)
-- [🍎 MacOS Templates Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template-debug.zip)
+- [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor-luaapi.zip)
+- [🍎 MacOS Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor-luajit-luaapi.zip)
+- [🍎 MacOS Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template-luaapi.zip)
 
 TODO
 -----

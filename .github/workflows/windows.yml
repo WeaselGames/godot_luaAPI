@@ -1,5 +1,5 @@
 # # Huge credit to https://github.com/goostengine/goost
-# this action was made by them and only modified to my needs
+# this action was made by them and only modified to our needs
 name: Windows
 on:
   pull_request:
@@ -21,14 +21,34 @@ on:
 
 env:
   BASE_BRANCH: main
-  SCONSFLAGS: debug_symbols=no
+  SCONSFLAGS: "production=yes extra_suffix=luaAPI"
   SCONS_CACHE_MSVC_CONFIG: true
   SCONS_CACHE_LIMIT: 7168
 
 jobs:
-  windows-editor:
+  windows-builds:
     runs-on: "windows-latest"
-    name: Windows Editor (target=editor, tools=yes)
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows Editor (target=editor)
+            cache-name: windows-editor
+            build-options: "target=editor"
+
+          - name: Windows Editor LuaJIT (target=editor, luaapi_luaver=jit)
+            cache-name: windows-editor-luajit
+            build-options: "target=editor luaapi_luaver=jit"
+
+          - name: Windows Template (target=template_release)
+            cache-name: windows-template
+            build-options: "target=template_release"
+
+          - name: Windows Template Debug (target=template_debug)
+            cache-name: windows-template-debug
+            build-options: "target=template_debug"
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -37,15 +57,15 @@ jobs:
       # Editing this is pretty dangerous for Windows since it can break.
       # Needs to be properly tested with a fresh cache.
       - name: Load .scons_cache directory
-        id: windows-editor-cache
         uses: RevoluPowered/cache@v2.1
         with:
           path: /.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          key: ${{matrix.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
           restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}
+            ${{matrix.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{matrix.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{matrix.cache-name}}-${{env.BASE_BRANCH}}
+
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
@@ -58,156 +78,18 @@ jobs:
           python -m pip install scons pywin32
           python --version
           scons --version
+
       - name: Compilation
         working-directory: ./scripts
         env:
           SCONS_CACHE: /.scons_cache/
         run: |
-          scons platform=windows tools=yes target=editor extra_suffix=luaAPI
+          scons platform=windows ${{ matrix.build-options }} ${{ env.SCONSFLAGS }}
+
       - name: Prepare artifact
         run: |
           Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{github.job}}
-          path: scripts/godot/bin/*
-
-  windows-editor-luajit:
-    runs-on: "windows-latest"
-    name: Windows Editor LuaJIT (target=editor, tools=yes)
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      # Editing this is pretty dangerous for Windows since it can break.
-      # Needs to be properly tested with a fresh cache.
-      - name: Load .scons_cache directory
-        id: windows-editor-cache
-        uses: RevoluPowered/cache@v2.1
-        with:
-          path: /.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64"
-
-      - name: Configuring Python packages
-        run: |
-          python -c "import sys; print(sys.version)"
-          python -m pip install scons pywin32
-          python --version
-          scons --version
-      - name: Compilation
-        working-directory: ./scripts
-        env:
-          SCONS_CACHE: /.scons_cache/
-        run: |
-          scons platform=windows tools=yes target=editor extra_suffix=luaAPI luaapi_luaver=jit
-      - name: Prepare artifact
-        run: |
-          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{github.job}}
-          path: scripts/godot/bin/*
-
-  windows-template:
-    runs-on: "windows-latest"
-    name: Windows Template (target=template_release, tools=no)
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      # Editing this is pretty dangerous for Windows since it can break.
-      # Needs to be properly tested with a fresh cache.
-      - name: Load .scons_cache directory
-        id: windows-template-cache
-        uses: RevoluPowered/cache@v2.1
-        with:
-          path: /.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64"
-
-      - name: Configuring Python packages
-        run: |
-          python -c "import sys; print(sys.version)"
-          python -m pip install scons pywin32
-          python --version
-          scons --version
-      - name: Compilation
-        working-directory: ./scripts
-        env:
-          SCONS_CACHE: /.scons_cache/
-        run: |
-          scons platform=windows target=template_release tools=no extra_suffix=luaAPI
-      - name: Prepare artifact
-        run: |
-          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{github.job}}
-          path: scripts/godot/bin/*
-
-  windows-template-debug:
-    runs-on: "windows-latest"
-    name: Windows Template Debug (target=template_debug, tools=no)
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      # Editing this is pretty dangerous for Windows since it can break.
-      # Needs to be properly tested with a fresh cache.
-      - name: Load .scons_cache directory
-        id: windows-template-debug-cache
-        uses: RevoluPowered/cache@v2.1
-        with:
-          path: /.scons_cache/
-          key: ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-          restore-keys: |
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
-            ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
-            ${{github.job}}-${{env.BASE_BRANCH}}
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64"
-
-      - name: Configuring Python packages
-        run: |
-          python -c "import sys; print(sys.version)"
-          python -m pip install scons pywin32
-          python --version
-          scons --version
-      - name: Compilation
-        working-directory: ./scripts
-        env:
-          SCONS_CACHE: /.scons_cache/
-        run: |
-          scons platform=windows target=template_debug tools=no extra_suffix=luaAPI
-      - name: Prepare artifact
-        run: |
-          Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{github.job}}
+          name: ${{matrix.cache-name}}
           path: scripts/godot/bin/*
