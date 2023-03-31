@@ -100,7 +100,7 @@ jobs:
         working-directory: ./scripts/godot
         if: ${{ matrix.editor }}
         run: |
-          lipo -create bin/godot.macos.editor.x86_64 bin/godot.macos.editor.arm64 -output scripts/bin/godot.macos.editor.universal
+          lipo -create bin/godot.macos.editor.x86_64 bin/godot.macos.editor.arm64 -output bin/godot.macos.editor.universal
           strip bin/godot.macos.editor.universal
           mkdir app
           cp -r misc/dist/macos_tools.app app/Godot.app
@@ -112,8 +112,8 @@ jobs:
         working-directory: ./scripts/godot
         if: ${{ matrix.template }}
         run: |
-          lipo -create bin/godot.macos.template_debug.x86_64 bin/godot.macos.template_debug.arm64 -output scripts/bin/godot.macos.template_debug.universal
-          lipo -create bin/godot.macos.template_release.x86_64 bin/godot.macos.template_release.arm64 -output scripts/bin/godot.macos.template_release.universal
+          lipo -create bin/godot.macos.template_debug.x86_64 bin/godot.macos.template_debug.arm64 -output bin/godot.macos.template_debug.universal
+          lipo -create bin/godot.macos.template_release.x86_64 bin/godot.macos.template_release.arm64 -output bin/godot.macos.template_release.universal
           strip bin/godot.*
           mkdir app
           cp -r misc/dist/macos_template.app app/macos_template.app
