@@ -1,12 +1,14 @@
 #ifndef LUASTATE_H
 #define LUASTATE_H
 
+
 #ifndef LAPI_GDEXTENSION
 #include "core/object/ref_counted.h"
 #include "core/variant/callable.h"
 #else
 #include <godot_cpp/classes/ref.hpp>
-#include <array>
+#include <classes/luaCallable.h>
+#include <godot_cpp/templates/vmap.hpp>
 #endif
 
 #include <lua/lua.hpp>
@@ -29,13 +31,15 @@ class LuaState {
         LuaError* pushGlobalVariant(String name, Variant var);
         LuaError* exposeObjectConstructor(String name, Object* obj);
         LuaError* handleError(int lua_error) const;
+
+        Object* getGDFuncState();
         
         static LuaError* pushVariant(lua_State* state, Variant var);
         static LuaError* handleError(lua_State* state, int lua_error);
         #ifndef LAPI_GDEXTENSION
         static LuaError* handleError(const StringName &func, Callable::CallError error, const Variant** p_arguments, int argc);
         #else
-        static LuaError* handleError(const StringName &func, int error, int expected, int argument, const Variant** p_arguments, int argc);
+        static LuaError* handleError(const StringName &func, GDExtensionCallError error, const Variant** p_arguments, int argc);
         #endif
         static Variant getVariant(lua_State* state, int index, const RefCounted* obj);
 
@@ -46,8 +50,10 @@ class LuaState {
         static int luaUserdataFuncCall(lua_State* state);
         static int luaCallableCall(lua_State* state);
     private:
-        lua_State *L = nullptr;
+        lua_State* L = nullptr;
         RefCounted* obj;
+
+        static VMap<lua_State*, Object*> GDFunctionStates;
 
         void exposeConstructors();
         void createVector2Metatable();
@@ -55,6 +61,7 @@ class LuaState {
         void createColorMetatable();
         void createRect2Metatable();
         void createPlaneMetatable();
+        void createSignalMetatable();
         void createObjectMetatable();
         void createCallableMetatable();
         void createCallableExtraMetatable();

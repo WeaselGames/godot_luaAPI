@@ -1,6 +1,8 @@
 #include "luaThread.h"
 
+#include "lua/lua.h"
 #include "luaAPI.h"
+#include "luaTuple.h"
 
 #ifdef LAPI_GDEXTENSION
 #include <godot_cpp/classes/file_access.hpp>
@@ -11,6 +13,8 @@ void LuaThread::_bind_methods() {
     
     ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaThread::bind);
     ClassDB::bind_method(D_METHOD("resume"), &LuaThread::resume);
+    ClassDB::bind_method(D_METHOD("yield_await", "signal"), &LuaThread::yieldAwait);
+
     ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaThread::loadString);
     ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaThread::loadFile);
     ClassDB::bind_method(D_METHOD("is_done"), &LuaThread::isDone);
@@ -20,7 +24,21 @@ void LuaThread::_bind_methods() {
     ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaThread::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaThread::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaThread::exposeObjectConstructor);
+    // This is a dummy signal never meant to actually be emited. Await needs with a coroutine or a signal to work. Even though we resume it via the GDScriptFunctionState
+    ADD_SIGNAL(MethodInfo("thread_resume"));
 
+
+}
+
+Signal LuaThread::yieldAwait(Array args) {
+    lua_pop(tState, 1); // Pop function off top of stack.
+    for (int i = 0; i < args.size(); i++) {
+        LuaError* err = state.pushVariant(args[i]);
+        if (err != nullptr) {
+            // TODO: Handle error
+        }
+    }
+    return Signal(this, "thread_resume");
 }
 
 // Calls LuaState::luaFunctionExists()
@@ -101,13 +119,43 @@ Variant LuaThread::resume() {
     if (done) {
         return LuaError::newError("Thread is done executing", LuaError::ERR_RUNTIME);
     }
-
     int argc;
-    #ifndef LAPI_LUAJIT
-    int ret = lua_resume(tState, NULL, 0, &argc);
-    #else
-    int ret = lua_resume(tState, 0);
-    #endif
+    int ret = 0;
+    Object* funcState = state.getGDFuncState();
+    if (funcState != nullptr) {
+        #ifndef LAPI_GDEXTENSION
+        Callable::CallError error;
+        Variant toReturn = funcState->callp("resume", nullptr, 0, error);
+        if (error.error != error.CALL_OK)
+            return LuaState::handleError("resume", error, nullptr, 0);
+        #else
+        Variant toReturn = funcState->callv("resume", Array());
+        #endif
+
+        state.pushVariant(toReturn);
+        int retArgc = 1;
+        if (toReturn.get_type() == Variant::OBJECT) {
+            if (LuaTuple* tuple = Object::cast_to<LuaTuple>(toReturn.operator Object*()); tuple != nullptr)
+                retArgc = tuple->size();
+        }
+
+        #ifndef LAPI_LUAJIT
+        ret = lua_resume(tState, NULL, retArgc, &argc);
+        #else
+        ret = lua_resume(tState, retArgc);
+        #endif
+
+    }
+    else {
+        #ifndef LAPI_LUAJIT
+        ret = lua_resume(tState, NULL, 0, &argc);
+        #else
+        ret = lua_resume(tState, 0);
+        #endif
+    }
+    
+    
+    
     if (ret == LUA_OK) done = true; // thread is finished
     else if (ret != LUA_YIELD) {
         done = true;

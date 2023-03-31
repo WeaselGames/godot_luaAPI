@@ -1,4 +1,5 @@
 #include "luaState.h"
+#include "lua/lua.h"
 #include <classes/luaAPI.h>
 #include <classes/luaTuple.h>
 #include <classes/luaCallableExtra.h>
@@ -8,6 +9,8 @@
 #ifndef LAPI_GDXTENSION
 #include <classes/luaCallable.h>
 #endif
+
+VMap<lua_State*, Object*> LuaState::GDFunctionStates;
 
 void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     this->L = L;
@@ -29,6 +32,7 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
     createColorMetatable();     // "mt_Color"
     createRect2Metatable();     // "mt_Rect2"
     createPlaneMetatable();     // "mt_Plane"
+    createSignalMetatable();    // "mt_Signal"
     createObjectMetatable();    // "mt_Object"
     createCallableMetatable();  // "mt_Callable"
     createCallableExtraMetatable();  // "mt_CallableExtra"
@@ -39,6 +43,12 @@ void LuaState::setState(lua_State *L, RefCounted* obj, bool bindAPI) {
 
 lua_State* LuaState::getState() const {
     return L;
+}
+
+Object* LuaState::getGDFuncState() {
+    Object* obj = GDFunctionStates[L];
+    GDFunctionStates[L] = nullptr;
+    return obj;
 }
 
 #ifndef LAPI_LUAJIT
@@ -296,8 +306,14 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
             luaL_setmetatable(state, "mt_Plane");
             break;     
         }
+        case Variant::Type::SIGNAL: {
+            void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
+            memcpy(userdata, (void*)&var, sizeof(Variant));
+            luaL_setmetatable(state, "mt_Signal");
+            break;  
+        }
         case Variant::Type::OBJECT: {
-                        // If the type being pushed is a lua error, Raise a error
+            // If the type being pushed is a lua error, Raise a error
             #ifndef LAPI_GDEXTENSION
             if (LuaError* err = Object::cast_to<LuaError>(var.operator Object*()); err != nullptr) {
             #else
@@ -323,6 +339,17 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                 break;
             }
 
+            // Temp maybe? If we do not store a referance to refCounted they will die with GDScript
+            if (RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*()); temp != nullptr) {
+                lua_pushstring(state, "__OBJECT");
+                lua_rawget(state, LUA_REGISTRYINDEX);
+                LuaAPI* OBJ = (LuaAPI*) lua_touserdata(state, -1);
+                lua_pop(state, 1);
+
+                if (OBJ != nullptr)
+                    OBJ->addRef(var);
+            }
+
             // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
             #ifndef LAPI_GDEXTENSION
             if (LuaCallableExtra* func = Object::cast_to<LuaCallableExtra>(var.operator Object*()); func != nullptr) {
@@ -336,16 +363,6 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                 break;
             }
 
-            // Temp maybe? If we do not store a referance to refCounted they will die with GDScript
-            if (RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*()); temp != nullptr) {
-                lua_pushstring(state, "__OBJECT");
-                lua_rawget(state, LUA_REGISTRYINDEX);
-                LuaAPI* OBJ = (LuaAPI*) lua_touserdata(state, -1);
-                lua_pop(state, 1);
-
-                if (OBJ != nullptr)
-                    OBJ->addRef(var);
-            }
 
             void* userdata = (Variant*)lua_newuserdata(state, sizeof(Variant));
             memcpy(userdata, (void*)&var, sizeof(Variant));
@@ -462,15 +479,15 @@ LuaError* LuaState::handleError(const StringName &func, Callable::CallError erro
 
 #else
 
-LuaError* LuaState::handleError(const StringName &func, int error, int expected, int argument, const Variant** p_arguments, int argc) {
-    switch (error) {
+LuaError* LuaState::handleError(const StringName &func, GDExtensionCallError error, const Variant** p_arguments, int argc) {
+    switch (error.error) {
         case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
             return LuaError::newError(
                 vformat("Error calling function: %s - Invalid type for argument %s, expected %s but is %s.", 
                     String(func), 
-                    itos(argument+1), // lua indexes by 1 so this should be more correct
-                    Variant::get_type_name(Variant::Type(expected)),
-                    Variant::get_type_name(p_arguments[argument]->get_type())), 
+                    itos(error.argument+1), // lua indexes by 1 so this should be more correct
+                    Variant::get_type_name(Variant::Type(error.expected)),
+                    Variant::get_type_name(p_arguments[error.argument]->get_type())), 
                 LuaError::ERR_RUNTIME);
          }
         case GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS: {
@@ -485,7 +502,7 @@ LuaError* LuaState::handleError(const StringName &func, int error, int expected,
             return LuaError::newError(
                 vformat("Error calling function: %s - Too few arguments, expected %d but got $d.", 
                     String(func),
-                    argument,
+                    error.argument,
                     argc), 
                 LuaError::ERR_RUNTIME);
         }
@@ -661,8 +678,22 @@ int LuaState::luaCallableCall(lua_State* state) {
         lua_error(state);
         return 0;
     }
+
+    // await was called
+    // We get class name to avoid binding to headers defined in the gdscript module.
+    if (returned.is_ref_counted() && (returned.operator Object*())->get_class_name()=="GDScriptFunctionState") { 
+        GDFunctionStates[state] = (returned.operator Object*());
+        // TODO: Check if its actually a thread
+        return lua_yield(state, lua_gettop(state));
+    }
     
-    LuaState::pushVariant(state, returned);
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
+
     if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
@@ -697,6 +728,12 @@ int LuaState::luaCallableCall(lua_State* state) {
 
     Variant returned = callable.callv(args);
     
+    if (returned.get_type() == Variant::OBJECT && (returned.operator Object*())->get_class()=="GDScriptFunctionState") { 
+        GDFunctionStates[state] = (returned.operator Object*());
+        // TODO: Check if its actually a thread
+        return lua_yield(state, lua_gettop(state));
+     }
+
     LuaError* err = LuaState::pushVariant(state, returned);
     if (err != nullptr) {
         lua_pushstring(state, err->getMessage().ascii().get_data());
@@ -746,7 +783,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     GDExtensionCallError error;
     obj->callp(fName.ascii().get_data(), args, argc, returned, error);
     if (error.error != GDEXTENSION_CALL_OK) {
-        LuaError* err = LuaState::handleError(fName, error.error, error.expected, error.argument, args, argc);
+        LuaError* err = LuaState::handleError(fName, error, args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
