@@ -70,8 +70,13 @@ int LuaCallableExtra::call(lua_State *state) {
 
     int argc = lua_gettop(state)-1; // We subtract 1 becuase the LuaCallableExtra is counted
     int noneMulty = argc;
-    // TODO: Check if func is null
     LuaCallableExtra* func = (LuaCallableExtra*) LuaState::getVariant(state, 1, OBJ).operator Object*();
+    if (func == nullptr) {
+        LuaError* err = LuaError::newError("Error during LuaCallableExtra::call fun==null", LuaError::ERR_RUNTIME);
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return 0;
+    }
     if (func->isTuple)
         noneMulty=func->argc-1; // We subtract one becuase the tuple is countedA
     

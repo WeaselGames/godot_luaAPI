@@ -2,9 +2,6 @@ extends UnitTest
 var lua: LuaAPI
 var thread: LuaThread
 
-func lua_get_frames()->int:
-	return frames
-
 func _ready():
 	# Since we are using poly here, we need to make sure to call super for _methods
 	super._ready()

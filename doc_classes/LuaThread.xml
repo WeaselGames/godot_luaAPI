@@ -16,6 +16,13 @@
 				This is a static method that exists so you dont have to call LuaThread.new() and thread.bind(lua) every time. It creates a new thread and calls bind passing lua.
 			</description>
 		</method>
+		<method name="yield_await">
+			<return type="Signal" />
+			<param index="0" name="args" type="Array" />
+			<description>
+				Allows a GDScript function being called by a LuaThread to await. It yields the lua state and passes any args to LuaThread.resume()
+			</description>
+		</method>
 		<method name="bind">
 			<return type="void" />
 			<param index="0" name="Lua" type="LuaAPI" />

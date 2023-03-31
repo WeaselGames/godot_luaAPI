@@ -72,7 +72,6 @@ LuaError* LuaAPI::doFile(String fileName) {
     // push the error handler onto the stack
     lua_pushcfunction(lState, LuaState::luaErrorHandler);
 
-    Error error;
     String path;
     // fileAccess never unrefs without this
     {

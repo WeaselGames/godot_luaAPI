@@ -27,6 +27,8 @@ func _ready():
 	logPrint("Starting time: %s\n" % str(time_elapsed))
 	load_tests()
 	for test in tests:
+		add_child(test)
+		test.set_process(false)
 		test._ready()
 	tests.sort_custom(sort_tests)
 	testCount = tests.size()
