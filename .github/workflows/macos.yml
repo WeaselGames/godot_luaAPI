@@ -124,7 +124,9 @@ jobs:
           chmod +x app/macos_template.app/Contents/MacOS/godot_macos_release.universal
 
       - name: Prepare artifact
-        uses: actions/upload-artifact@v2
+        run: |
+          cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/scripts/godot/bin/
+      - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.cache-name}}
           path: scripts/godot/bin

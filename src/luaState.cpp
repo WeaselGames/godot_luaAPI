@@ -620,12 +620,16 @@ int LuaState::luaPrint(lua_State* state)
 		String it_string;
 		
 		switch(lua_type(state, n)) {
-			case LUA_TUSERDATA:{
+			case LUA_TUSERDATA: {
 				Variant var = *(Variant*) lua_touserdata(state, n);
 				it_string = var.operator String();
 				break;
 			}
-			default:{
+            case LUA_TBOOLEAN: {
+                it_string = lua_toboolean(state, n) ? "true" : "false";
+                break;
+            }
+			default: {
 				it_string = lua_tostring(state, n);
 				break;
 			}

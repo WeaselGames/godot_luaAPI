@@ -195,8 +195,7 @@ jobs:
           SCONS_CACHE_LIMIT: 7168
         run: |
           rm -rf ${{ github.workspace }}/project/.g* ${{ github.workspace }}/project/project.godot ${{ github.workspace }}/project/testing ${{ github.workspace }}/project/addons/luaAPI/bin/.gitignore
-          cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' '${{ github.workspace }}/.github/LUA-LICENSE' ${{ github.workspace }}/project/addons/luaAPI
-          cp '${{ github.workspace }}/external/luaJIT/COPYRIGHT' ${{ github.workspace }}/project/addons/luaAPI/LUAJIT-LICENSE
+          cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/project/addons/luaAPI
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:

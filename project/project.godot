@@ -12,7 +12,7 @@ config_version=5
 
 config/name="LuaAPI Test Project"
 run/main_scene="res://testing/run_tests.tscn"
-config/features=PackedStringArray("4.1", "Mobile")
+config/features=PackedStringArray("4.0", "Mobile")
 
 [autoload]
 
