@@ -33,11 +33,9 @@
 .vscode
 .clangd
 .cache
-
+*.cbp
+*.layout
 compile_commands.json
-
-# Godot files
-*.import
 
 # Cache
 __pycache__/
