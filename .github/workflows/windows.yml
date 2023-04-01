@@ -89,6 +89,8 @@ jobs:
       - name: Prepare artifact
         run: |
           Remove-Item scripts/godot/bin/* -Include *.exp,*.lib,*.pdb -Force
+          Copy-Item '${{ github.workspace }}/README.md' -Destination ${{ github.workspace }}/scripts/godot/bin/
+          Copy-Item '${{ github.workspace }}/LICENSE' -Destination ${{ github.workspace }}/scripts/godot/bin/
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.cache-name}}

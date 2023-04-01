@@ -94,6 +94,7 @@ jobs:
         run: |
           strip scripts/godot/bin/godot.*
           chmod +x scripts/godot/bin/godot.*
+          cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/scripts/godot/bin/
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.cache-name}}
