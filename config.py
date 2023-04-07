@@ -22,7 +22,7 @@ def configure(env):
 def get_doc_classes():
     return [
         "LuaAPI",
-        "LuaThread",
+        "LuaCoroutine",
         "LuaError",
         "LuaTuple",
         "LuaCallableExtra",

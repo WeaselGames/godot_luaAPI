@@ -1,5 +1,5 @@
-#ifndef LUATHREAD_H
-#define LUATHREAD_H
+#ifndef LUACOROUTINE_H
+#define LUACOROUTINE_H
 
 #include "luaError.h" 
 
@@ -19,16 +19,15 @@ using namespace godot;
 
 class LuaAPI;
 
-class LuaThread : public RefCounted {
-    GDCLASS(LuaThread, RefCounted);
+class LuaCoroutine : public RefCounted {
+    GDCLASS(LuaCoroutine, RefCounted);
 
     protected:
         static void _bind_methods();
 
     public:
-        static LuaThread* newThread(Ref<LuaAPI> lua);
-
         void bind(Ref<LuaAPI> lua);
+        void bindExisting(Ref<LuaAPI> lua, lua_State* tState);
         void loadString(String code);
         Signal yieldAwait(Array args);
 
@@ -36,7 +35,8 @@ class LuaThread : public RefCounted {
 
         LuaError* loadFile(String fileName);
         LuaError* pushGlobalVariant(String name, Variant var);
-        LuaError* exposeObjectConstructor(String name, Object* obj);
+
+        Ref<LuaAPI> getParent();
 
         Variant resume();
         Variant pullVariant(String name);
@@ -45,11 +45,15 @@ class LuaThread : public RefCounted {
         bool isDone();
         
         static int luaYield(lua_State *state);
+
+        inline lua_State* getLuaState() {
+            return tState;
+        }
+
     private:
         LuaState state;
         Ref<LuaAPI> parent;
         lua_State* tState;
-        lua_State* parentState;
         bool done;
 };
 

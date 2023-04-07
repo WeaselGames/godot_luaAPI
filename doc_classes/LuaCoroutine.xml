@@ -1,67 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="LuaThread" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="LuaCoroutine" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		A coroutine.
 	</brief_description>
 	<description>
-		Binds to a existing Lua object and creates a new lua thread with lua_newthread. This is not a typical thread but a coroutine. Instead of executing a file or string directly you load it into the state. Every time the resume method is caleld the lua code will execute untill yield is called from lua.
+		Binds to a existing Lua object and creates a new lua coroutine with lua_newthread. This is not a typical thread but a coroutine. Instead of executing a file or string directly you load it into the state. Every time the resume method is caleld the lua code will execute untill yield is called from lua.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="new_thread" qualifiers="static">
-			<return type="LuaThread" />
-			<param index="0" name="Lua" type="LuaAPI" />
-			<description>
-				This is a static method that exists so you dont have to call LuaThread.new() and thread.bind(lua) every time. It creates a new thread and calls bind passing lua.
-			</description>
-		</method>
 		<method name="yield_await">
 			<return type="Signal" />
 			<param index="0" name="args" type="Array" />
 			<description>
-				Allows a GDScript function being called by a LuaThread to await. It yields the lua state and passes any args to LuaThread.resume()
+				Allows a GDScript function being called by a LuaCoroutine to await. It yields the lua state and passes any args to LuaCoroutine.resume()
 			</description>
 		</method>
 		<method name="bind">
 			<return type="void" />
 			<param index="0" name="Lua" type="LuaAPI" />
 			<description>
-				Binds the thread to a lua object. All threads attached to the same object share resources.
+				Binds the coroutine to a lua object. All coroutines attached to the same object share resources.
 			</description>
 		</method>
 		<method name="load_file">
 			<return type="LuaError" />
 			<param index="0" name="FilePath" type="String" />
 			<description>
-				Loads a file into the threads state.
+				Loads a file into the coroutines state.
 			</description>
 		</method>
 		<method name="load_string">
 			<return type="void" />
 			<param index="0" name="Code" type="String" />
 			<description>
-				Loads a string into the threads state.
+				Loads a string into the coroutines state.
 			</description>
 		</method>
 		<method name="resume">
 			<return type="Variant" />
 			<description>
-				Resumes or starts the thread. Will either return a Array of arguments passed by lua in yield() or a LuaError.
+				Resumes or starts the coroutine. Will either return a Array of arguments passed by lua in yield() or a LuaError.
 			</description>
 		</method>
 		<method name="is_done">
 			<return type="bool" />
 			<description>
-				Returns true if the thread is finished executing.
-			</description>
-		</method>
-		<method name="expose_constructor">
-			<return type="LuaError" />
-			<param index="0" name="LuaConstructorName" type="String" />
-			<param index="1" name="Object" type="Object" />
-			<description>
-				Accepts any object that has a new() method. Allows lua to call the contructor aka the new() method. Exposed as a global with the given name.
+				Returns true if the coroutine is finished executing.
 			</description>
 		</method>
 		<method name="function_exists">

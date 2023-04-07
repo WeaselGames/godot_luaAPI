@@ -1,5 +1,6 @@
 #include "luaAPI.h"
 
+#include "luaCoroutine.h"
 
 #ifdef LAPI_GDEXTENSION
 #include <godot_cpp/classes/file_access.hpp>
@@ -30,16 +31,13 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
+
+    ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 }
 
 // Calls LuaState::bindLibs()
 void LuaAPI::bindLibraries(Array libs) {
     state.bindLibraries(libs);
-}
-
-// Adds the pointer to a object now owned by lua for cleanup later
-void LuaAPI::addOwnedObject(void* luaPtr, Variant* obj) {
-    ownedObjects[luaPtr] = obj;
 }
 
 // Calls LuaState::luaFunctionExists()
@@ -122,8 +120,15 @@ LuaError* LuaAPI::execute(int handlerIndex) {
     return nullptr;
 }
 
+Ref<LuaCoroutine> LuaAPI::newCoroutine() {
+    Ref<LuaCoroutine> thread;
+    thread.instantiate();
+    thread->bind(this);
+    return thread;
+}
+
 // Creates a new thread staee
-lua_State* LuaAPI::newThread() {
+lua_State* LuaAPI::newThreadState() {
     return lua_newthread(lState);
 }
 
