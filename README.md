@@ -61,7 +61,7 @@ Nightly Builds
 - [⚙️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/gdextension/main/godot_luaAPI.zip)
 - [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
 - [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor-luajit.zip)
-- [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-release.zip)
+- [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template.zip)
 - [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-debug.zip)
 - [🎨 Windows Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor.zip)
 - [🎨 Windows Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor-luajit.zip)
