@@ -40,7 +40,7 @@ Features
 - Choose which libraries you want Lua to have access to.
 - Custom LuaCallable type which allows you to get a Lua function as a Callable. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/lua_callable/).
 - LuaError type which is used to report any errors this addon or Lua run into.
-- LuaThread type which creates a Lua thread. This is not a OS thread but a coroutine. 
+- LuaCoroutine type which creates a Lua thread. This is not a OS thread but a coroutine. 
 - Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/objects/).
 - Objects can override most of the Lua metamethods. I.E. __index by defining a function with the same name.
 - Callables passed as userdata, which allows you to push a Callable as a Lua function.

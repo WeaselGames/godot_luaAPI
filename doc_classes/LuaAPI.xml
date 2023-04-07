@@ -9,6 +9,12 @@
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="new_coroutine">
+			<return type="LuaCoroutine" />
+			<description>
+				This is a method that exists so you dont have to call LuaCoroutine.new() and coroutine.bind(lua) every time. It creates a new coroutine and calls bind passing lua.
+			</description>
+		</method>
 		<method name="bind_libraries">
 			<return type="void" />
 			<param index="0" name="Array" type="Array" />

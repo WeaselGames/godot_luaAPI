@@ -1,4 +1,4 @@
-#include "luaThread.h"
+#include "luaCoroutine.h"
 
 #include "lua/lua.h"
 #include "luaAPI.h"
@@ -8,29 +8,26 @@
 #include <godot_cpp/classes/file_access.hpp>
 #endif
 
-void LuaThread::_bind_methods() {
-    ClassDB::bind_static_method("LuaThread", D_METHOD("new_thread", "lua"), &LuaThread::newThread);
-    
-    ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaThread::bind);
-    ClassDB::bind_method(D_METHOD("resume"), &LuaThread::resume);
-    ClassDB::bind_method(D_METHOD("yield_await", "signal"), &LuaThread::yieldAwait);
+void LuaCoroutine::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaCoroutine::bind);
+    ClassDB::bind_method(D_METHOD("resume"), &LuaCoroutine::resume);
+    ClassDB::bind_method(D_METHOD("yield_await", "signal"), &LuaCoroutine::yieldAwait);
 
-    ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaThread::loadString);
-    ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaThread::loadFile);
-    ClassDB::bind_method(D_METHOD("is_done"), &LuaThread::isDone);
+    ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaCoroutine::loadString);
+    ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaCoroutine::loadFile);
+    ClassDB::bind_method(D_METHOD("is_done"), &LuaCoroutine::isDone);
 
-    ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaThread::callFunction);
-    ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaThread::luaFunctionExists);
-    ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaThread::pushGlobalVariant);
-    ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaThread::pullVariant);
-    ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaThread::exposeObjectConstructor);
+    ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaCoroutine::callFunction);
+    ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
+    ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaCoroutine::pushGlobalVariant);
+    ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaCoroutine::pullVariant);
     // This is a dummy signal never meant to actually be emited. Await needs with a coroutine or a signal to work. Even though we resume it via the GDScriptFunctionState
-    ADD_SIGNAL(MethodInfo("thread_resume"));
+    ADD_SIGNAL(MethodInfo("coroutine_resume"));
 
 
 }
 
-Signal LuaThread::yieldAwait(Array args) {
+Signal LuaCoroutine::yieldAwait(Array args) {
     lua_pop(tState, 1); // Pop function off top of stack.
     for (int i = 0; i < args.size(); i++) {
         LuaError* err = state.pushVariant(args[i]);
@@ -38,58 +35,62 @@ Signal LuaThread::yieldAwait(Array args) {
             // TODO: Handle error
         }
     }
-    return Signal(this, "thread_resume");
+    return Signal(this, "coroutine_resume");
 }
 
 // Calls LuaState::luaFunctionExists()
-bool LuaThread::luaFunctionExists(String functionName) {
+bool LuaCoroutine::luaFunctionExists(String functionName) {
     return state.luaFunctionExists(functionName);
 }
 
 // Calls LuaState::pullVariant()
-Variant LuaThread::pullVariant(String name) {
+Variant LuaCoroutine::pullVariant(String name) {
     return state.pullVariant(name);
 }
 
 // Calls LuaState::pushGlobalVariant()
-LuaError* LuaThread::pushGlobalVariant(String name, Variant var) {
+LuaError* LuaCoroutine::pushGlobalVariant(String name, Variant var) {
     return state.pushGlobalVariant(name, var);
 }
 
-// Calls LuaState::exposeObjectConstructor()
-LuaError* LuaThread::exposeObjectConstructor(String name, Object* obj) {
-    return state.exposeObjectConstructor(name, obj);
-}
-
 // Calls LuaState::callFunction()
-Variant LuaThread::callFunction(String functionName, Array args) {
+Variant LuaCoroutine::callFunction(String functionName, Array args) {
     return state.callFunction(functionName, args);
 }
 
-LuaThread* LuaThread::newThread(Ref<LuaAPI> lua) {
-    LuaThread* thread = memnew(LuaThread);
-    thread->bind(lua);
-    return thread;
-}
-
 // binds the thread to a lua object
-void LuaThread::bind(Ref<LuaAPI> lua) {
+void LuaCoroutine::bind(Ref<LuaAPI> lua) {
     parent = lua;
-    tState = lua->newThread();
+    tState = lua->newThreadState();
     state.setState(tState, this, false);
     
     // register the yield method
     lua_register(tState, "yield", luaYield);
 }
 
+// binds the thread to a lua object
+void LuaCoroutine::bindExisting(Ref<LuaAPI> lua, lua_State* tState) {
+    done = false;
+    parent = lua;
+    this->tState = tState;
+    state.setState(tState, this, false);
+    
+    // register the yield method
+    lua_register(tState, "yield", luaYield);
+}
+
+Ref<LuaAPI> LuaCoroutine::getParent() { 
+    return parent; 
+}
+
 // loads a string into the threads state
-void LuaThread::loadString(String code) {
+void LuaCoroutine::loadString(String code) {
     done = false;
     luaL_loadstring(tState, code.ascii().get_data());
 }
 
 
-LuaError* LuaThread::loadFile(String fileName) {
+LuaError* LuaCoroutine::loadFile(String fileName) {
     #ifndef LAPI_GDEXTENSION
     done = false;
     Error error;
@@ -115,7 +116,7 @@ LuaError* LuaThread::loadFile(String fileName) {
 
 // Value 1 will always be a boolean which indicates weather the thread is done or not.
 // If a error occures it will be value number 2, otherwise the rest of the values are arguments passed to yield()
-Variant LuaThread::resume() {
+Variant LuaCoroutine::resume() {
     if (done) {
         return LuaError::newError("Thread is done executing", LuaError::ERR_RUNTIME);
     }
@@ -174,11 +175,11 @@ Variant LuaThread::resume() {
     return toReturn;
 }
 
-bool LuaThread::isDone() {
+bool LuaCoroutine::isDone() {
     return done;
 }
 
-int LuaThread::luaYield(lua_State *state) {
+int LuaCoroutine::luaYield(lua_State *state) {
     int argc = lua_gettop(state);
     return lua_yield(state, argc);
 }

@@ -22,7 +22,7 @@ func _ready():
 		return "Hello gdScript!"
 	end
 	""")
-	print(err)
+	
 	if err is LuaError:
 		print("ERROR %d: %s" % [err.type, err.message])
 		return

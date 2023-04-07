@@ -20,6 +20,8 @@
 using namespace godot;
 #endif
 
+class LuaCoroutine;
+
 class LuaAPI : public RefCounted {
     GDCLASS(LuaAPI, RefCounted);
 
@@ -31,7 +33,6 @@ class LuaAPI : public RefCounted {
         ~LuaAPI();
 
         void bindLibraries(Array libs);
-        void addOwnedObject(void* luaPtr, Variant* obj);
 
         bool luaFunctionExists(String functionName);
 
@@ -42,20 +43,28 @@ class LuaAPI : public RefCounted {
         LuaError* doString(String code);
         LuaError* pushGlobalVariant(String name, Variant var);
         LuaError* exposeObjectConstructor(String name, Object* obj);
+
+        Ref<LuaCoroutine> newCoroutine();
         
-        lua_State* newThread();
+        lua_State* newThreadState();
         lua_State* getState();
 
         inline void addRef(Variant var) {
             refs.append(var);
         }
 
+        inline void addOwnedObject(void* luaPtr, Variant* obj) {
+            ownedObjects[luaPtr] = obj;
+        }
+
     private:
         LuaState state;
         lua_State* lState;
-        // Temp. Looking for better method
+
+        // Temp. Looking for better method. Maybe?
         Array refs;
         std::map<void*, Variant*> ownedObjects;
+
         LuaError* execute(int handlerIndex);
 };
 

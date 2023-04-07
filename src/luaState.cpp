@@ -1,6 +1,7 @@
 #include "luaState.h"
 #include "lua/lua.h"
 #include <classes/luaAPI.h>
+#include <classes/luaCoroutine.h>
 #include <classes/luaTuple.h>
 #include <classes/luaCallableExtra.h>
 
@@ -339,6 +340,27 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
                 break;
             }
 
+            // If the type being pushed is a thread, push a LUA_TTHREAD state.
+            #ifndef LAPI_GDEXTENSION
+            if (LuaCoroutine* thread = Object::cast_to<LuaCoroutine>(var.operator Object*()); thread != nullptr) {
+            #else
+            // blame this on https://github.com/godotengine/godot-cpp/issues/995
+            if (LuaCoroutine* thread = dynamic_cast<LuaCoroutine*>(var.operator Object*()); thread != nullptr) {
+            #endif
+                // For some reason passing the thread like this does not work. 
+                // calling coroutine.resume with it gives the following error:
+                // attempt to call a thread value
+               /* 
+                lua_pushthread(thread->getLuaState());
+                Ref<LuaAPI> parent = thread->getParent();
+                // TODO: Handle this?
+                if (parent.is_valid())
+                    parent->addRef(thread); 
+                */
+                return LuaError::newError("pushing threads is currently not supported.", LuaError::ERR_TYPE);
+                break;
+            }
+
             // Temp maybe? If we do not store a referance to refCounted they will die with GDScript
             if (RefCounted* temp = Object::cast_to<RefCounted>(var.operator Object*()); temp != nullptr) {
                 lua_pushstring(state, "__OBJECT");
@@ -393,6 +415,87 @@ LuaError* LuaState::pushVariant(lua_State* state, Variant var) {
             return LuaError::newError(vformat("can't pass Variants of type \"%s\" to Lua.", Variant::get_type_name(var.get_type())), LuaError::ERR_TYPE);
     }
     return nullptr;
+}
+
+// gets a variant at a given index
+Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj) {
+    Variant result;
+    int type = lua_type(state, index);
+    switch (type) {
+        case LUA_TSTRING:
+            result = lua_tostring(state, index);
+            break;
+        case LUA_TNUMBER:
+            result = lua_tonumber(state, index);
+            break;
+        case LUA_TBOOLEAN:
+            result = (bool)lua_toboolean(state, index);
+            break;
+        case LUA_TUSERDATA:
+            result = *(Variant*)lua_touserdata(state, index);
+            break;
+        case LUA_TTABLE: {
+            #ifndef LAPI_LUAJIT
+            lua_len(state, index);
+            #else
+            lua_objlen(state, index);
+            #endif
+
+            int len = lua_tointeger(state, -1);
+            lua_pop(state, 1);
+            // len should be 0 if the type is table and not a array
+            if (len) {
+                Array array;
+                for (int i = 1; i <= len; i++) {
+                    #ifndef LAPI_LUAJIT
+                    lua_geti(state, index, i);
+                    #else
+                    lua_rawgeti(state, index, i);
+                    #endif
+                    array.push_back(getVariant(state, -1, obj));
+                    lua_pop(state, 1);
+                }
+                result = array;
+                break;
+            }
+
+            lua_pushnil(state);  /* first key */
+            Dictionary dict;
+            while (lua_next(state, (index<0)?(index-1):(index)) != 0) {
+                Variant key = getVariant(state, -2, obj);
+                Variant value = getVariant(state, -1, obj);
+                dict[key] = value;
+                lua_pop(state, 1);
+            }
+            result = dict;
+            break;
+        }
+        case LUA_TFUNCTION: {
+            #ifndef LAPI_GDEXTENSION
+            // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
+            lua_pushvalue(state, index);
+            LuaCallable *callable = memnew(LuaCallable(Ref<RefCounted>(obj), luaL_ref(state, LUA_REGISTRYINDEX), state));
+            result = Callable(callable);
+            #else
+            result = LuaError::newError("LuaCallable's are not supported with GDExtension.", LuaError::ERR_RUNTIME);
+            #endif
+            break;
+        }
+        case LUA_TTHREAD: {
+            lua_State* tState = lua_tothread(state, index);
+            Ref<LuaCoroutine> thread;
+            thread.instantiate();
+            thread->bindExisting((Ref<LuaAPI>)obj, tState);
+            result = thread;
+            break;
+        }
+        case LUA_TNIL: {
+            break;
+        }
+        default:
+            result = LuaError::newError(vformat("Unsupported lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
+    }
+    return result;
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
@@ -524,80 +627,6 @@ LuaError* LuaState::handleError(const StringName &func, GDExtensionCallError err
 }
 
 #endif
-
-
-// gets a variant at a given index
-Variant LuaState::getVariant(lua_State* state, int index, const RefCounted* obj) {
-    Variant result;
-    int type = lua_type(state, index);
-    switch (type) {
-        case LUA_TSTRING:
-            result = lua_tostring(state, index);
-            break;
-        case LUA_TNUMBER:
-            result = lua_tonumber(state, index);
-            break;
-        case LUA_TBOOLEAN:
-            result = (bool)lua_toboolean(state, index);
-            break;
-        case LUA_TUSERDATA:
-            result = *(Variant*)lua_touserdata(state, index);
-            break;
-        case LUA_TTABLE: {
-            #ifndef LAPI_LUAJIT
-            lua_len(state, index);
-            #else
-            lua_objlen(state, index);
-            #endif
-
-            int len = lua_tointeger(state, -1);
-            lua_pop(state, 1);
-            // len should be 0 if the type is table and not a array
-            if (len) {
-                Array array;
-                for (int i = 1; i <= len; i++) {
-                    #ifndef LAPI_LUAJIT
-                    lua_geti(state, index, i);
-                    #else
-                    lua_rawgeti(state, index, i);
-                    #endif
-                    array.push_back(getVariant(state, -1, obj));
-                    lua_pop(state, 1);
-                }
-                result = array;
-                break;
-            }
-
-            lua_pushnil(state);  /* first key */
-            Dictionary dict;
-            while (lua_next(state, (index<0)?(index-1):(index)) != 0) {
-                Variant key = getVariant(state, -2, obj);
-                Variant value = getVariant(state, -1, obj);
-                dict[key] = value;
-                lua_pop(state, 1);
-            }
-            result = dict;
-            break;
-        }
-        case LUA_TFUNCTION: {
-            #ifndef LAPI_GDEXTENSION
-            // Put function on the top of the stack and get a ref to it. This will create a copy of the function.
-            lua_pushvalue(state, index);
-            LuaCallable *callable = memnew(LuaCallable(Ref<RefCounted>(obj), luaL_ref(state, LUA_REGISTRYINDEX), state));
-            result = Callable(callable);
-            #else
-            result = LuaError::newError("LuaCallable's are not supported with GDExtension.", LuaError::ERR_RUNTIME);
-            #endif
-            break;
-        }
-        case LUA_TNIL: {
-            break;
-        }
-        default:
-            result = LuaError::newError(vformat("Unsupported lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
-    }
-    return result;
-}
 
 // -------------
 // Lua functions
