@@ -46,6 +46,8 @@ uint32_t LuaCallable::hash() const {
 }
 
 void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
+	lua_pushcfunction(state, LuaState::luaErrorHandler);
+	
 	// Geting the lua function via the referance stored in funcRef
 	lua_rawgeti(state, LUA_REGISTRYINDEX, funcRef);
 
@@ -55,7 +57,7 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 	}
 
 	// execute the function using a protected call.
-	int ret = lua_pcall(state, p_argcount, 1, 0);
+	int ret = lua_pcall(state, p_argcount, 1, -2 - p_argcount);
     if (ret != LUA_OK) {
         r_return_value = LuaState::handleError(state, ret);
     } else r_return_value = LuaState::getVariant(state, -1, obj.ptr());
