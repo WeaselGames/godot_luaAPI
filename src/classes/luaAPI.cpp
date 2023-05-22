@@ -104,7 +104,11 @@ LuaError* LuaAPI::doFile(String fileName) {
 LuaError* LuaAPI::doString(String code) {
     // push the error handler onto the stack
     lua_pushcfunction(lState, LuaState::luaErrorHandler);
-    luaL_loadstring(lState, code.ascii().get_data());
+    int ret = luaL_loadstring(lState, code.ascii().get_data());
+    if (ret != LUA_OK) {
+        return state.handleError(ret);
+    }
+    
     LuaError* err = execute(-2);
     // pop the error handler from the stack
     lua_pop(lState, 1);
