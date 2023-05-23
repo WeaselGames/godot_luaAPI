@@ -123,7 +123,7 @@ void LuaState::createVector2Metatable() {
     luaL_newmetatable(L, "mt_Vector2");
 
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
-        if (arg1.has_method(arg2)) {
+        if (arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -201,7 +201,7 @@ void LuaState::createVector3Metatable() {
     luaL_newmetatable(L, "mt_Vector3");
  
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
-        if (arg1.has_method(arg2)) {
+        if (arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -270,7 +270,7 @@ void LuaState::createRect2Metatable() {
  
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
         // Index was not found, so check to see if there is a matching function
-        if (arg1.has_method(arg2)) {
+        if (arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -301,7 +301,7 @@ void LuaState::createPlaneMetatable() {
     luaL_newmetatable(L, "mt_Plane");
  
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
-        if (arg1.has_method(arg2)) {
+        if (arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -331,7 +331,7 @@ void LuaState::createColorMetatable() {
     luaL_newmetatable(L, "mt_Color");
  
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
-        if (arg1.has_method(arg2)) {
+        if (arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state,1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -399,7 +399,7 @@ void LuaState::createSignalMetatable() {
     luaL_newmetatable(L, "mt_Signal");
 
     LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
-        if (arg1.has_method(arg2)) {
+        if (arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -430,7 +430,7 @@ void LuaState::createObjectMetatable() {
         }
 
         // If the functions is allowed and exists 
-        if ((allowedFields.is_empty() || allowedFields.has(arg2)) && arg1.has_method(arg2)) {
+        if ((allowedFields.is_empty() || allowedFields.has(arg2)) && arg1.has_method(arg2.operator String())) {
             lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
             LuaState::pushVariant(inner_state, arg2);
             lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);

@@ -727,6 +727,7 @@ int LuaState::luaCallableCall(lua_State* state) {
         return 0;
     }
 
+    if (returned.get_type() != Variant::Type::OBJECT) return 1;
     if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
@@ -773,7 +774,8 @@ int LuaState::luaCallableCall(lua_State* state) {
         lua_error(state);
         return 0;
     }
-
+    
+    if (returned.get_type() != Variant::Type::OBJECT) return 1;
     if (LuaTuple* tuple = dynamic_cast<LuaTuple*>(returned.operator Object*()); tuple != nullptr)
         return tuple->size();
     return 1;
@@ -824,6 +826,7 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     #endif
 
     LuaState::pushVariant(state, returned);
+    if (returned.get_type() != Variant::Type::OBJECT) return 1;
     #ifndef LAPI_GDEXTENSION
     if (LuaTuple* tuple = Object::cast_to<LuaTuple>(returned.operator Object*()); tuple != nullptr)
     #else

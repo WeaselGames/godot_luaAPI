@@ -46,7 +46,6 @@ class LuaState {
         // Lua functions
         static int luaErrorHandler(lua_State* state);
         static int luaPrint(lua_State* state);
-        static int luaExposedFuncCall(lua_State* state);
         static int luaUserdataFuncCall(lua_State* state);
         static int luaCallableCall(lua_State* state);
     private:
