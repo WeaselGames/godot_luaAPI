@@ -4,7 +4,7 @@
 		A coroutine.
 	</brief_description>
 	<description>
-		Binds to a existing Lua object and creates a new lua coroutine with lua_newthread. This is not a typical thread but a coroutine. Instead of executing a file or string directly you load it into the state. Every time the resume method is caleld the lua code will execute untill yield is called from lua.
+		Binds to a existing Lua object and creates a new lua coroutine with lua_newthread. This is not a typical thread but a coroutine. Instead of executing a file or string directly you load it into the state. Every time the resume method is called the lua code will execute untill yield is called from lua.
 	</description>
 	<tutorials>
 	</tutorials>

@@ -12,14 +12,14 @@
 		<method name="new_coroutine">
 			<return type="LuaCoroutine" />
 			<description>
-				This is a method that exists so you dont have to call LuaCoroutine.new() and coroutine.bind(lua) every time. It creates a new coroutine and calls bind passing lua.
+				This method will create a coroutine that is already bound to this runtime.
 			</description>
 		</method>
 		<method name="bind_libraries">
 			<return type="void" />
 			<param index="0" name="Array" type="Array" />
 			<description>
-				bind lua libraries.
+				Bind lua libraries.
 			</description>
 		</method>
 		<method name="do_file">
@@ -33,7 +33,7 @@
 			<return type="LuaError" />
 			<param index="0" name="Code" type="String" />
 			<description>
-				loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors
+				Loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors.
 			</description>
 		</method>
 		<method name="expose_constructor">
@@ -56,7 +56,7 @@
 			<param index="0" name="LuaFunctionName" type="String" />
 			<param index="1" name="Args" type="Array" />
 			<description>
-				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if lua returns no value it will be null.
+				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with Lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if Lua returns no value it will be null. If an error occurs while calling this function, a LuaError object will be returned.
 			</description>
 		</method>
 		<method name="pull_variant">
