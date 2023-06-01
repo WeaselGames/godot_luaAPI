@@ -56,7 +56,7 @@
 			<param index="0" name="LuaFunctionName" type="String" />
 			<param index="1" name="Args" type="Array" />
 			<description>
-				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with Lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if Lua returns no value it will be null.
+				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with Lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if Lua returns no value it will be null. If an error occurs while calling this function, a LuaError object will be returned.
 			</description>
 		</method>
 		<method name="pull_variant">
