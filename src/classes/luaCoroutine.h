@@ -64,6 +64,7 @@ class LuaCoroutine : public RefCounted {
         Ref<LuaAPI> parent;
         lua_State* tState;
         bool done;
+        bool killing;
 };
 
 #endif
