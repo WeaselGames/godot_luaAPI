@@ -218,7 +218,7 @@ void LuaCoroutine::kill() {
     }
 }
 
-void LuaCoroutine::terminate_hook(lua_State* tState,lua_Debug* dbg) {
-   lua_pushstring(tState,"execution terminated");
+void LuaCoroutine::terminate_hook(lua_State* tState, lua_Debug* dbg) {
+   lua_pushstring(tState, "execution terminated");
    lua_error(tState);
 }
