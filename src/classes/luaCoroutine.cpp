@@ -186,10 +186,10 @@ int LuaCoroutine::luaYield(lua_State *state) {
 }
 
 void LuaCoroutine::pause_execution() {
-    if (!done) lua_sethook(tState,terminate_hook,LUA_MASKCOUNT,1); // force it to run next time
+    if (!done) lua_sethook(tState, terminate_hook, LUA_MASKCOUNT, 1); // force it to run next time
 }
 
 void LuaCoroutine::terminate_hook(lua_State* tState,lua_Debug* dbg) {
-   lua_sethook(tState,nullptr,NULL,NULL); // remove hook
+   lua_sethook(tState, nullptr, NULL, NULL); // remove hook
    lua_yield(tState,0);
 }
