@@ -115,7 +115,6 @@ void LuaState::exposeConstructors() {
         return 1;
     }));
     lua_setglobal(L, "Plane");
-    
 }
 
 // Create metatable for Vector2 and saves it at LUA_REGISTRYINDEX with name "mt_Vector2"

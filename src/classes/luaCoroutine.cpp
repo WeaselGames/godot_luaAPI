@@ -85,9 +85,13 @@ Ref<LuaAPI> LuaCoroutine::getParent() {
 }
 
 // loads a string into the threads state
-void LuaCoroutine::loadString(String code) {
+LuaError* LuaCoroutine::loadString(String code) {
     done = false;
-    luaL_loadstring(tState, code.ascii().get_data());
+    int ret = luaL_loadstring(tState, code.ascii().get_data());
+    if (ret != LUA_OK) {
+        return state.handleError(ret);
+    }
+    return nullptr;
 }
 
 
