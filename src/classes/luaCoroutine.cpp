@@ -160,7 +160,10 @@ Variant LuaCoroutine::resume() {
         #endif
     }
     
-    
+    if (killing) {
+        killing = false;
+        lua_sethook(tState, nullptr, NULL, NULL); // clean up after thread killed
+    }
     
     if (ret == LUA_OK) done = true; // thread is finished
     else if (ret != LUA_YIELD) {
@@ -209,7 +212,10 @@ void LuaCoroutine::interrupt_hook(lua_State* tState,lua_Debug* dbg) {
 }
 
 void LuaCoroutine::kill() {
-    if (!done) lua_sethook(tState, terminate_hook, LUA_MASKCOUNT, 1); // force it to run next time
+    if (!done) {
+        lua_sethook(tState, terminate_hook, LUA_MASKCOUNT, 1); // force it to run next time
+        killing = true;
+    }
 }
 
 void LuaCoroutine::terminate_hook(lua_State* tState,lua_Debug* dbg) {
