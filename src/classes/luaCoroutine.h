@@ -45,6 +45,9 @@ class LuaCoroutine : public RefCounted {
         bool isDone();
         
         static int luaYield(lua_State *state);
+    
+        void pause_execution();
+        static void terminate_hook(lua_State*, lua_Debug*);
 
         inline lua_State* getLuaState() {
             return tState;

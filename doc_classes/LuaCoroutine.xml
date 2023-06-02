@@ -79,5 +79,11 @@
 				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
 			</description>
 		</method>
+		<method name="pause_execution">
+			<return type="void" />
+			<description>
+				Pauses execution (if running/next time it resumes) by binding a new debug hook and yielding.
+			</description>
+		</method>
 	</methods>
 </class>

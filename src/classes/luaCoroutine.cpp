@@ -21,6 +21,7 @@ void LuaCoroutine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
     ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaCoroutine::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaCoroutine::pullVariant);
+    ClassDB::bind_method(D_METHOD("pause_execution"), &LuaCoroutine::pause_execution);
     // This is a dummy signal never meant to actually be emited. Await needs with a coroutine or a signal to work. Even though we resume it via the GDScriptFunctionState
     ADD_SIGNAL(MethodInfo("coroutine_resume"));
 
@@ -182,4 +183,13 @@ bool LuaCoroutine::isDone() {
 int LuaCoroutine::luaYield(lua_State *state) {
     int argc = lua_gettop(state);
     return lua_yield(state, argc);
+}
+
+void LuaCoroutine::pause_execution() {
+    if (!done) lua_sethook(tState, terminate_hook, LUA_MASKCOUNT, 1); // force it to run next time
+}
+
+void LuaCoroutine::terminate_hook(lua_State* tState,lua_Debug* dbg) {
+   lua_sethook(tState, nullptr, NULL, NULL); // remove hook
+   lua_yield(tState, 0);
 }
