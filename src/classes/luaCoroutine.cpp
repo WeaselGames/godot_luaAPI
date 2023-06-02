@@ -191,5 +191,5 @@ void LuaCoroutine::pause_execution() {
 
 void LuaCoroutine::terminate_hook(lua_State* tState,lua_Debug* dbg) {
    lua_sethook(tState, nullptr, NULL, NULL); // remove hook
-   lua_yield(tState,0);
+   lua_yield(tState, 0);
 }
