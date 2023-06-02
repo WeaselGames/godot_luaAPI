@@ -207,7 +207,7 @@ void LuaCoroutine::interrupt_execution() {
 
 void LuaCoroutine::interrupt_hook(lua_State* tState,lua_Debug* dbg) {
    lua_sethook(tState, nullptr, NULL, NULL); // remove hook
-   lua_pushstring(tState,"execution interrupted");
+   lua_pushstring(tState, "execution interrupted");
    lua_error(tState);
 }
 
