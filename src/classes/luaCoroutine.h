@@ -28,11 +28,11 @@ class LuaCoroutine : public RefCounted {
     public:
         void bind(Ref<LuaAPI> lua);
         void bindExisting(Ref<LuaAPI> lua, lua_State* tState);
-        void loadString(String code);
         Signal yieldAwait(Array args);
 
         bool luaFunctionExists(String functionName);
 
+        LuaError* loadString(String code);
         LuaError* loadFile(String fileName);
         LuaError* pushGlobalVariant(String name, Variant var);
 

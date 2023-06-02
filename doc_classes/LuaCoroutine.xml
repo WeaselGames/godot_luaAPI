@@ -31,7 +31,7 @@
 			</description>
 		</method>
 		<method name="load_string">
-			<return type="void" />
+			<return type="LuaError" />
 			<param index="0" name="Code" type="String" />
 			<description>
 				Loads a string into the coroutines state.
