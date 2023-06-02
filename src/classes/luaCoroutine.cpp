@@ -184,3 +184,7 @@ int LuaCoroutine::luaYield(lua_State *state) {
     int argc = lua_gettop(state);
     return lua_yield(state, argc);
 }
+
+void LuaCoroutine::pause_execution() {
+    if (!done) lua_sethook(tState,terminate_hook,LUA_MASKCOUNT,1); // force it to run next time
+}
