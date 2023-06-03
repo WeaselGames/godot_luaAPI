@@ -230,5 +230,5 @@ void LuaCoroutine::terminate_hook(lua_State* tState, lua_Debug* dbg) {
 }
 
 bool LuaCoroutine::isRunning() {
-    return (not done) and lua_status(tState) == LUA_OK;
+    return (!done) && lua_status(tState) == LUA_OK;
 }
