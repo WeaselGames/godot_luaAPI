@@ -23,8 +23,18 @@ def build_luajit():
         os.chdir("luaJIT")
         # cross compile linux->windows
         if env['PLATFORM'] == 'posix' and env['platform'] == 'windows':
+            host_arch = platform.machine()
             run("make clean")
-            run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_SYS=Windows' % (env['luaapi_host_cc'], env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+            if (host_arch != env['arch']):
+                if (host_arch == 'x86_64' and env['arch'] == 'x86_32'):
+                    host_cc = env['luaapi_host_cc'] + ' -m32'
+                    run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_SYS=Windows' % (host_cc, env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+
+                else:
+                    print("ERROR: Unsupported cross compile!")
+                    sys.exit(-1)
+            else:
+                run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_SYS=Windows' % (env['luaapi_host_cc'], env['CC'].replace("-gcc", "-").replace("-clang", "-")))
 
         elif env['platform']=='macos':
             run("make clean MACOSX_DEPLOYMENT_TARGET=10.12")

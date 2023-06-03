@@ -100,7 +100,7 @@ void LuaState::bindLibraries(Array libs) {
 void LuaState::bindLibraries(Array libs) {
 
     for (int i = 0; i < libs.size(); i++) {
-        String lib = ((String)libs.get(i)).to_lower();
+        String lib = ((String)libs[i]).to_lower();
         if (lib=="base") {
             lua_pushcfunction(L, luaopen_base);
             lua_pushstring(L, "");
