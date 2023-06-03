@@ -26,6 +26,7 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
 
     ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
+    ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaAPI::setHook);
     ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
     ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
@@ -33,11 +34,21 @@ void LuaAPI::_bind_methods() {
     ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
 
     ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
+    ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
+
+    BIND_ENUM_CONSTANT(HOOK_MASK_CALL);
+    BIND_ENUM_CONSTANT(HOOK_MASK_RETURN);
+    BIND_ENUM_CONSTANT(HOOK_MASK_LINE);
+    BIND_ENUM_CONSTANT(HOOK_MASK_COUNT);
 }
 
 // Calls LuaState::bindLibs()
 void LuaAPI::bindLibraries(Array libs) {
     state.bindLibraries(libs);
+}
+
+void LuaAPI::setHook(Callable hook, int mask, int count) {
+    return state.setHook(hook, mask, count);
 }
 
 // Calls LuaState::luaFunctionExists()
@@ -128,6 +139,20 @@ Ref<LuaCoroutine> LuaAPI::newCoroutine() {
     Ref<LuaCoroutine> thread;
     thread.instantiate();
     thread->bind(this);
+    return thread;
+}
+
+Ref<LuaCoroutine> LuaAPI::getRunningCoroutine() {
+    Variant top = state.getVar();
+    if (top.get_type() != Variant::Type::OBJECT) {
+        return nullptr;
+    }
+
+    #ifndef LAPI_GDEXTENSION
+    Ref<LuaCoroutine> thread = Object::cast_to<LuaCoroutine>(top);
+    #else
+    Ref<LuaCoroutine> thread = dynamic_cast<LuaCoroutine*>(top.operator Object*());
+    #endif
     return thread;
 }
 

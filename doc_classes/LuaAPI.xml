@@ -15,6 +15,12 @@
 				This method will create a coroutine that is already bound to this runtime.
 			</description>
 		</method>
+		<method name="get_running_coroutine">
+			<return type="LuaCoroutine" />
+			<description>
+				Intended to be called from a lua hook. Returns the current running coroutine.
+			</description>
+		</method>
 		<method name="bind_libraries">
 			<return type="void" />
 			<param index="0" name="Array" type="Array" />
@@ -74,5 +80,28 @@
 				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
 			</description>
 		</method>
+		<method name="set_hook">
+			<return type="void" />
+			<param index="0" name="hook" type="Callable" />
+			<param index="1" name="mask" type="int" />
+			<param index="1" name="count" type="int" />
+			<description>
+				Sets the hook for the state. The hook will be called on the events specified by the mask. The count specifies how many instructions should be executed before the hook is called. If count is 0, the hook will be called on every instruction. The hook will be called with the following arguments: [code]hook(parent, event, line)[/code]. The parent is the LuaAPI object that owns the current state.
+			</description>
+		</method>
 	</methods>
+	<constants>
+		<constant name="HOOK_MASK_CALL" value="1" enum="HookMask">
+			Specifies on which events the hook will be called.
+		</constant>
+		<constant name="HOOK_MASK_RETURN" value="2" enum="HookMask">
+			Specifies on which events the hook will be called.
+		</constant>
+		<constant name="HOOK_MASK_LINE" value="3" enum="HookMask">
+			Specifies on which events the hook will be called.
+		</constant>
+		<constant name="HOOK_MASK_COUNT" value="4" enum="HookMask">
+			Specifies on which events the hook will be called.
+		</constant>
+	</constants>
 </class>
