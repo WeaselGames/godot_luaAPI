@@ -15,7 +15,9 @@ void LuaCoroutine::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaCoroutine::loadString);
     ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaCoroutine::loadFile);
+    
     ClassDB::bind_method(D_METHOD("is_done"), &LuaCoroutine::isDone);
+    ClassDB::bind_method(D_METHOD("is_running"), &LuaCoroutine::isSuspended);
 
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaCoroutine::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
@@ -225,4 +227,8 @@ void LuaCoroutine::kill() {
 void LuaCoroutine::terminate_hook(lua_State* tState, lua_Debug* dbg) {
    lua_pushstring(tState, "execution terminated");
    lua_error(tState);
+}
+
+bool LuaCoroutine::is_running() {
+    return (not done) and lua_status(tState) == LUA_OK;
 }
