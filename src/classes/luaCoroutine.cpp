@@ -17,7 +17,7 @@ void LuaCoroutine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaCoroutine::loadFile);
     
     ClassDB::bind_method(D_METHOD("is_done"), &LuaCoroutine::isDone);
-    ClassDB::bind_method(D_METHOD("is_running"), &LuaCoroutine::isSuspended);
+    ClassDB::bind_method(D_METHOD("is_running"), &LuaCoroutine::isRunning);
 
     ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaCoroutine::callFunction);
     ClassDB::bind_method(D_METHOD("function_exists","LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
