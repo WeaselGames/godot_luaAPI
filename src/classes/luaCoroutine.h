@@ -47,7 +47,13 @@ class LuaCoroutine : public RefCounted {
         static int luaYield(lua_State *state);
     
         void pause_execution();
-        static void terminate_hook(lua_State*, lua_Debug*);
+        static void pause_hook(lua_State*, lua_Debug*);
+    
+        void interrupt_execution();
+        static void interrupt_hook(lua_State*, lua_Debug*);
+    
+        void kill(); //is the lua thread still resisting? while trues in pcalls in while trues?
+        static void terminate_hook(lua_State*, lua_Debug*); // no problem! Just chop its head off :] Repeatedly throws errors.
 
         inline lua_State* getLuaState() {
             return tState;
@@ -58,6 +64,7 @@ class LuaCoroutine : public RefCounted {
         Ref<LuaAPI> parent;
         lua_State* tState;
         bool done;
+        bool killing;
 };
 
 #endif
