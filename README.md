@@ -59,6 +59,7 @@ If a feature is missing that you would like to see feel free to create a [Featur
 Nightly Builds
 ---------------
 - [⚙️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/gdextension/main/godot_luaAPI.zip)
+- [⚙️ GDExtension LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/gdextension-luajit/main/godot_luaAPI-luaJIT.zip)
 - [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
 - [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor-luajit.zip)
 - [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template.zip)
