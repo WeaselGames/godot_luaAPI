@@ -28,6 +28,8 @@ class LuaCoroutine : public RefCounted {
     public:
         void bind(Ref<LuaAPI> lua);
         void bindExisting(Ref<LuaAPI> lua, lua_State* tState);
+        void setHook(Callable hook, int mask, int count);
+
         Signal yieldAwait(Array args);
 
         bool luaFunctionExists(String functionName);
@@ -35,6 +37,7 @@ class LuaCoroutine : public RefCounted {
         LuaError* loadString(String code);
         LuaError* loadFile(String fileName);
         LuaError* pushGlobalVariant(String name, Variant var);
+        LuaError* yield(Array args);
 
         Ref<LuaAPI> getParent();
 
@@ -45,15 +48,7 @@ class LuaCoroutine : public RefCounted {
         bool isDone();
         
         static int luaYield(lua_State *state);
-    
-        void pause_execution();
-        static void pause_hook(lua_State*, lua_Debug*);
-    
-        void interrupt_execution();
-        static void interrupt_hook(lua_State*, lua_Debug*);
-    
-        void kill(); //is the lua thread still resisting? while trues in pcalls in while trues?
-        static void terminate_hook(lua_State*, lua_Debug*); // no problem! Just chop its head off :] Repeatedly throws errors.
+        static void luaHook(lua_State *state, lua_Debug *ar);
 
         inline lua_State* getLuaState() {
             return tState;
@@ -64,7 +59,6 @@ class LuaCoroutine : public RefCounted {
         Ref<LuaAPI> parent;
         lua_State* tState;
         bool done;
-        bool killing;
 };
 
 #endif

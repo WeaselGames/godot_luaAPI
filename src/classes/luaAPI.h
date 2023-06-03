@@ -33,6 +33,7 @@ class LuaAPI : public RefCounted {
         ~LuaAPI();
 
         void bindLibraries(Array libs);
+        void setHook(Callable hook, int mask, int count);
 
         bool luaFunctionExists(String functionName);
 
@@ -45,6 +46,7 @@ class LuaAPI : public RefCounted {
         LuaError* exposeObjectConstructor(String name, Object* obj);
 
         Ref<LuaCoroutine> newCoroutine();
+        Ref<LuaCoroutine> getRunningCoroutine();
         
         lua_State* newThreadState();
         lua_State* getState();
@@ -57,6 +59,13 @@ class LuaAPI : public RefCounted {
             ownedObjects[luaPtr] = obj;
         }
 
+        enum HookMask{
+            HOOK_MASK_CALL      = LUA_MASKCALL,
+            HOOK_MASK_RETURN    = LUA_MASKRET,
+            HOOK_MASK_LINE      = LUA_MASKLINE,
+            HOOK_MASK_COUNT     = LUA_MASKCOUNT,
+        };
+
     private:
         LuaState state;
         lua_State* lState;
@@ -67,5 +76,7 @@ class LuaAPI : public RefCounted {
 
         LuaError* execute(int handlerIndex);
 };
+
+VARIANT_ENUM_CAST(LuaAPI::HookMask)
 
 #endif
