@@ -49,6 +49,12 @@
 				Returns true if the coroutine is finished executing.
 			</description>
 		</method>
+		<method name="is_running">
+			<return type="bool" />
+			<description>
+				Returns true if the coroutine is currently running.
+			</description>
+		</method>
 		<method name="function_exists">
 			<return type="bool" />
 			<param index="0" name="LuaFunctionName" type="String" />
@@ -82,19 +88,19 @@
 		<method name="pause_execution">
 			<return type="void" />
 			<description>
-				Pauses execution (if running/next time it resumes) by binding a new debug hook and yielding.
+				Pauses execution (if running) by binding a new debug hook and yielding.
 			</description>
 		</method>
 		<method name="interrupt_execution">
 			<return type="void" />
 			<description>
-				Interrupts execution (if running/next time it resumes) by binding a new debug hook and throwing the error [code]execution interrupted[/code].
+				Interrupts execution (if running) by binding a new debug hook and throwing the error [code]execution interrupted[/code].
 			</description>
 		</method>
 		<method name="kill">
 			<return type="void" />
 			<description>
-				Kills the thread (if running/next time it resumes) by throwing repeated errors until it gets to the top of the stack, exiting.
+				Kills the thread (if running) by throwing repeated errors until it gets to the top of the stack, exiting.
 			</description>
 		</method>
 	</methods>
