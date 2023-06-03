@@ -199,7 +199,7 @@ int LuaCoroutine::luaYield(lua_State *state) {
 }
 
 void LuaCoroutine::pause_execution() {
-    if (is_running()) lua_sethook(tState, pause_hook, LUA_MASKCOUNT, 1); // force it to run next time
+    if (isRunning()) lua_sethook(tState, pause_hook, LUA_MASKCOUNT, 1); // force it to run next time
 }
 
 void LuaCoroutine::pause_hook(lua_State* tState,lua_Debug* dbg) {
@@ -208,7 +208,7 @@ void LuaCoroutine::pause_hook(lua_State* tState,lua_Debug* dbg) {
 }
 
 void LuaCoroutine::interrupt_execution() {
-    if (is_running()) lua_sethook(tState, interrupt_hook, LUA_MASKCOUNT, 1); // force it to run next time
+    if (isRunning()) lua_sethook(tState, interrupt_hook, LUA_MASKCOUNT, 1); // force it to run next time
 }
 
 void LuaCoroutine::interrupt_hook(lua_State* tState,lua_Debug* dbg) {
@@ -218,7 +218,7 @@ void LuaCoroutine::interrupt_hook(lua_State* tState,lua_Debug* dbg) {
 }
 
 void LuaCoroutine::kill() {
-    if (is_running()) {
+    if (isRunning()) {
         lua_sethook(tState, terminate_hook, LUA_MASKCOUNT, 1); // force it to run next time
         killing = true;
     }
