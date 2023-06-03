@@ -43,6 +43,7 @@ class LuaCoroutine : public RefCounted {
         Variant callFunction(String functionName, Array args);
 
         bool isDone();
+        bool isSuspended();
         
         static int luaYield(lua_State *state);
     
