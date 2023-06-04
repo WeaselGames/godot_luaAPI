@@ -1,27 +1,122 @@
 # Used for extension builds
-import os
 import sys
+import os
+import platform
+
+def configure(env):
+    from SCons.Script import BoolVariable, EnumVariable, Variables, Help
+
+    env_vars = Variables()
+
+    env_vars.Add(BoolVariable("luaapi_luajit_build", 
+    "When LuaAPI is using luaJIT, be defualt it will attempt to build it automatically. if you prefer you can build it manually and disable auto building with this flag. Make sure to build staticly and that the libs are in external/luaJIT/src", 
+    True))
+
+    env_vars.Add(EnumVariable("luaapi_host_cc", 
+    "LuaJIT builds some tools to assit with the rest of the build. You can set the host CC to be used here in the case of cross compilation.", "gcc", ("gcc", "clang")))
+
+    env_vars.Add(EnumVariable("luaapi_luaver", 
+    "Build the LuaAPI module with the following lua VM", "5.4", ("5.4", "5.1", "jit")))
+    
+    env_vars.Update(env)
+    Help(env_vars.GenerateHelpText(env))
+
+def run(cmd):
+    print("Running: %s" % cmd)
+    res = os.system(cmd)
+    code = 0
+    if (os.name == 'nt'):
+        code = res
+    else:
+        code = os.WEXITSTATUS(res)
+    if code != 0:
+        print("Error: return code: " + str(code))
+        sys.exit(code)
+
+def build_luajit():
+    os.chdir("luaJIT")
+    # cross compile linux->windows
+    if env['platform'] == 'windows':
+        host_arch = platform.machine()
+        run("make clean")
+        if (host_arch != env['arch']):
+            if (host_arch == 'x86_64' and env['arch'] == 'x86_32'):
+                host_cc = env['luaapi_host_cc'] + ' -m32'
+                run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_SYS=Windows TARGET_CFLAGS="-fPIC"' % (host_cc, env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+
+            else:
+                print("ERROR: Unsupported cross compile!")
+                sys.exit(-1)
+        else:
+            run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_SYS=Windows TARGET_CFLAGS="-fPIC"' % (env['luaapi_host_cc'], env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+
+    elif env['platform']=='macos':
+        run("make clean MACOSX_DEPLOYMENT_TARGET=10.12")
+        run('make CC="%s" TARGET_FLAGS="-arch %s" MACOSX_DEPLOYMENT_TARGET=10.12' % (env['CC'], env['arch']))
+
+    elif env['platform']=='linux':
+        host_arch = platform.machine()
+        run("make clean")
+        if (host_arch != env['arch']):
+            if (host_arch == 'x86_64' and env['arch'] == 'x86_32'):
+                host_cc = env['luaapi_host_cc'] + ' -m32'
+                run('make HOST_CC="%s" CROSS="%s" BUILDMODE="static" TARGET_CFLAGS="-fPIC"' % (host_cc, env['CC'].replace("-gcc", "-").replace("-clang", "-")))
+
+            else:
+                print("ERROR: Unsupported cross compile!")
+                sys.exit(-1)
+
+        else:
+            run('make CC="%s" BUILDMODE="static" TARGET_CFLAGS="-fPIC"' % env['CC'])
+
+    else:
+        print("ERROR: Unsupported platform '%s'." % env['platform'])
+        sys.exit(-1)
 
 env = SConscript("godot-cpp/SConstruct")
+configure(env)
 env_lua = env.Clone()
 
-if env_lua["platform"] == 'linux':
-    env_lua.Append(CPPDEFINES=['LUA_USE_POSIX'])
-elif env_lua["platform"] == "ios":
-    env_lua.Append(CPPDEFINES=['LUA_USE_IOS'])
+luaver = env["luaapi_luaver"]
 
+if luaver == "jit":
+    if env["luaapi_luajit_build"]:
+        build_luajit()
+    
+    env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
+    env.Append(LIBS=['libluajit'])
 
-env_lua.Append(CPPDEFINES = ['MAKE_LIB'])
-env_lua.Append(CXXFLAGS = ['-std=c++17'])
-env_lua.Append(CFLAGS = ['-std=c99'])
+elif luaver == "5.1":
+    env_lua.Append(CPPDEFINES='MAKE_LIB')
 
-sources = ['lua/onelua.c']
-library_name = "liblua{}{}".format(env['suffix'], env["LIBSUFFIX"])
-library = env_lua.StaticLibrary("bin/{}".format(library_name), source=sources)
-Default(library)
+    if env['PLATFORM'] == 'posix' and env['platform'] == 'linux':
+        env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+    elif env['platform'] == 'ios':
+        env_lua.Append(CPPDEFINES=['LUA_USE_IOS'])
 
-env.Append(LIBPATH=[Dir("bin").abspath])
-env.Append(LIBS=[library_name])
+    sources = ['lua/onelua.c']
+    library_name = "liblua{}{}".format(env['suffix'], env["LIBSUFFIX"])
+    library = env_lua.StaticLibrary("bin/{}".format(library_name), source=sources)
+    Default(library)
+
+    env.Append(LIBPATH=[Dir("bin").abspath])
+    env.Append(LIBS=[library_name])
+
+else:
+    env_lua.Append(CPPDEFINES='MAKE_LIB')
+
+    if env['PLATFORM'] == 'posix' and env['platform'] == 'linux':
+        env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+    elif env['platform'] == 'ios':
+        env_lua.Append(CPPDEFINES=['LUA_USE_IOS'])
+
+    sources = ['lua/onelua.c']
+    library_name = "liblua{}{}".format(env['suffix'], env["LIBSUFFIX"])
+    library = env_lua.StaticLibrary("bin/{}".format(library_name), source=sources)
+    Default(library)
+
+    env.Append(LIBPATH=[Dir("bin").abspath])
+    env.Append(LIBS=[library_name])
 
 
 Return('env')

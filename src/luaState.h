@@ -19,6 +19,8 @@ class LuaState {
         void setState(lua_State* state, RefCounted* obj, bool bindAPI);
         void bindLibraries(Array libs);
 
+        void setHook(Callable hook, int mask, int count);
+
         bool luaFunctionExists(String functionName);
 
         lua_State* getState() const;
@@ -48,6 +50,8 @@ class LuaState {
         static int luaPrint(lua_State* state);
         static int luaUserdataFuncCall(lua_State* state);
         static int luaCallableCall(lua_State* state);
+
+        static void luaHook(lua_State* state, lua_Debug* ar);
     private:
         lua_State* L = nullptr;
         RefCounted* obj;

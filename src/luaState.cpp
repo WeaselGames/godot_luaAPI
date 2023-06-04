@@ -100,7 +100,7 @@ void LuaState::bindLibraries(Array libs) {
 void LuaState::bindLibraries(Array libs) {
 
     for (int i = 0; i < libs.size(); i++) {
-        String lib = ((String)libs.get(i)).to_lower();
+        String lib = ((String)libs[i]).to_lower();
         if (lib=="base") {
             lua_pushcfunction(L, luaopen_base);
             lua_pushstring(L, "");
@@ -140,6 +140,18 @@ void LuaState::bindLibraries(Array libs) {
 }
 
 #endif
+
+void LuaState::setHook(Callable hook, int mask, int count) {
+    if (hook.is_null()) {
+        lua_sethook(L, nullptr, 0, 0);
+        return;
+    }
+
+    lua_pushstring(L, "__HOOK");
+    pushVariant(hook);
+    lua_settable(L, LUA_REGISTRYINDEX);
+    lua_sethook(L, LuaCoroutine::luaHook, mask, count);
+}
 
 // Returns true if a lua function exists with the given name
 bool LuaState::luaFunctionExists(String functionName) {
@@ -747,7 +759,6 @@ int LuaState::luaCallableCall(lua_State* state) {
     Array args;
     int index = 2; // we start at 2, 1 is the callable
     for (int i = 0; i < argc; i++) {
-        
         Variant var = LuaState::getVariant(state, index++, OBJ);
         if (var.get_type() == Variant::Type::OBJECT) {
             if (LuaError* err = dynamic_cast<LuaError*>(var.operator Object*()); err != nullptr) {
@@ -786,7 +797,7 @@ int LuaState::luaCallableCall(lua_State* state) {
 // This function is invoked whenever a function is called on one of the userdata types 
 // excluding mt_Callable or mt_Object if __index is overwritten
 int LuaState::luaUserdataFuncCall(lua_State* state) {
-        lua_pushstring(state, "__OBJECT");
+    lua_pushstring(state, "__OBJECT");
     lua_rawget(state, LUA_REGISTRYINDEX);
     RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
     lua_pop(state, 1);
@@ -835,4 +846,61 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     #endif
         return tuple->size();
     return 1;
+}
+
+void LuaCoroutine::luaHook(lua_State* state, lua_Debug* ar) {
+    lua_pushstring(state, "__OBJECT");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
+    lua_pop(state, 1);
+
+    lua_pushstring(state, "__HOOK");
+    lua_rawget(state, LUA_REGISTRYINDEX);
+    Callable hook = LuaState::getVariant(state, -1, OBJ);
+    lua_pop(state, 1);
+
+    if (hook.is_null()) {
+        return;
+    }
+
+    #ifndef LAPI_GDEXTENSION
+    Array p_args;
+    p_args.append(OBJ);
+    p_args.append(ar->event);
+    p_args.append(ar->currentline);    
+
+    const Variant **args = (const Variant**)alloca(sizeof(const Variant**) * p_args.size());
+    for (int i = 0; i < p_args.size(); i++) {
+        args[i] = &p_args[i];
+    }
+
+    Variant returned;
+    Callable::CallError error;
+    hook.callp(args, p_args.size(), returned, error);
+    if (error.error != error.CALL_OK) {
+        LuaError* err = LuaState::handleError(hook.get_method(), error, args, p_args.size());
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+        return;
+    }
+
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+    }
+    #else
+    Array args;
+    args.append(OBJ);
+    args.append(ar->event);
+    args.append(ar->currentline);
+
+    
+    Variant returned = hook.callv(args);
+    LuaError* err = LuaState::pushVariant(state, returned);
+    if (err != nullptr) {
+        lua_pushstring(state, err->getMessage().ascii().get_data());
+        lua_error(state);
+    }
+    #endif
 }

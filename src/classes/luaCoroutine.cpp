@@ -10,8 +10,10 @@
 
 void LuaCoroutine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaCoroutine::bind);
+    ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaCoroutine::setHook);
     ClassDB::bind_method(D_METHOD("resume"), &LuaCoroutine::resume);
-    ClassDB::bind_method(D_METHOD("yield_await", "signal"), &LuaCoroutine::yieldAwait);
+    ClassDB::bind_method(D_METHOD("yield_await", "Args"), &LuaCoroutine::yieldAwait);
+    ClassDB::bind_method(D_METHOD("yield_state", "Args"), &LuaCoroutine::yield);
 
     ClassDB::bind_method(D_METHOD("load_string", "Code"), &LuaCoroutine::loadString);
     ClassDB::bind_method(D_METHOD("load_file", "FilePath"), &LuaCoroutine::loadFile);
@@ -24,14 +26,33 @@ void LuaCoroutine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaCoroutine::pushGlobalVariant);
     ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaCoroutine::pullVariant);
     
-    ClassDB::bind_method(D_METHOD("pause_execution"), &LuaCoroutine::pause_execution);
-    ClassDB::bind_method(D_METHOD("interrupt_execution"), &LuaCoroutine::interrupt_execution);
-    ClassDB::bind_method(D_METHOD("kill"), &LuaCoroutine::kill);
-    
     // This is a dummy signal never meant to actually be emited. Await needs with a coroutine or a signal to work. Even though we resume it via the GDScriptFunctionState
     ADD_SIGNAL(MethodInfo("coroutine_resume"));
+}
 
+// binds the thread to a lua object
+void LuaCoroutine::bind(Ref<LuaAPI> lua) {
+    parent = lua;
+    tState = lua->newThreadState();
+    state.setState(tState, this, false);
+    
+    // register the yield method
+    lua_register(tState, "yield", luaYield);
+}
 
+// binds the thread to a lua object
+void LuaCoroutine::bindExisting(Ref<LuaAPI> lua, lua_State* tState) {
+    done = false;
+    parent = lua;
+    this->tState = tState;
+    state.setState(tState, this, false);
+    
+    // register the yield method
+    lua_register(tState, "yield", luaYield);
+}
+
+void LuaCoroutine::setHook(Callable hook, int mask, int count) {
+    return state.setHook(hook, mask, count);
 }
 
 Signal LuaCoroutine::yieldAwait(Array args) {
@@ -63,27 +84,6 @@ LuaError* LuaCoroutine::pushGlobalVariant(String name, Variant var) {
 // Calls LuaState::callFunction()
 Variant LuaCoroutine::callFunction(String functionName, Array args) {
     return state.callFunction(functionName, args);
-}
-
-// binds the thread to a lua object
-void LuaCoroutine::bind(Ref<LuaAPI> lua) {
-    parent = lua;
-    tState = lua->newThreadState();
-    state.setState(tState, this, false);
-    
-    // register the yield method
-    lua_register(tState, "yield", luaYield);
-}
-
-// binds the thread to a lua object
-void LuaCoroutine::bindExisting(Ref<LuaAPI> lua, lua_State* tState) {
-    done = false;
-    parent = lua;
-    this->tState = tState;
-    state.setState(tState, this, false);
-    
-    // register the yield method
-    lua_register(tState, "yield", luaYield);
 }
 
 Ref<LuaAPI> LuaCoroutine::getParent() { 
@@ -125,8 +125,22 @@ LuaError* LuaCoroutine::loadFile(String fileName) {
     return nullptr;
 }
 
-// Value 1 will always be a boolean which indicates weather the thread is done or not.
-// If a error occures it will be value number 2, otherwise the rest of the values are arguments passed to yield()
+LuaError* LuaCoroutine::yield(Array args) {
+    Array ret;
+    if (int count = lua_gettop(tState); count > 0) {
+        lua_pop(tState, count);
+    }
+    for (int i = 0; i < args.size(); i++) {
+        LuaError* err = state.pushVariant(args[i]);
+        if (err != nullptr) {
+            return err;
+        }
+    }
+
+    lua_yield(tState, args.size());
+    return nullptr;
+}
+
 Variant LuaCoroutine::resume() {
     if (done) {
         return LuaError::newError("Thread is done executing", LuaError::ERR_RUNTIME);
@@ -166,11 +180,6 @@ Variant LuaCoroutine::resume() {
         #endif
     }
     
-    if (killing) {
-        killing = false;
-        lua_sethook(tState, nullptr, NULL, NULL); // clean up after thread killed
-    }
-    
     if (ret == LUA_OK) done = true; // thread is finished
     else if (ret != LUA_YIELD) {
         done = true;
@@ -196,39 +205,4 @@ bool LuaCoroutine::isDone() {
 int LuaCoroutine::luaYield(lua_State *state) {
     int argc = lua_gettop(state);
     return lua_yield(state, argc);
-}
-
-void LuaCoroutine::pause_execution() {
-    if (isRunning()) lua_sethook(tState, pause_hook, LUA_MASKCOUNT, 1); // force it to run next time
-}
-
-void LuaCoroutine::pause_hook(lua_State* tState,lua_Debug* dbg) {
-   lua_sethook(tState, nullptr, NULL, NULL); // remove hook
-   lua_yield(tState, 0);
-}
-
-void LuaCoroutine::interrupt_execution() {
-    if (isRunning()) lua_sethook(tState, interrupt_hook, LUA_MASKCOUNT, 1); // force it to run next time
-}
-
-void LuaCoroutine::interrupt_hook(lua_State* tState,lua_Debug* dbg) {
-   lua_sethook(tState, nullptr, NULL, NULL); // remove hook
-   lua_pushstring(tState, "execution interrupted");
-   lua_error(tState);
-}
-
-void LuaCoroutine::kill() {
-    if (isRunning()) {
-        lua_sethook(tState, terminate_hook, LUA_MASKCOUNT, 1); // force it to run next time
-        killing = true;
-    }
-}
-
-void LuaCoroutine::terminate_hook(lua_State* tState, lua_Debug* dbg) {
-   lua_pushstring(tState, "execution terminated");
-   lua_error(tState);
-}
-
-bool LuaCoroutine::isRunning() {
-    return (!done) && lua_status(tState) == LUA_OK;
 }

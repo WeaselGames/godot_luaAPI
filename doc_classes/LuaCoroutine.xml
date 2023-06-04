@@ -16,6 +16,13 @@
 				Allows a GDScript function being called by a LuaCoroutine to await. It yields the lua state and passes any args to LuaCoroutine.resume()
 			</description>
 		</method>
+		<method name="yield_state">
+			<return type="LuaError" />
+			<param index="0" name="args" type="Array" />
+			<description>
+				Must be called from a lua hook. Will yield the lua state and pass arguments to `reumse()`. Can be destructive.
+			</description>
+		</method>
 		<method name="bind">
 			<return type="void" />
 			<param index="0" name="Lua" type="LuaAPI" />
@@ -84,23 +91,14 @@
 			<description>
 				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
 			</description>
-		</method>
-		<method name="pause_execution">
+    </method>
+		<method name="set_hook">
 			<return type="void" />
+			<param index="0" name="hook" type="Callable" />
+			<param index="1" name="mask" type="int" />
+			<param index="1" name="count" type="int" />
 			<description>
-				Pauses execution (if running) by binding a new debug hook and yielding.
-			</description>
-		</method>
-		<method name="interrupt_execution">
-			<return type="void" />
-			<description>
-				Interrupts execution (if running) by binding a new debug hook and throwing the error [code]execution interrupted[/code].
-			</description>
-		</method>
-		<method name="kill">
-			<return type="void" />
-			<description>
-				Kills the thread (if running) by throwing repeated errors until it gets to the top of the stack, exiting.
+				Sets the hook for the state. The hook will be called on the events specified by the mask. The count specifies how many instructions should be executed before the hook is called. If count is 0, the hook will be called on every instruction. The hook will be called with the following arguments: [code]hook(parent, event, line)[/code]. The parent is the LuaAPI object that owns the current state.
 			</description>
 		</method>
 	</methods>
