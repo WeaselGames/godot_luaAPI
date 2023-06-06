@@ -6,6 +6,7 @@
 #include "core/core_bind.h"
 #else
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/templates/vector.hpp>
 #endif
 
 #include <lua/lua.hpp>

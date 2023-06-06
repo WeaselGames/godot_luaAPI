@@ -68,8 +68,8 @@ int LuaCallableExtra::call(lua_State *state) {
     RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
     lua_pop(state, 1);
 
-    int argc = lua_gettop(state)-1; // We subtract 1 becuase the LuaCallableExtra is counted
-    int noneMulty = argc;
+    int l_argc = lua_gettop(state)-1; // We subtract 1 becuase the LuaCallableExtra is counted
+    int noneMulty = l_argc;
     LuaCallableExtra* func = (LuaCallableExtra*) LuaState::getVariant(state, 1, OBJ).operator Object*();
     if (func == nullptr) {
         LuaError* err = LuaError::newError("Error during LuaCallableExtra::call fun==null", LuaError::ERR_RUNTIME);
@@ -80,41 +80,44 @@ int LuaCallableExtra::call(lua_State *state) {
     if (func->isTuple)
         noneMulty=func->argc-1; // We subtract one becuase the tuple is countedA
     
-    Array p_args;
+    Array args;
 
     if (func->wantsRef)
-        p_args.append(OBJ);
+        args.append(OBJ);
 
     int index = 2; // we start at 2 becuase the LuaCallableExtra is arg 1
     for (int i = 0; i < noneMulty; i++) {
-        p_args.append(LuaState::getVariant(state, index++, OBJ));
+        args.append(LuaState::getVariant(state, index++, OBJ));
     }
 
     if (func->isTuple) {
         Array tupleArgs;
-        for (int i = noneMulty; i < argc; i++) {
+        for (int i = noneMulty; i < l_argc; i++) {
             tupleArgs.push_back(LuaState::getVariant(state, index++, OBJ));
         }
-        p_args.append(LuaTuple::fromArray(tupleArgs));
+        args.append(LuaTuple::fromArray(tupleArgs));
     }
 
-    const Variant **args = (const Variant**)alloca(sizeof(const Variant**) * p_args.size());
-    for (int i = 0; i < p_args.size(); i++) {
-        args[i] = &p_args[i];
+    Vector<const Variant*> mem_args;
+    mem_args.resize(args.size());
+    for (int i = 0; i < args.size(); i++) {
+        mem_args.write[i] = &args[i];
     }
+
+    const Variant **p_args = (const Variant **)mem_args.ptr();
 
     Variant returned;
     #ifndef LAPI_GDEXTENSION
     Callable::CallError error;
-    func->function.callp(args, p_args.size(), returned, error);
+    func->function.callp(p_args, args.size(), returned, error);
     if (error.error != error.CALL_OK) {
-        LuaError* err = LuaState::handleError(func->function.get_method(), error, args, argc);
+        LuaError* err = LuaState::handleError(func->function.get_method(), error, p_args, args.size());
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
     }
     #else
-    returned = func->function.callv(p_args);
+    returned = func->function.callv(args);
     #endif
 
     LuaState::pushVariant(state, returned);

@@ -9,6 +9,7 @@
 #include <godot_cpp/classes/ref.hpp>
 #include <classes/luaCallable.h>
 #include <godot_cpp/templates/vmap.hpp>
+#include <godot_cpp/templates/vector.hpp>
 #endif
 
 #include <lua/lua.hpp>
