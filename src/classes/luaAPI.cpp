@@ -35,6 +35,8 @@ void LuaAPI::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
     ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
+    
+    ClassDB::bind_method(D_METHOD("_get_scripts_from_object","Object"), &LuaAPI::get_scripts_from_object);
 
     BIND_ENUM_CONSTANT(HOOK_MASK_CALL);
     BIND_ENUM_CONSTANT(HOOK_MASK_RETURN);
@@ -45,6 +47,10 @@ void LuaAPI::_bind_methods() {
 // Calls LuaState::bindLibs()
 void LuaAPI::bindLibraries(Array libs) {
     state.bindLibraries(libs);
+}
+
+Array LuaAPI::get_scripts_from_object(Object* o) {
+	return get_all_scripts_from_object(o);
 }
 
 void LuaAPI::setHook(Callable hook, int mask, int count) {
