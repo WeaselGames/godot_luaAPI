@@ -1,4 +1,5 @@
 #include "register_types.h"
+#include "src/util.h"
 #include "src/classes/luaAPI.h"
 #include "src/classes/luaError.h"
 #include "src/classes/luaCoroutine.h"
