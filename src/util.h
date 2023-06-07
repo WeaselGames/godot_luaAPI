@@ -12,7 +12,7 @@ inline Array get_all_scripts_from_object(const Object const* obj) {
 		if (script.get_type() != Variant.Type.OBJECT) {
 			break; //not a script
 		}
-		a.insert(script);
+		a.append(script);
 	}
 	return a;
 }
