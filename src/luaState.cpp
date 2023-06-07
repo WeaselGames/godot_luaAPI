@@ -687,6 +687,8 @@ int LuaState::luaPrint(lua_State* state)
 
 #ifndef LAPI_GDEXTENSION
 
+#include <vector>
+
 // Used as the __call metamethod for mt_Callable. 
 // All exposed gdscript functions are called vis this method.
 int LuaState::luaCallableCall(lua_State* state) {
@@ -698,27 +700,32 @@ int LuaState::luaCallableCall(lua_State* state) {
     int argc = lua_gettop(state)-1; // We subtract 1 becuase the callable its self will be counted
     Callable callable = (Callable) LuaState::getVariant(state, 1, OBJ);
    
-    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
+    Array args;
+    args.resize(argc);
+    Vector<const Variant*> mem_args;
+    mem_args.resize(argc);
+
     int index = 2; // we start at 2, 1 is the callable
     for (int i = 0; i < argc; i++) {
-        Variant* temp = memnew(Variant);
-        *temp = LuaState::getVariant(state, index++, OBJ);
-        if ((*temp).get_type() != Variant::Type::OBJECT) {
-            if (LuaError* err = Object::cast_to<LuaError>(temp->operator Object*()); err != nullptr) {
+        args[i] = LuaState::getVariant(state, index++, OBJ);
+        if (args[i].get_type() != Variant::Type::OBJECT) {
+            if (LuaError* err = Object::cast_to<LuaError>(args[i].operator Object*()); err != nullptr) {
                 lua_pushstring(state, err->getMessage().ascii().get_data());
                 lua_error(state);
                 return 0;
             }
         }
 
-        args[i] = temp;
+        mem_args.write[i] = &args[i];
     }
+
+    const Variant **p_args = (const Variant **)mem_args.ptr();
 
     Variant returned;
     Callable::CallError error;
-    callable.callp(args, argc, returned, error);
+    callable.callp(p_args, argc, returned, error);
     if (error.error != error.CALL_OK) {
-        LuaError* err = LuaState::handleError(callable.get_method(), error, args, argc);
+        LuaError* err = LuaState::handleError(callable.get_method(), error, p_args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
@@ -802,34 +809,37 @@ int LuaState::luaUserdataFuncCall(lua_State* state) {
     RefCounted* OBJ = (RefCounted*) lua_touserdata(state, -1);
     lua_pop(state, 1);
 
-    int argc = lua_gettop(state);
-
-    Array p_args;
-    const Variant **args = (const Variant **)alloca(sizeof(const Variant **) * argc);
-    int index = 1;
-    for (int i = 0; i < argc; i++) {
-        p_args.append(LuaState::getVariant(state, index++, OBJ));
-        args[i] = &p_args[i];
-    }
-
     Variant* obj  = (Variant*)lua_touserdata(state, lua_upvalueindex(1));
     String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
+
+    int argc = lua_gettop(state);
+    Array args;
+    args.resize(argc);
+    Vector<const Variant*> mem_args;
+    mem_args.resize(argc);
+    for (int i = 0; i < argc; i++) {
+        args[i] = LuaState::getVariant(state, i+1, OBJ);
+        mem_args.write[i] = &args[i];
+    }
+    
+    const Variant **p_args = (const Variant **)mem_args.ptr();
     
     Variant returned;
     #ifndef LAPI_GDEXTENSION
     Callable::CallError error;
-    obj->callp(fName.ascii().get_data(), args, argc, returned, error);
+    obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
     if (error.error != error.CALL_OK) {
-        LuaError* err = LuaState::handleError(fName, error, args, argc);
+        print_line("error: " + String::num(error.error));
+        LuaError* err = LuaState::handleError(fName, error, p_args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
     }
     #else
     GDExtensionCallError error;
-    obj->callp(fName.ascii().get_data(), args, argc, returned, error);
+    obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
     if (error.error != GDEXTENSION_CALL_OK) {
-        LuaError* err = LuaState::handleError(fName, error, args, argc);
+        LuaError* err = LuaState::handleError(fName, error, p_args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return 0;
@@ -864,21 +874,23 @@ void LuaCoroutine::luaHook(lua_State* state, lua_Debug* ar) {
     }
 
     #ifndef LAPI_GDEXTENSION
-    Array p_args;
-    p_args.append(OBJ);
-    p_args.append(ar->event);
-    p_args.append(ar->currentline);    
+    Array args;
+    args.append(OBJ);
+    args.append(ar->event);
+    args.append(ar->currentline);
 
-    const Variant **args = (const Variant**)alloca(sizeof(const Variant**) * p_args.size());
-    for (int i = 0; i < p_args.size(); i++) {
-        args[i] = &p_args[i];
+    const int argc = 3;
+    const Variant *p_args[argc];
+    for (int i = 0; i < argc; i++) {
+        args[i] = LuaState::getVariant(state, i+1, OBJ);
+        p_args[i] = &args[i];
     }
 
     Variant returned;
     Callable::CallError error;
-    hook.callp(args, p_args.size(), returned, error);
+    hook.callp(p_args, argc, returned, error);
     if (error.error != error.CALL_OK) {
-        LuaError* err = LuaState::handleError(hook.get_method(), error, args, p_args.size());
+        LuaError* err = LuaState::handleError(hook.get_method(), error, p_args, argc);
         lua_pushstring(state, err->getMessage().ascii().get_data());
         lua_error(state);
         return;
