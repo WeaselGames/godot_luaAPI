@@ -7,6 +7,7 @@
 
 inline Array get_all_scripts_from_object(const Object const* obj) {
 	Array a;
+	if (obj == null) return a;
 	Variant script = obj.get_script();
 	while (script != nullptr) {
 		if (script.get_type() != Variant.Type.OBJECT) {
@@ -18,7 +19,7 @@ inline Array get_all_scripts_from_object(const Object const* obj) {
 }
 
 #else
-#error cannot find array.h for non gdextension //TODO: fix it dammit
+#error cannot find array.h for gdextension //TODO: fix it dammit
 #include <godot_cpp/variant/utility_functions.hpp>
 using namespace godot;
 
