@@ -1,31 +1,24 @@
-name: Module Unit Tests
+name: ⚙️ Module Unit Tests
 on:
-  workflow_run:
-    workflows: ["Linux"]
-    types:
-      - completed
+  workflow_call:
 
 env:
   BASE_BRANCH: main
-  SCONSFLAGS: debug_symbols=no
-  SCONS_CACHE_LIMIT: 7168
 
 jobs:
   module-unit-tests:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: "ubuntu-20.04"
     timeout-minutes: 30
-    name: Module Unit Testing
+    name: Module Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: Download editor
-        id: download-editor
-        uses: dawidd6/action-download-artifact@v2
+      - name: Download Editor
+        id: download-extension
+        uses: actions/download-artifact@v2
         with:
-          workflow: linux.yml
-          workflow_conclusion: success
           name: linux-editor
-      - name: Unit Testing
+          path: ./
+      - name: Unit Tests
         run: |
           rm -rf project/addons
           chmod +x godot.linuxbsd.editor.x86_64.luaAPI
@@ -35,20 +28,19 @@ jobs:
         with:
           name: test-results
           path: project/log.txt
+
   module-unit-tests-luajit:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: "ubuntu-20.04"
     timeout-minutes: 30
-    name: Module Unit Testing
+    name: LuaJIT Module Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: Download editor
-        id: download-editor
-        uses: dawidd6/action-download-artifact@v2
+      - name: Download Editor
+        id: download-extension
+        uses: actions/download-artifact@v2
         with:
-          workflow: linux.yml
-          workflow_conclusion: success
-          name: linux-editor-luajit
+          name: linux-editor
+          path: ./
       - name: Unit Testing
         run: |
           rm -rf project/addons

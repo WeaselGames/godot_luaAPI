@@ -2,8 +2,8 @@
 #define LUACALLABLEEXTRA_H
 
 #ifndef LAPI_GDEXTENSION
-#include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#include "core/object/ref_counted.h"
 #else
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/templates/vector.hpp>
@@ -16,34 +16,34 @@ using namespace godot;
 #endif
 
 class LuaCallableExtra : public RefCounted {
-    GDCLASS(LuaCallableExtra, RefCounted);
+	GDCLASS(LuaCallableExtra, RefCounted);
 
-    protected:
-        static void _bind_methods();
+protected:
+	static void _bind_methods();
 
-    public:
-        static LuaCallableExtra* withTuple(Callable function, int argc);
-        static LuaCallableExtra* withRef(Callable function);
-        static LuaCallableExtra* withRefAndTuple(Callable function, int argc);
+public:
+	static LuaCallableExtra *withTuple(Callable function, int argc);
+	static LuaCallableExtra *withRef(Callable function);
+	static LuaCallableExtra *withRefAndTuple(Callable function, int argc);
 
-        void setInfo(Callable function, int argc, bool isTuple, bool wantsRef);
+	void setInfo(Callable function, int argc, bool isTuple, bool wantsRef);
 
-        void setTuple(bool isTuple);
-        bool getTuple();
+	void setTuple(bool isTuple);
+	bool getTuple();
 
-        void setWantsRef(bool wantsRef);
-        bool getWantsRef();
+	void setWantsRef(bool wantsRef);
+	bool getWantsRef();
 
-        void setArgc(int argc);
-        int getArgc();
+	void setArgc(int argc);
+	int getArgc();
 
-        static int call(lua_State *state);
+	static int call(lua_State *state);
 
-    private:
-        bool isTuple = false;
-        bool wantsRef = false;
-        int argc = 0;
+private:
+	bool isTuple = false;
+	bool wantsRef = false;
+	int argc = 0;
 
-        Callable function;
+	Callable function;
 };
 #endif

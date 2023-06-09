@@ -1,0 +1,55 @@
+name: 🔗 GHA
+on:
+  pull_request:
+    branches:
+      - "*"
+    paths-ignore:
+      - "**/README.md"
+      - "**/*.png"
+      - "**/LICENSE"
+      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**/README.md"
+      - "**/*.png"
+      - "**/LICENSE"
+      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
+
+jobs:
+  static-checks:
+    name: 📊 Static checks
+    uses: ./.github/workflows/static-checks.yml
+
+  linux-build:
+    name: 🐧 Linux
+    needs: static-checks
+    uses: ./.github/workflows/linux.yml
+
+  macos-build:
+    name: 🍎 macOS
+    needs: static-checks
+    uses: ./.github/workflows/macos.yml
+
+  windows-build:
+    name: 🎨 Windows
+    needs: static-checks
+    uses: ./.github/workflows/windows.yml
+  
+  gdextension-build:
+    name: ⚙️ GDExtension
+    needs: static-checks
+    uses: ./.github/workflows/gdextension.yml
+  
+  module-unit-tests:
+    name: ⚙️ Module Unit Tests
+    needs: linux-build
+    uses: ./.github/workflows/module-unit-tests.yml
+  
+  gdextension-unit-tests:
+    name: ⚙️ GDExtension Unit Tests
+    needs: gdextension-build
+    uses: ./.github/workflows/gdextension-unit-tests.yml

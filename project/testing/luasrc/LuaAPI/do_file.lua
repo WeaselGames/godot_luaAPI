@@ -7,5 +7,5 @@ function Fib(n)
     end
     return inner(n)
   end
-  
+
   result = Fib(15)
