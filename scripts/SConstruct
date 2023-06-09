@@ -26,7 +26,7 @@ def run(args, dir="."):
 
 if not lua_dir.exists():
     print("Copying over source files.")
-    copytree("../", lua_dir.abspath, 
+    copytree("../", lua_dir.abspath,
         ignore=ignore_patterns('.github*', 'scripts*', 'testing*'))
 
 if not godot_dir.exists():

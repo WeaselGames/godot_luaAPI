@@ -2,15 +2,14 @@
 #include "luaCallable.h"
 #include "luaAPI.h"
 
-
 #include "core/templates/hashfuncs.h"
 
 // I used "GDScriptLambdaCallable" as a template for this
-LuaCallable::LuaCallable(Ref<RefCounted> p_obj, int ref, lua_State *p_state){
-    obj = p_obj;
-    funcRef = ref; 
-    state = p_state;
-    h = (uint32_t)hash_djb2_one_64((uint64_t)this);
+LuaCallable::LuaCallable(Ref<RefCounted> p_obj, int ref, lua_State *p_state) {
+	obj = p_obj;
+	funcRef = ref;
+	state = p_state;
+	h = (uint32_t)hash_djb2_one_64((uint64_t)this);
 }
 
 bool LuaCallable::compare_equal(const CallableCustom *p_a, const CallableCustom *p_b) {
@@ -32,7 +31,7 @@ CallableCustom::CompareLessFunc LuaCallable::get_compare_less_func() const {
 }
 
 ObjectID LuaCallable::get_object() const {
-    return obj->get_instance_id();
+	return obj->get_instance_id();
 }
 
 String LuaCallable::get_as_text() const {
@@ -47,8 +46,8 @@ uint32_t LuaCallable::hash() const {
 
 void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
 	lua_pushcfunction(state, LuaState::luaErrorHandler);
-	
-	// Geting the lua function via the referance stored in funcRef
+
+	// Getting the lua function via the reference stored in funcRef
 	lua_rawgeti(state, LUA_REGISTRYINDEX, funcRef);
 
 	// Push all the argument on to the stack
@@ -58,9 +57,11 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 
 	// execute the function using a protected call.
 	int ret = lua_pcall(state, p_argcount, 1, -2 - p_argcount);
-    if (ret != LUA_OK) {
-        r_return_value = LuaState::handleError(state, ret);
-    } else r_return_value = LuaState::getVariant(state, -1, obj.ptr());
+	if (ret != LUA_OK) {
+		r_return_value = LuaState::handleError(state, ret);
+	} else {
+		r_return_value = LuaState::getVariant(state, -1, obj.ptr());
+	}
 
 	lua_pop(state, 1);
 }

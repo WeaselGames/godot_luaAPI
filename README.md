@@ -11,11 +11,10 @@
 
 About
 -------
-[![Linux](https://github.com/WeaselGames/lua/actions/workflows/linux.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/linux.yml) [![Windows](https://github.com/WeaselGames/lua/actions/workflows/windows.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/windows.yml) [![MacOS](https://github.com/WeaselGames/lua/actions/workflows/macos.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/macos.yml) [![GDExtension](https://github.com/WeaselGames/lua/actions/workflows/gdextension.yml/badge.svg)](https://github.com/WeaselGames/lua/actions/workflows/gdextension.yml)
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is a **beta** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/lua/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is a **beta** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/godot_luaAPI/tree/v1.1-stable) for godot v3.x.
 
 This is a Godot addon that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
@@ -40,11 +39,11 @@ Features
 - Choose which libraries you want Lua to have access to.
 - Custom LuaCallable type which allows you to get a Lua function as a Callable. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/lua_callable/).
 - LuaError type which is used to report any errors this addon or Lua run into.
-- LuaCoroutine type which creates a Lua thread. This is not a OS thread but a coroutine. 
+- LuaCoroutine type which creates a Lua thread. This is not a OS thread but a coroutine.
 - Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/objects/).
 - Objects can override most of the Lua metamethods. I.E. __index by defining a function with the same name.
 - Callables passed as userdata, which allows you to push a Callable as a Lua function.
-- Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:  
+- Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:
 ```lua
 local v1 = Vector2(1,2)
 local v2 = Vector2(100.52,100.83)
@@ -54,29 +53,29 @@ print(v1+v2) -- "(101,102)"
 change_my_sprite_color(Color(1,0,0,1)) -- If "change_my_sprite_color" was exposed, in GDScript it will receive a Color variant.
 ```
 
-If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/WeaselGames/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR 
+If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/WeaselGames/godot_luaAPI/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR
 
 Nightly Builds
 ---------------
-- [⚙️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/gdextension/main/godot_luaAPI.zip)
-- [⚙️ GDExtension LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/gdextension-luajit/main/godot_luaAPI-luaJIT.zip)
-- [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor.zip)
-- [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-editor-luajit.zip)
-- [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template.zip)
-- [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/linux/main/linux-template-debug.zip)
-- [🎨 Windows Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor.zip)
-- [🎨 Windows Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-editor-luajit.zip)
-- [🎨 Windows Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template.zip)
-- [🎨 Windows Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/windows/main/windows-template-debug.zip)
-- [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor-luaapi.zip)
-- [🍎 MacOS Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-editor-luajit-luaapi.zip)
-- [🍎 MacOS Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/macos/main/macos-template-luaapi.zip)
+- [⚙️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/gdextension.zip)
+- [⚙️ GDExtension LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/gdextension-LuaJIT.zip)
+- [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-editor.zip)
+- [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-editor-luajit.zip)
+- [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-template.zip)
+- [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-template-debug.zip)
+- [🎨 Windows Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-editor.zip)
+- [🎨 Windows Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-editor-luajit.zip)
+- [🎨 Windows Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-template.zip)
+- [🎨 Windows Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-template-debug.zip)
+- [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/macos-editor-luaapi.zip)
+- [🍎 MacOS Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/macos-editor-luajit-luaapi.zip)
+- [🍎 MacOS Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/macos-template-luaapi.zip)
 
 TODO
 -----
 - Finish v2 documentation
 - Workaround for lack of CallableCustoms in GDExtension
-- More up to date todo list on the v2 [project](https://github.com/WeaselGames/lua/projects/1) 
+- More up to date todo list on the v2 [project](https://github.com/WeaselGames/godot_luaAPI/projects/1)
 
 Compiling
 ------------
@@ -102,10 +101,10 @@ func _lua_print(message: String) -> void:
 func _ready():
 	lua.push_variant("print", _lua_print)
 	lua.push_variant("message", "Hello lua!")
-	
+
 	# All builtin libraries are available to bind with. Use OS and IO at your own risk.
 	lua.bind_libraries(["base", "table", "string"])
-	
+
 	# Most methods return a LuaError in case of an error
 	var err: LuaError = lua.do_string("""
 	for i=1,10,1 do
@@ -118,12 +117,12 @@ func _ready():
 	if err is LuaError:
 		print("ERROR %d: %s" % [err.type, err.message])
 		return
-	
+
 	var val = lua.pull_variant("get_message")
 	if val is LuaError:
 		print("ERROR %d: %s" % [err.type, err.message])
 		return
-	
+
 	var message = val.call()
 	print(message)
 ```
@@ -131,6 +130,6 @@ Contributing And Feature Requests
 ---------------
 All contributions are welcome, if you would like to contribute submit a PR.
 <br />
-Additionally if you do not have the time and or the knowledge you can create a [Feature Request](https://github.com/WeaselGames/lua/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=).
+Additionally if you do not have the time and or the knowledge you can create a [Feature Request](https://github.com/WeaselGames/godot_luaAPI/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=).
 
 [![lua logo](https://www.lua.org/images/powered-by-lua.gif)](https://www.lua.org/)

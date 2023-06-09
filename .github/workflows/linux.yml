@@ -1,23 +1,6 @@
-# # Huge credit to https://github.com/goostengine/goost
-# this action was made by them and only modified to my needs
-name: Linux
+name: 🐧 Linux
 on:
-  pull_request:
-    branches:
-      - "*"
-    paths-ignore:
-      - "**/README.md"
-      - "testing/*"
-      - ".github/ISSUE_TEMPLATE/*"
-      - ".github/CODEOWNERS"
-  push:
-    branches:
-      - "main"
-    paths-ignore:
-      - "**/README.md"
-      - "testing/*"
-      - ".github/ISSUE_TEMPLATE/*"
-      - ".github/CODEOWNERS"
+  workflow_call:
 
 env:
   BASE_BRANCH: main
