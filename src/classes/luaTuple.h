@@ -2,8 +2,8 @@
 #define LUATUPLE_H
 
 #ifndef LAPI_GDEXTENSION
-#include "core/object/ref_counted.h"
 #include "core/core_bind.h"
+#include "core/object/ref_counted.h"
 #else
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/variant/callable.hpp>
@@ -14,29 +14,30 @@ using namespace godot;
 #endif
 
 class LuaTuple : public RefCounted {
-    GDCLASS(LuaTuple, RefCounted);
+	GDCLASS(LuaTuple, RefCounted);
 
-    protected:
-        static void _bind_methods();
-    
-    public:
-        static LuaTuple* fromArray(Array elms);
+protected:
+	static void _bind_methods();
 
-        void pushBack(Variant var);
-        void pushFront(Variant var);
-        void set(int i, Variant var);
-        void clear();
+public:
+	static LuaTuple *fromArray(Array elms);
 
-        bool isEmpty();
+	void pushBack(Variant var);
+	void pushFront(Variant var);
+	void set(int i, Variant var);
+	void clear();
 
-        int size();
+	bool isEmpty();
 
-        Variant popBack();
-        Variant popFront();
-        Variant get(int i);
+	int size();
 
-        Array toArray();
-    private:
-        Array elements;
+	Variant popBack();
+	Variant popFront();
+	Variant get(int i);
+
+	Array toArray();
+
+private:
+	Array elements;
 };
 #endif

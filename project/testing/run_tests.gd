@@ -33,25 +33,25 @@ func _ready():
 	tests.sort_custom(sort_tests)
 	testCount = tests.size()
 	logPrint("Loaded %d tests\n" % testCount)
-		
+
 func _process(delta):
 	if done:
 		get_tree().quit(failures)
 		return
-		
+
 	time_elapsed += delta
 	var doneCount = 0
 	if currentTest == null:
 		currentTest = tests.pop_back()
-	
+
 	if not currentTest.done:
 		currentTest._process(delta)
-	
+
 	if currentTest.done:
 		logPrint("Test #%d: " % currentTest.id + currentTest.testName + " has finished.")
 		doneTests.append(currentTest)
 		currentTest = null
-	
+
 	if doneTests.size() == testCount:
 		finish()
 
@@ -67,23 +67,23 @@ func finish():
 		logPrint(test.testDescription)
 		logPrint("Frames: %d" % test.frames)
 		logPrint("Time: %s" % str(test.time))
-		
+
 		if test.status:
 			logPrint("Test finished with no errors.")
 			logPrint("-------------------------------\n")
 			test._finalize()
 			test.free()
 			continue
-			
+
 		failures += 1
-		
+
 		logPrint("Test finished with %d errors." % test.errors.size())
 		for err in test.errors:
 			logPrint("\nERROR %d: " % err.type + err.message)
 		logPrint("-------------------------------\n")
 		test._finalize()
 		test.free()
-	
+
 	doneTests.clear()
 	logPrint("%d/" % failures + "%d tests failed." % testCount)
 	done=true
@@ -100,5 +100,5 @@ func load_tests():
 		elif not file.begins_with(".") and  file.ends_with(".gd"):
 			var test = load("res://testing/tests/%s" % file).new()
 			tests.append(test)
-	
+
 	dir.list_dir_end()
