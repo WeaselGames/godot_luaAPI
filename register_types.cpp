@@ -1,11 +1,11 @@
 #include "register_types.h"
-#include "src/util.h"
 #include "src/classes/luaAPI.h"
 #include "src/classes/luaCallable.h"
 #include "src/classes/luaCallableExtra.h"
 #include "src/classes/luaCoroutine.h"
 #include "src/classes/luaError.h"
 #include "src/classes/luaTuple.h"
+#include "src/util.h"
 
 #ifdef LAPI_GDEXTENSION
 using namespace godot;
