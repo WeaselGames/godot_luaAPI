@@ -13,9 +13,10 @@ inline void print_line(const Variant &v) {
 	UtilityFunctions::print(v);
 }
 #endif
-inline Array get_all_scripts_from_object(const Object const* obj) {
+inline Array get_all_scripts_from_object(const Object const *obj) {
 	Array a;
-	if (obj == null) return a;
+	if (obj == null)
+		return a;
 	Variant script = obj.get_script();
 	while (script != nullptr) {
 		if (script.get_type() != Variant.Type.OBJECT) {
