@@ -48,9 +48,6 @@ public:
 	Ref<LuaCoroutine> newCoroutine();
 	Ref<LuaCoroutine> getRunningCoroutine();
 
-	lua_State *newThreadState();
-	lua_State *getState();
-
 	static Array get_scripts_from_object(Object *o);
 
 	lua_State *newThreadState();
