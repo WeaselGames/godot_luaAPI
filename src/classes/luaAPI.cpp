@@ -47,7 +47,21 @@ void LuaAPI::_bind_methods() {
 void LuaAPI::bindLibraries(Array libs) {
 	state.bindLibraries(libs);
 }
-
+inline Array get_all_scripts_from_object(const Object *obj) {
+	Array a;
+	if (obj == nullptr)
+		return a;
+	Variant script = obj->get_script();
+	if (!script.is_null()) {
+		while (!script.is_null()) {
+			if (script.get_type() != Variant::Type::OBJECT) {
+				break; //not a script
+			}
+			a.append(script);
+		}
+	}
+	return a;
+}
 Array LuaAPI::get_scripts_from_object(Object *o) {
 	return get_all_scripts_from_object(o);
 }
