@@ -52,9 +52,9 @@ public:
 	static int luaCallableCall(lua_State *state);
 
 	static void luaHook(lua_State *state, lua_Debug *ar);
-  
-  // Utilities
-  static bool check_inheritance(Object* obj, String cls);
+	
+	// Utilities
+	static bool check_inheritance(Object *obj, String cls);
 
 private:
 	lua_State *L = nullptr;
