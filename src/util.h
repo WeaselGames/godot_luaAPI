@@ -13,7 +13,7 @@ inline void print_line(const Variant &v) {
 	UtilityFunctions::print(v);
 }
 #endif
-inline Array get_all_scripts_from_object(const Object const *obj) {
+inline Array get_all_scripts_from_object(const Object *obj) {
 	Array a;
 	if (obj == nullptr)
 		return a;
