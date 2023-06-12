@@ -18,8 +18,8 @@ inline Array get_all_scripts_from_object(const Object const *obj) {
 	if (obj == nullptr)
 		return a;
 	Variant script = obj->get_script();
-	if (!script->is_null()) {
-		while (!script->is_null()) {
+	if (!script.is_null()) {
+		while (!script.is_null()) {
 			if (script.get_type() != Variant::Type.OBJECT) {
 				break; //not a script
 			}
