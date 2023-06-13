@@ -896,7 +896,6 @@ void LuaCoroutine::luaHook(lua_State *state, lua_Debug *ar) {
 	const int argc = 3;
 	const Variant *p_args[argc];
 	for (int i = 0; i < argc; i++) {
-		args[i] = LuaState::getVariant(state, i + 1, OBJ);
 		p_args[i] = &args[i];
 	}
 
@@ -907,6 +906,10 @@ void LuaCoroutine::luaHook(lua_State *state, lua_Debug *ar) {
 		LuaError *err = LuaState::handleError(hook.get_method(), error, p_args, argc);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
+		return;
+	}
+
+	if (returned.get_type() == Variant::NIL) {
 		return;
 	}
 
