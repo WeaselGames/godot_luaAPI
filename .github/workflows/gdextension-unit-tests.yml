@@ -13,9 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download godot 4.0.3
-        uses: wei/wget@v1
-        with:
-          args: -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0.3/Godot_v4.0.3-stable_linux.x86_64.zip
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0.3/Godot_v4.0.3-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip
@@ -45,9 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download godot 4.0.3
-        uses: wei/wget@v1
-        with:
-          args: -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0.3/Godot_v4.0.3-stable_linux.x86_64.zip
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0.3/Godot_v4.0.3-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip
