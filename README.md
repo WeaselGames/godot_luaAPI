@@ -14,9 +14,9 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is a **beta** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates. Please see the branch [v1.1-stable](https://github.com/WeaselGames/godot_luaAPI/tree/v1.1-stable) for godot v3.x.
+***WARNING!!!*** this is a **beta** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates.
 
-This is a Godot addon that adds Lua API support via GDScript. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
+This is a Godot addon that adds Lua API support via GDScript, C# or GDExtension. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
 To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
 
