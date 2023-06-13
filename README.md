@@ -31,6 +31,8 @@ If you are looking to make your game using Lua or would like to support Modding 
 
 We will supply a brief overview here. But for more info check out the [wiki](https://luaapi.weaselgames.info/latest).
 
+For discussion related to this project feel free to join the Weasel Games [Discord](https://discord.gg/vGazqdQZ7p).
+
 Features
 --------------------------------
 - Run Lua directly from a string or a text file.
