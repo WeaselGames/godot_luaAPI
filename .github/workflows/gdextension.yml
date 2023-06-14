@@ -118,11 +118,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
       - name: Install gcc-multilib
         if: ${{ startsWith(matrix.arch, 'x86_32') }}
         shell: sh
         run: |
           sudo apt install gcc-multilib g++-multilib
+
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
@@ -130,23 +132,34 @@ jobs:
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
-      - name: (Android) Set up Java 11
-        if: ${{ startsWith(matrix.identifier, 'android-') }}
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: (Android) Set up Android SDK
-        if: ${{ startsWith(matrix.identifier, 'android-') }}
-        uses: android-actions/setup-android@v2
-
-      - name: (Android) Install Android Tools
-        if: ${{ startsWith(matrix.identifier, 'android-') }}
+      
+      - name: (Linux) Install buildroot x86_64
+        if: ${{ startsWith(matrix.identifier, 'linux-') && contains(matrix.arch, 'x86_64')}}
         shell: sh
         run: |
-          "$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "build-tools;30.0.3" "platforms;android-29" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;21.4.7075529"
-      - name: Set up Python
-        uses: actions/setup-python@v2
+          sudo apt-get update
+          sudo apt-get install yasm
+          cd /opt
+          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          tar xf x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          rm -f x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          mv x86_64-godot-linux-gnu_sdk-buildroot buildroot
+          cd buildroot
+          ./relocate-sdk.sh
+      
+      - name: (Linux) Install buildroot x86_32
+        if: ${{ startsWith(matrix.identifier, 'linux-') && contains(matrix.arch, 'x86_32')}}
+        shell: sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install yasm
+          cd /opt
+          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/i686-godot-linux-gnu_sdk-buildroot.tar.bz2
+          tar xf i686-godot-linux-gnu_sdk-buildroot.tar.bz2
+          rm -f i686-godot-linux-gnu_sdk-buildroot.tar.bz2
+          mv i686-godot-linux-gnu_sdk-buildroot buildroot
+          cd buildroot
+          ./relocate-sdk.sh
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -170,7 +183,7 @@ jobs:
       - name: Compile extension
         shell: sh
         run: |
-          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' -j2
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' ${{ matrix.args }}
           ls -l project/addons/luaAPI/bin/
       - name: Strip bins
         if: "!startsWith(matrix.identifier, 'windows-') && startsWith(matrix.arch, 'x86_')"
@@ -270,11 +283,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
       - name: Install gcc-multilib
         if: ${{ startsWith(matrix.arch, 'x86_32') }}
         shell: sh
         run: |
           sudo apt install gcc-multilib g++-multilib
+
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
@@ -282,9 +297,34 @@ jobs:
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      
+      - name: (Linux) Install buildroot x86_64
+        if: ${{ startsWith(matrix.identifier, 'linux-') && contains(matrix.arch, 'x86_64')}}
+        shell: sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install yasm
+          cd /opt
+          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          tar xf x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          rm -f x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          mv x86_64-godot-linux-gnu_sdk-buildroot buildroot
+          cd buildroot
+          ./relocate-sdk.sh
+      
+      - name: (Linux) Install buildroot x86_32
+        if: ${{ startsWith(matrix.identifier, 'linux-') && contains(matrix.arch, 'x86_32')}}
+        shell: sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install yasm
+          cd /opt
+          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/i686-godot-linux-gnu_sdk-buildroot.tar.bz2
+          tar xf i686-godot-linux-gnu_sdk-buildroot.tar.bz2
+          rm -f i686-godot-linux-gnu_sdk-buildroot.tar.bz2
+          mv i686-godot-linux-gnu_sdk-buildroot buildroot
+          cd buildroot
+          ./relocate-sdk.sh
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -305,11 +345,18 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{env.BASE_BRANCH}}
-      - name: Compile extension
+      - name: Compile extension (Other)
+        if: "!startsWith(matrix.identifier, 'linux-')"
         shell: sh
         run: |
-          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' luaappi_luaver=jit -j2
-          ls -l project/addons/luaAPI/bin/
+         scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' luaappi_luaver=jit -j2
+         ls -l project/addons/luaAPI/bin/
+      - name: Compile extension (Linux)
+        if: "startsWith(matrix.identifier, 'linux-')"
+        shell: sh
+        run: |
+         PATH=/opt/buildroot/bin:$PATH scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' luaappi_luaver=jit -j2
+         ls -l project/addons/luaAPI/bin/
       - name: Strip bins
         if: "!startsWith(matrix.identifier, 'windows-') && startsWith(matrix.arch, 'x86_')"
         shell: sh

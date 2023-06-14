@@ -118,5 +118,4 @@ else:
     env.Append(LIBPATH=[Dir("bin").abspath])
     env.Append(LIBS=[library_name])
 
-
 Return('env')
