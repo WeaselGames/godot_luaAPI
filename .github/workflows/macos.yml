@@ -16,17 +16,17 @@ jobs:
       matrix:
         include:
           - name: macOS Editor (target=editor)
-            cache-name: macos-editor-luaapi
+            cache-name: macos-editor
             editor: true
             build-options: "target=editor"
 
           - name: macOS Editor LuaJIT (target=editor, luaapi_luaver=jit)
-            cache-name: macos-editor-luajit-luaapi
+            cache-name: macos-editor-luajit
             editor: true
             build-options: "target=editor luaapi_luaver=jit"
 
           - name: macOS Template
-            cache-name: macos-template-luaapi
+            cache-name: macos-template
             template: true
 
     steps:

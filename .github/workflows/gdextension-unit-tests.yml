@@ -33,7 +33,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: extension-test-results
+          name: gdextension-test-results
           path: project/extension-log.txt
     
   gdextension-luajit-unit-tests:
@@ -63,5 +63,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: extension-test-results
+          name: gdextension-luajit-test-results
           path: project/extension-log.txt

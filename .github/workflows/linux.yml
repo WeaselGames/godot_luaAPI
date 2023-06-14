@@ -40,8 +40,13 @@ jobs:
       - name: Configure dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install build-essential pkg-config libx11-dev libxcursor-dev \
-            libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm
+          sudo apt-get install yasm
+          cd /opt
+          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          tar xf x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          rm -f x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          cd x86_64-godot-linux-gnu_sdk-buildroot
+          ./relocate-sdk.sh
 
       - name: Load .scons_cache directory
         uses: actions/cache@v2
@@ -71,7 +76,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linuxbsd ${{ matrix.build-options }} ${{ env.SCONSFLAGS }}
+          PATH=/opt/x86_64-godot-linux-gnu_sdk-buildroot/bin:$PATH scons platform=linuxbsd ${{ matrix.build-options }} ${{ env.SCONSFLAGS }}
 
       - name: Prepare artifact
         run: |
