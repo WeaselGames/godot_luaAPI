@@ -34,8 +34,6 @@ public:
 	LuaError *exposeObjectConstructor(String name, Object *obj);
 	LuaError *handleError(int lua_error) const;
 
-	Object *getGDFuncState();
-
 	static LuaError *pushVariant(lua_State *state, Variant var);
 	static LuaError *handleError(lua_State *state, int lua_error);
 #ifndef LAPI_GDEXTENSION
@@ -56,8 +54,6 @@ public:
 private:
 	lua_State *L = nullptr;
 	RefCounted *obj = nullptr;
-
-	static VMap<lua_State *, Object *> GDFunctionStates;
 
 	void exposeConstructors();
 	void createVector2Metatable();

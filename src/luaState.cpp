@@ -11,8 +11,6 @@
 #include <classes/luaCallable.h>
 #endif
 
-VMap<lua_State *, Object *> LuaState::GDFunctionStates;
-
 void LuaState::setState(lua_State *L, RefCounted *obj, bool bindAPI) {
 	this->L = L;
 	this->obj = obj;
@@ -45,12 +43,6 @@ void LuaState::setState(lua_State *L, RefCounted *obj, bool bindAPI) {
 
 lua_State *LuaState::getState() const {
 	return L;
-}
-
-Object *LuaState::getGDFuncState() {
-	Object *obj = GDFunctionStates[L];
-	GDFunctionStates[L] = nullptr;
-	return obj;
 }
 
 #ifndef LAPI_LUAJIT
@@ -736,10 +728,8 @@ int LuaState::luaCallableCall(lua_State *state) {
 		return 0;
 	}
 
-	// await was called
-	// We get class name to avoid binding to headers defined in the gdscript module.
+	// await was called, so yield
 	if (returned.is_ref_counted() && (returned.operator Object *())->get_class_name() == "GDScriptFunctionState") {
-		GDFunctionStates[state] = (returned.operator Object *());
 		// TODO: Check if its actually a thread
 		return lua_yield(state, lua_gettop(state));
 	}
@@ -788,9 +778,8 @@ int LuaState::luaCallableCall(lua_State *state) {
 	}
 
 	Variant returned = callable.callv(args);
-
+	// await was called, so yield
 	if (returned.get_type() == Variant::OBJECT && (returned.operator Object *())->get_class() == "GDScriptFunctionState") {
-		GDFunctionStates[state] = (returned.operator Object *());
 		// TODO: Check if its actually a thread
 		return lua_yield(state, lua_gettop(state));
 	}

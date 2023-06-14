@@ -41,7 +41,7 @@ public:
 
 	Ref<LuaAPI> getParent();
 
-	Variant resume();
+	Variant resume(Array args);
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
 

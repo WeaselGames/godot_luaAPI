@@ -81,7 +81,7 @@ func _process(delta):
 		done = true
 		return
 
-	var ret = co.resume()
+	var ret = co.resume([])
 	if ret is LuaError:
 		errors.append(ret)
 		return fail()
