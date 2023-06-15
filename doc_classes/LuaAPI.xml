@@ -4,8 +4,7 @@
 		Execute Lua code at runtime and make your own API.
 	</brief_description>
 	<description>
-		TODO
-	</description>
+		This class represents a lua state and allows you to interact with lua at runtime. You can load files and strings code. Push Callable's as lua functions. And push any Variant as a lua variable.
 	<tutorials>
 	</tutorials>
 	<methods>
