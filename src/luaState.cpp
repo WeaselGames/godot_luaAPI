@@ -354,16 +354,6 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			// blame this on https://github.com/godotengine/godot-cpp/issues/995
 			if (LuaCoroutine *thread = dynamic_cast<LuaCoroutine *>(var.operator Object *()); thread != nullptr) {
 #endif
-				// For some reason passing the thread like this does not work.
-				// calling coroutine.resume with it gives the following error:
-				// attempt to call a thread value
-				/*
-				 lua_pushthread(thread->getLuaState());
-				 Ref<LuaAPI> parent = thread->getParent();
-				 // TODO: Handle this?
-				 if (parent.is_valid())
-					 parent->addRef(thread);
-				 */
 				return LuaError::newError("pushing threads is currently not supported.", LuaError::ERR_TYPE);
 				break;
 			}
@@ -730,7 +720,6 @@ int LuaState::luaCallableCall(lua_State *state) {
 
 	// await was called, so yield
 	if (returned.is_ref_counted() && (returned.operator Object *())->get_class_name() == "GDScriptFunctionState") {
-		// TODO: Check if its actually a thread
 		return lua_yield(state, lua_gettop(state));
 	}
 
@@ -780,7 +769,6 @@ int LuaState::luaCallableCall(lua_State *state) {
 	Variant returned = callable.callv(args);
 	// await was called, so yield
 	if (returned.get_type() == Variant::OBJECT && (returned.operator Object *())->get_class() == "GDScriptFunctionState") {
-		// TODO: Check if its actually a thread
 		return lua_yield(state, lua_gettop(state));
 	}
 
@@ -914,6 +902,7 @@ void LuaCoroutine::luaHook(lua_State *state, lua_Debug *ar) {
 	args.append(ar->currentline);
 
 	Variant returned = hook.callv(args);
+
 	LuaError *err = LuaState::pushVariant(state, returned);
 	if (err != nullptr) {
 		lua_pushstring(state, err->getMessage().ascii().get_data());

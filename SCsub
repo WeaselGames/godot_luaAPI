@@ -20,7 +20,7 @@ Export('env_lua')
 SConscript('external/SCsub')
 
 if env["luaapi_luaver"] == 'jit':
-    env_lua.Append(CPPDEFINES=['LAPI_LUAJIT', 'LAPI_51'])
+    env_lua.Append(CPPDEFINES=['LAPI_LUAJIT'])
 elif env["luaapi_luaver"] == '5.1':
     env_lua.Append(CPPDEFINES=['LAPI_51'])
 

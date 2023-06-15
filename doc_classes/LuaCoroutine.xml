@@ -48,7 +48,7 @@
 			<return type="Variant" />
 			<param index="0" name="Args" type="Array" />
 			<description>
-				Resumes or starts the coroutine. Will either return a Array of arguments passed by lua in yield() or a LuaError. Arguments are passed to yield() in lua.
+				Resumes or starts the coroutine. Will either return a Array of arguments passed by lua in yield() or a LuaError. Arguments are passed to yield() in lua. This is a blocking call, it will not return until the coroutine has yielded or finished.
 			</description>
 		</method>
 		<method name="is_done">
