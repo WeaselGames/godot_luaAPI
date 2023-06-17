@@ -12,6 +12,7 @@ func _ready():
 	id = 9950
 
 	lua = LuaAPI.new()
+	lua.permissive = true
 	var err = lua.expose_constructor("TestObj", TestObject)
 	if err is LuaError:
 		errors.append(err)

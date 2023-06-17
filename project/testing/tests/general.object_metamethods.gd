@@ -16,6 +16,7 @@ func _ready():
 	id = 9850
 
 	lua = LuaAPI.new()
+	lua.permissive = true
 	lua.set_meta("isValid", true)
 	testObj = TestObject.new()
 	lua.push_variant("testObj", testObj)

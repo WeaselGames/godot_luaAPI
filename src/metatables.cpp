@@ -417,19 +417,44 @@ void LuaState::createObjectMetatable() {
 	luaL_newmetatable(L, "mt_Object");
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
+		Ref<LuaAPI> lua_api = dynamic_cast<LuaAPI *>(OBJ);
+		if (lua_api == nullptr) {
+			LuaError *err = LuaError::newError("Object not found!", LuaError::ERR_RUNTIME);
+			LuaState::pushVariant(inner_state, err);
+			return 0;
+		}
+
 		// If object overrides
 		if (arg1.has_method("__index")) {
-			LuaState::pushVariant(inner_state, arg1.call("__index", Ref<LuaAPI>(OBJ), arg2));
+			LuaState::pushVariant(inner_state, arg1.call("__index", lua_api, arg2));
 			return 1;
 		}
 
+		bool permissive = lua_api->getPermissive();
 		Array allowedFields = Array();
 		if (arg1.has_method("lua_fields")) {
 			allowedFields = arg1.call("lua_fields");
 		}
 
+		// In permissive mode, allowedFields beomces a blacklist.
+		if (permissive) {
+			if (!allowedFields.has(arg2) && arg1.has_method(arg2.operator String())) {
+				lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
+				LuaState::pushVariant(inner_state, arg2);
+				lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
+				return 1;
+			}
+
+			if (!allowedFields.has(arg2)) {
+				Variant var = arg1.get(arg2);
+				LuaState::pushVariant(inner_state, var);
+				return 1;
+			}
+			return 0;
+		}
+
 		// If the functions is allowed and exists
-		if ((allowedFields.is_empty() || allowedFields.has(arg2)) && arg1.has_method(arg2.operator String())) {
+		if (allowedFields.has(arg2) && arg1.has_method(arg2.operator String())) {
 			lua_pushlightuserdata(inner_state, lua_touserdata(inner_state, 1));
 			LuaState::pushVariant(inner_state, arg2);
 			lua_pushcclosure(inner_state, luaUserdataFuncCall, 2);
@@ -437,7 +462,7 @@ void LuaState::createObjectMetatable() {
 		}
 
 		// If the field is allowed
-		if (allowedFields.is_empty() || allowedFields.has(arg2)) {
+		if (allowedFields.has(arg2)) {
 			Variant var = arg1.get(arg2);
 			LuaState::pushVariant(inner_state, var);
 			return 1;
@@ -447,19 +472,29 @@ void LuaState::createObjectMetatable() {
 	});
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__newindex", {
+		Ref<LuaAPI> lua_api = dynamic_cast<LuaAPI *>(OBJ);
+		if (lua_api == nullptr) {
+			LuaError *err = LuaError::newError("Object not found!", LuaError::ERR_RUNTIME);
+			LuaState::pushVariant(inner_state, err);
+			return 0;
+		}
+
 		// If object overrides
 		if (arg1.has_method("__newindex")) {
-			LuaState::pushVariant(inner_state, arg1.call("__newindex", Ref<LuaAPI>(OBJ), arg2, arg3));
+			LuaState::pushVariant(inner_state, arg1.call("__newindex", lua_api, arg2, arg3));
 			return 1;
 		}
 
+		bool permissive = lua_api->getPermissive();
 		Array allowedFields = Array();
 		if (arg1.has_method("lua_fields")) {
 			allowedFields = arg1.call("lua_fields");
 		}
 
-		if (allowedFields.is_empty() || allowedFields.has(arg2)) {
+		if (!permissive && allowedFields.has(arg2)) {
 			// We can't use arg1 here because we need to reference the userdata
+			((Variant *)lua_touserdata(inner_state, 1))->set(arg2, arg3);
+		} else if (permissive && !allowedFields.has(arg2)) { // In permissive mode, allowedFields beomces a blacklist.
 			((Variant *)lua_touserdata(inner_state, 1))->set(arg2, arg3);
 		}
 		return 0;
