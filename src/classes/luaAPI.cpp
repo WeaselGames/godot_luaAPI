@@ -37,6 +37,11 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 	ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
 
+	ClassDB::bind_method(D_METHOD("set_permissive", "value"), &LuaAPI::setPermissive);
+	ClassDB::bind_method(D_METHOD("get_permissive"), &LuaAPI::getPermissive);
+
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "permissive"), "set_permissive", "get_permissive");
+
 	BIND_ENUM_CONSTANT(HOOK_MASK_CALL);
 	BIND_ENUM_CONSTANT(HOOK_MASK_RETURN);
 	BIND_ENUM_CONSTANT(HOOK_MASK_LINE);

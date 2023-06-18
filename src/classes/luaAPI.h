@@ -35,6 +35,14 @@ public:
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
+	inline void setPermissive(bool permissive) {
+		this->permissive = permissive;
+	}
+
+	inline bool getPermissive() const {
+		return permissive;
+	}
+
 	bool luaFunctionExists(String functionName);
 
 	Variant pullVariant(String name);
@@ -68,7 +76,9 @@ public:
 
 private:
 	LuaState state;
-	lua_State *lState;
+	lua_State *lState = nullptr;
+
+	bool permissive = false;
 
 	// Temp. Looking for better method. Maybe?
 	Array refs;

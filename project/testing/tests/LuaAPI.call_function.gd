@@ -8,6 +8,7 @@ func _ready():
 	id = 9970
 
 	lua = LuaAPI.new()
+	lua.permissive = true
 
 	# testName and testDescription are for any needed context about the test.
 	testName = "LuaAPI.call_function"

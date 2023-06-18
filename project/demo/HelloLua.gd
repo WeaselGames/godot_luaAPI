@@ -7,11 +7,11 @@ func _lua_print(message: String):
 	return LuaError.new_error("test", LuaError.ERR_RUNTIME)
 
 func _ready():
+	# All builtin libraries are available to bind with. Use Debug, OS and IO at your own risk.
+	lua.bind_libraries(["base", "table", "string"])
+
 	lua.push_variant("print", _lua_print)
 	lua.push_variant("message", "Hello lua!")
-
-	# All builtin libraries are available to bind with. Use OS and IO at your own risk.
-	lua.bind_libraries(["base", "table", "string"])
 
 	# Most methods return a LuaError in case of an error
 	var err: LuaError = lua.do_string("""

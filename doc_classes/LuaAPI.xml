@@ -89,6 +89,11 @@
 			</description>
 		</method>
 	</methods>
+	<members>
+		<member name="permissive" type="bool" setter="set_permissive" getter="get_permissive" default="false">
+			Set weather an objects lua_fields method should be treated as a blacklist instead of a whitelist.
+		</member>
+	</members>
 	<constants>
 		<constant name="HOOK_MASK_CALL" value="1" enum="HookMask">
 			Specifies on which events the hook will be called.
