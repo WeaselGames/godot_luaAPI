@@ -3,7 +3,7 @@
 **Table of contents:**
   * [About](#about)
   * [Features](#features)
-  * [Nightly Builds](#nightly-builds)
+  * [Release Builds](#release-builds)
   * [TODO](#todo)
   * [Compiling](#compiling)
   * [Getting Started](#getting-started)
@@ -18,7 +18,7 @@ Art created by [Alex](https://www.instagram.com/redheadalex1)
 
 This is a Godot addon that adds Lua API support via GDScript, C# or GDExtension. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
-To use you can either [Compile from source](#compiling) or you can download one of the [nightly builds](#nightly-builds).
+To use you can either [Compile from source](#compiling) or you can download one of the [release builds](#release-builds).
 
 By default the Lua print function is set to print to the GDEditor console. This can be changed by exposing your own print function as it will overwrite the existing one.
 
@@ -57,21 +57,18 @@ change_my_sprite_color(Color(1,0,0,1)) -- If "change_my_sprite_color" was expose
 
 If a feature is missing that you would like to see feel free to create a [Feature Request](https://github.com/WeaselGames/godot_luaAPI/issues/new?assignees=&labels=feature%20request&template=feature_request.md&title=) or submit a PR
 
-Nightly Builds
+Release Builds
 ---------------
-- [⚙️ GDExtension](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/gdextension.zip)
-- [⚙️ GDExtension LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/gdextension-LuaJIT.zip)
-- [🐧 Linux Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-editor.zip)
-- [🐧 Linux Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-editor-luajit.zip)
-- [🐧 Linux Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-template.zip)
-- [🐧 Linux Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/linux-template-debug.zip)
-- [🎨 Windows Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-editor.zip)
-- [🎨 Windows Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-editor-luajit.zip)
-- [🎨 Windows Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-template.zip)
-- [🎨 Windows Template Debug](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/windows-template-debug.zip)
-- [🍎 MacOS Editor](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/macos-editor.zip)
-- [🍎 MacOS Editor LuaJIT](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/macos-editor-luajit.zip)
-- [🍎 MacOS Template](https://nightly.link/WeaselGames/godot_luaAPI/workflows/runner/main/macos-template.zip)
+- [⚙️ GDExtension](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/gdextension.zip)
+- [⚙️ GDExtension LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/gdextension-LuaJIT.zip)
+- [🐧 Linux Editor](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/linux-editor.zip)
+- [🐧 Linux Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/linux-editor-luajit.zip)
+- [🎨 Windows Editor](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/windows-editor.zip)
+- [🎨 Windows Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/windows-editor-luajit.zip)
+- [🍎 MacOS Editor](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/macos-editor.zip)
+- [🍎 MacOS Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/macos-editor-luajit.zip)
+- [🗜️ Export Templates](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/export-templates.tpz)
+For previous versions see [releases](https://github.com/WeaselGames/godot_luaAPI/releases)
 
 TODO
 -----

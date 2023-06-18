@@ -22,3 +22,5 @@ macos.release = "bin/libluaapi.macos.template_release.universal.dylib"
 
 ios.debug.arm64 = "bin/libluaapi.ios.template_debug.arm64.dylib"
 ios.release.arm64 = "bin/libluaapi.ios.template_release.arm64.dylib"
+ios.debug.simulator = "bin/libluaapi.ios.template_debug.universal.simulator.dylib"
+ios.release.simulator = "bin/libluaapi.ios.template_release.universal.simulator.dylib"

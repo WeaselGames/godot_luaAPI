@@ -101,10 +101,10 @@
 		<constant name="HOOK_MASK_RETURN" value="2" enum="HookMask">
 			Specifies on which events the hook will be called.
 		</constant>
-		<constant name="HOOK_MASK_LINE" value="3" enum="HookMask">
+		<constant name="HOOK_MASK_LINE" value="4" enum="HookMask">
 			Specifies on which events the hook will be called.
 		</constant>
-		<constant name="HOOK_MASK_COUNT" value="4" enum="HookMask">
+		<constant name="HOOK_MASK_COUNT" value="8" enum="HookMask">
 			Specifies on which events the hook will be called.
 		</constant>
 	</constants>

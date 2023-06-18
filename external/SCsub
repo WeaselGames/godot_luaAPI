@@ -62,7 +62,6 @@ def build_luajit():
         os.chdir("luaJIT/src")
         run("msvcbuild static")
 
-env_lua = env_lua.Clone()
 luaver = env["luaapi_luaver"]
 
 if luaver == "jit":
@@ -79,8 +78,10 @@ if luaver == "jit":
 elif luaver == "5.1":
     env_lua.Append(CPPDEFINES='MAKE_LIB')
 
-    if env['PLATFORM'] == 'posix' and env['platform'] == 'linuxbsd':
+    if env['PLATFORM'] == 'posix' and (env['platform'] == 'linux' or env['platform'] == 'linuxbsd'):
         env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+    elif env['platform'] == 'ios':
+        env_lua.Append(CPPDEFINES=['LUA_USE_IOS'])
 
     if not env_lua.msvc:
         env_lua['CFLAGS'].remove('-std=gnu11')
@@ -91,8 +92,10 @@ elif luaver == "5.1":
 else:
     env_lua.Append(CPPDEFINES='MAKE_LIB')
 
-    if env['PLATFORM'] == 'posix' and env['platform'] == 'linuxbsd':
+    if env['PLATFORM'] == 'posix' and (env['platform'] == 'linux' or env['platform'] == 'linuxbsd'):
         env_lua.Append(CPPDEFINES='LUA_USE_POSIX')
+    elif env['platform'] == 'ios':
+        env_lua.Append(CPPDEFINES=['LUA_USE_IOS'])
 
     if not env_lua.msvc:
         env_lua['CFLAGS'].remove('-std=gnu11')
