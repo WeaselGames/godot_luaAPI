@@ -47,7 +47,7 @@ lua_State *LuaState::getState() const {
 
 #ifndef LAPI_LUAJIT
 
-// Binds lua librares with the lua state
+// Binds lua libraries with the lua state
 void LuaState::bindLibraries(Array libs) {
 	for (int i = 0; i < libs.size(); i++) {
 		String lib = ((String)libs[i]).to_lower();
@@ -89,7 +89,7 @@ void LuaState::bindLibraries(Array libs) {
 
 #else
 
-// Binds lua librares with the lua state
+// Binds lua libraries with the lua state
 void LuaState::bindLibraries(Array libs) {
 	for (int i = 0; i < libs.size(); i++) {
 		String lib = ((String)libs[i]).to_lower();
@@ -132,6 +132,29 @@ void LuaState::bindLibraries(Array libs) {
 }
 
 #endif
+
+void LuaState::luaWarn(void *inst, const char *msg, int tocont) {
+	LuaAPI *instance;
+	instance->warn_str += msg;
+	if (tocont > 0) {
+		Callable c = instance->warnf;
+		if (c.is_valid()) {
+			c.call(instance->warn_str);
+		} else {
+			ERR_PRINT("Callable is invalid.");
+		}
+		instance->warn_str = String();
+	}
+}
+
+void LuaState::triggerChangedWarnFunction(void* api) {
+	LuaAPI *luaAPI = (LuaAPI*)api;
+	if (luaAPI->warnf.is_null()) {
+		lua_setwarnf(L,LuaAPI::default_warnf,api);
+	} else {
+		lua_setwarnf(L,LuaState::luaWarn,api);
+	}
+}
 
 void LuaState::setHook(Callable hook, int mask, int count) {
 	if (hook.is_null()) {

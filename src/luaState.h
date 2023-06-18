@@ -19,6 +19,7 @@ public:
 	void setState(lua_State *state, RefCounted *obj, bool bindAPI);
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
+	void triggerChangedWarnFunction(void * luaAPI);
 
 	bool luaFunctionExists(String functionName);
 
@@ -47,6 +48,7 @@ public:
 	static int luaPrint(lua_State *state);
 	static int luaUserdataFuncCall(lua_State *state);
 	static int luaCallableCall(lua_State *state);
+	static void luaWarn(void *luaAPI, const char *msg, int tocont);
 
 	static void luaHook(lua_State *state, lua_Debug *ar);
 

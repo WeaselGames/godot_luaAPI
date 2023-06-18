@@ -53,6 +53,8 @@ public:
 	LuaError *pushGlobalVariant(String name, Variant var);
 	LuaError *exposeObjectConstructor(String name, Object *obj);
 
+	void setWarnFunction(Callable c);
+
 	Ref<LuaCoroutine> newCoroutine();
 	Ref<LuaCoroutine> getRunningCoroutine();
 
@@ -74,6 +76,9 @@ public:
 		HOOK_MASK_COUNT = LUA_MASKCOUNT,
 	};
 
+	Callable warnf;
+	String warn_str;
+	static void default_warnf(void *luaAPI, const char *msg, int tocont);
 private:
 	LuaState state;
 	lua_State *lState = nullptr;
@@ -85,9 +90,6 @@ private:
 	std::map<void *, Variant *> ownedObjects;
 
 	LuaError *execute(int handlerIndex);
-	String warn_str;
-
-	static void warnf(void *luaAPI, const char *msg, int tocont);
 };
 
 VARIANT_ENUM_CAST(LuaAPI::HookMask)

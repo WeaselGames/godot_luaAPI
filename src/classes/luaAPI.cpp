@@ -10,7 +10,7 @@ LuaAPI::LuaAPI() {
 	lState = luaL_newstate();
 	// Creating lua state instance
 	state.setState(lState, this, true);
-	lua_setwarnf(lState, LuaAPI::warnf, this);
+	lua_setwarnf(lState, LuaAPI::default_warnf, this);
 }
 
 LuaAPI::~LuaAPI() {
@@ -172,11 +172,17 @@ lua_State *LuaAPI::newThreadState() {
 lua_State *LuaAPI::getState() {
 	return lState;
 }
-void LuaAPI::warnf(void *inst, const char *msg, int tocont) {
+
+void LuaAPI::default_warnf(void *inst, const char *msg, int tocont) {
 	LuaAPI *instance;
 	instance->warn_str += msg;
 	if (tocont > 0) {
 		WARN_PRINT(instance->warn_str);
 		instance->warn_str = String();
 	}
+}
+
+void LuaAPI::setWarnFunction(Callable c) {
+	warnf = c;
+	state.triggerChangedWarnFunction(this);
 }
