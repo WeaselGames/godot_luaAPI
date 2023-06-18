@@ -10,7 +10,7 @@ LuaAPI::LuaAPI() {
 	lState = luaL_newstate();
 	// Creating lua state instance
 	state.setState(lState, this, true);
-	lua_setwarnf(lState, LuaAPI::default_warnf, this);
+	state.triggerChangedWarnFunction(this);
 }
 
 LuaAPI::~LuaAPI() {
