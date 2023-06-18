@@ -10,6 +10,7 @@ LuaAPI::LuaAPI() {
 	lState = luaL_newstate();
 	// Creating lua state instance
 	state.setState(lState, this, true);
+	lua_setwarnf(lState,LuaAPI::warnf,this)
 }
 
 LuaAPI::~LuaAPI() {
@@ -170,4 +171,7 @@ lua_State *LuaAPI::newThreadState() {
 // returns state
 lua_State *LuaAPI::getState() {
 	return lState;
+}
+void LuaAPI::warnf(void *inst, const char *msg, int tocont) {
+	
 }
