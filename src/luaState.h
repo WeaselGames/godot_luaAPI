@@ -19,7 +19,8 @@ public:
 	void setState(lua_State *state, RefCounted *obj, bool bindAPI);
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
-	void triggerChangedWarnFunction(void * luaAPI);
+	
+	void triggerChangedWarnFunction(void *luaAPI);
 
 	bool luaFunctionExists(String functionName);
 
