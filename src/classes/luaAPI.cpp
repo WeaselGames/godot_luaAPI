@@ -173,9 +173,10 @@ lua_State *LuaAPI::getState() {
 	return lState;
 }
 void LuaAPI::warnf(void *inst, const char *msg, int tocont) {
-	warn_str += msg;
+	LuaAPI* instance;
+	instance->warn_str += msg;
 	if (tocont > 0) {
-		WARN_PRINT(warn_str);
-		warn_str = String();
+		WARN_PRINT(instance->warn_str);
+		instance->warn_str = String();
 	}
 }
