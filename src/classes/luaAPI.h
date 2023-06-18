@@ -87,7 +87,7 @@ private:
 	LuaError *execute(int handlerIndex);
 	String warn_str;
 
-	static void warnf(void *luaAPI, const char *msg, int tocont)
+	static void warnf(void *luaAPI, const char *msg, int tocont);
 };
 
 VARIANT_ENUM_CAST(LuaAPI::HookMask)
