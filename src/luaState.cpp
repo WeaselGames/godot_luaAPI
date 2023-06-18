@@ -147,12 +147,12 @@ void LuaState::luaWarn(void *inst, const char *msg, int tocont) {
 	}
 }
 
-void LuaState::triggerChangedWarnFunction(void* api) {
+void LuaState::triggerChangedWarnFunction(void *api) {
 	LuaAPI *luaAPI = (LuaAPI *)api;
 	if (luaAPI->warnf.is_null()) {
-		lua_setwarnf(L, LuaAPI::default_warnf,api);
+		lua_setwarnf(L, LuaAPI::default_warnf, api);
 	} else {
-		lua_setwarnf(L, LuaState::luaWarn,api);
+		lua_setwarnf(L, LuaState::luaWarn, api);
 	}
 }
 
