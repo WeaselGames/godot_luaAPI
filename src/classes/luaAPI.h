@@ -79,6 +79,7 @@ public:
 	Callable warnf;
 	String warn_str;
 	static void default_warnf(void *luaAPI, const char *msg, int tocont);
+
 private:
 	LuaState state;
 	lua_State *lState = nullptr;
