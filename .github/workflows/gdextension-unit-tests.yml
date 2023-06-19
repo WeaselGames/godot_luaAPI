@@ -1,7 +1,7 @@
 name: ⚙️ GDExtension Unit Tests
 on:
   workflow_call:
-
+  
 env:
   BASE_BRANCH: main
 
@@ -12,8 +12,8 @@ jobs:
     name: GDExtension Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: Download godot 4.0.3
-        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0.3/Godot_v4.0.3-stable_linux.x86_64.zip
+      - name: Download godot ${{ vars.GODOT_VERSION }}
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ vars.GODOT_VERSION }}/Godot_v${{ vars.GODOT_VERSION }}-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip
@@ -42,8 +42,8 @@ jobs:
     name: LuaJIT GDExtension Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: Download godot 4.0.3
-        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/4.0.3/Godot_v4.0.3-stable_linux.x86_64.zip
+      - name: Download godot ${{ vars.GODOT_VERSION }}
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ vars.GODOT_VERSION }}/Godot_v${{ vars.GODOT_VERSION }}-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip
