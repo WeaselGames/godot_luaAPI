@@ -285,38 +285,38 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			break;
 		}
 		case Variant::Type::VECTOR2: {
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Vector2");
 			break;
 		}
 		case Variant::Type::VECTOR3: {
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Vector3");
 			break;
 		}
 		case Variant::Type::COLOR: {
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Color");
 			break;
 		}
 		case Variant::Type::RECT2: {
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Rect2");
 			break;
 		}
 		case Variant::Type::PLANE: {
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Plane");
 			break;
 		}
 		case Variant::Type::SIGNAL: {
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Signal");
 			break;
 		}
@@ -358,16 +358,9 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 				break;
 			}
 
-			// Temp maybe? If we do not store a reference to refCounted they will die with GDScript
-			if (RefCounted *temp = Object::cast_to<RefCounted>(var.operator Object *()); temp != nullptr) {
-				lua_pushstring(state, "__OBJECT");
-				lua_rawget(state, LUA_REGISTRYINDEX);
-				LuaAPI *OBJ = (LuaAPI *)lua_touserdata(state, -1);
-				lua_pop(state, 1);
-
-				if (OBJ != nullptr) {
-					OBJ->addRef(var);
-				}
+			// If the type being pushed is a RefCounted, increase its refcount.
+			if (RefCounted *ref = Object::cast_to<RefCounted>(var.operator Object *()); ref != nullptr) {
+				ref->reference();
 			}
 
 // If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
@@ -378,13 +371,13 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			if (LuaCallableExtra *func = dynamic_cast<LuaCallableExtra *>(var.operator Object *()); func != nullptr) {
 #endif
 				void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-				memcpy(userdata, (void *)&var, sizeof(Variant));
+				memmove(userdata, (void *)&var, sizeof(Variant));
 				luaL_setmetatable(state, "mt_CallableExtra");
 				break;
 			}
 
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Object");
 			break;
 		}
@@ -402,8 +395,8 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			}
 #endif
 
-			void *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-			memcpy(userdata, (void *)&var, sizeof(Variant));
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memmove(userdata, (void *)&var, sizeof(Variant));
 			luaL_setmetatable(state, "mt_Callable");
 			break;
 		}
@@ -816,7 +809,6 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	Callable::CallError error;
 	obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
-		print_line("error: " + String::num(error.error));
 		LuaError *err = LuaState::handleError(fName, error, p_args, argc);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);

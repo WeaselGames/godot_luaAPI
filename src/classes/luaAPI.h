@@ -13,9 +13,6 @@
 #include <luaState.h>
 #include <lua/lua.hpp>
 
-#include <map>
-#include <string>
-
 #ifdef LAPI_GDEXTENSION
 using namespace godot;
 #endif
@@ -34,6 +31,10 @@ public:
 
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
+
+	inline int confgiure_gc(int what, int data) {
+		return lua_gc(lState, what, data);
+	}
 
 	inline void setPermissive(bool permissive) {
 		this->permissive = permissive;
@@ -59,14 +60,6 @@ public:
 	lua_State *newThreadState();
 	lua_State *getState();
 
-	inline void addRef(Variant var) {
-		refs.append(var);
-	}
-
-	inline void addOwnedObject(void *luaPtr, Variant *obj) {
-		ownedObjects[luaPtr] = obj;
-	}
-
 	enum HookMask {
 		HOOK_MASK_CALL = LUA_MASKCALL,
 		HOOK_MASK_RETURN = LUA_MASKRET,
@@ -74,15 +67,22 @@ public:
 		HOOK_MASK_COUNT = LUA_MASKCOUNT,
 	};
 
+	enum GCOption {
+		GC_STOP = LUA_GCSTOP,
+		GC_RESTART = LUA_GCRESTART,
+		GC_COLLECT = LUA_GCCOLLECT,
+		GC_COUNT = LUA_GCCOUNT,
+		GC_COUNTB = LUA_GCCOUNTB,
+		GC_STEP = LUA_GCSTEP,
+		GC_SETPAUSE = LUA_GCSETPAUSE,
+		GC_SETSTEPMUL = LUA_GCSETSTEPMUL,
+	};
+
 private:
 	LuaState state;
 	lua_State *lState = nullptr;
 
 	bool permissive = false;
-
-	// Temp. Looking for better method. Maybe?
-	Array refs;
-	std::map<void *, Variant *> ownedObjects;
 
 	LuaError *execute(int handlerIndex);
 };
