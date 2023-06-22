@@ -4,7 +4,6 @@ var lua: LuaAPI = LuaAPI.new()
 
 func _lua_print(message: String):
 	print(message)
-	return LuaError.new_error("test", LuaError.ERR_RUNTIME)
 
 func _ready():
 	# All builtin libraries are available to bind with. Use Debug, OS and IO at your own risk.
@@ -22,7 +21,12 @@ func _ready():
 		return "Hello gdScript!"
 	end
 	""")
-
 	if err is LuaError:
 		print("ERROR %d: %s" % [err.type, err.message])
 		return
+	
+	var ret = lua.call_function("get_message", [])
+	if ret is LuaError:
+		print("ERROR %d: %s" % [err.type, err.message])
+		return
+	print(ret)
