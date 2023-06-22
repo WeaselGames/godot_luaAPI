@@ -33,6 +33,25 @@ LuaError *LuaState::exposeObjectConstructor(String name, Object *obj) {
 		return LuaError::newError("during \"LuaState::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
 	}
 	lua_pushlightuserdata(L, obj);
+
+#ifndef LAPI_GDEXTENSION
+
+	lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
+		Object *inner_obj = (Object *)lua_touserdata(inner_state, lua_upvalueindex(1));
+
+		Variant *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
+		Variant ret = inner_obj->call("new");
+
+		*userdata = ret;
+
+		luaL_setmetatable(inner_state, "mt_Object");
+
+		return 1;
+	}),
+			1);
+
+#else
+
 	lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
 		Object *inner_obj = (Object *)lua_touserdata(inner_state, lua_upvalueindex(1));
 
@@ -51,6 +70,8 @@ LuaError *LuaState::exposeObjectConstructor(String name, Object *obj) {
 		return 1;
 	}),
 			1);
+#endif
+
 	lua_setglobal(L, name.ascii().get_data());
 	return nullptr;
 }
@@ -516,6 +537,16 @@ void LuaState::createObjectMetatable() {
 		return 1;
 	});
 
+#ifndef LAPI_GDEXTENSION
+	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+		if (!arg1.has_method("__gc")) {
+			return 0;
+		}
+
+		LuaState::pushVariant(inner_state, arg1.call("__gc", Ref<LuaAPI>(OBJ)));
+		return 1;
+	});
+#else
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
 		// If object is a RefCounted
 		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
@@ -523,8 +554,14 @@ void LuaState::createObjectMetatable() {
 			ref->unreference();
 		}
 
-		return 0;
+		if (!arg1.has_method("__gc")) {
+			return 0;
+		}
+
+		LuaState::pushVariant(inner_state, arg1.call("__gc", Ref<LuaAPI>(OBJ)));
+		return 1;
 	});
+#endif
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__tostring", {
 		// If object overrides
@@ -753,6 +790,17 @@ void LuaState::createCallableMetatable() {
 // Create metatable for any Callable and saves it at LUA_REGISTRYINDEX with name "mt_Callable"
 void LuaState::createCallableExtraMetatable() {
 	luaL_newmetatable(L, "mt_CallableExtra");
+
+#ifdef LAPI_GDEXTENSION
+	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
+		if (ref != nullptr) {
+			ref->unreference();
+		}
+
+		return 0;
+	});
+#endif
 
 	lua_pushstring(L, "__call");
 	lua_pushcfunction(L, LuaCallableExtra::call);
