@@ -520,18 +520,31 @@ void LuaState::createObjectMetatable() {
 		return 1;
 	});
 
+#ifndef LAPI_GDEXTENSION
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-#ifdef LAPI_GDEXTENSION
+		if (!arg1.has_method("__gc")) {
+			return 0;
+		}
+
+		LuaState::pushVariant(inner_state, arg1.call("__gc", Ref<LuaAPI>(OBJ)));
+		return 1;
+	});
+#else
+	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
 		// If object is a RefCounted
 		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
 		if (ref != nullptr) {
 			ref->unreference();
 		}
 
-#endif
+		if (!arg1.has_method("__gc")) {
+			return 0;
+		}
 
-		return 0;
+		LuaState::pushVariant(inner_state, arg1.call("__gc", Ref<LuaAPI>(OBJ)));
+		return 1;
 	});
+#endif
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__tostring", {
 		// If object overrides
@@ -761,17 +774,16 @@ void LuaState::createCallableMetatable() {
 void LuaState::createCallableExtraMetatable() {
 	luaL_newmetatable(L, "mt_CallableExtra");
 
-	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
 #ifdef LAPI_GDEXTENSION
-		// If object is a RefCounted
+	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
 		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
 		if (ref != nullptr) {
 			ref->unreference();
 		}
 
-#endif
 		return 0;
 	});
+#endif
 
 	lua_pushstring(L, "__call");
 	lua_pushcfunction(L, LuaCallableExtra::call);
