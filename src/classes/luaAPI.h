@@ -32,12 +32,12 @@ public:
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
-	inline int confgiure_gc(int what, int data) {
+	inline int configure_gc(int what, int data) {
 		return lua_gc(lState, what, data);
 	}
 
-	inline void setPermissive(bool permissive) {
-		this->permissive = permissive;
+	inline void setPermissive(bool value) {
+		permissive = value;
 	}
 
 	inline bool getPermissive() const {
@@ -88,5 +88,6 @@ private:
 };
 
 VARIANT_ENUM_CAST(LuaAPI::HookMask)
+VARIANT_ENUM_CAST(LuaAPI::GCOption)
 
 #endif

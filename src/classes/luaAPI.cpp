@@ -23,6 +23,7 @@ void LuaAPI::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
 	ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaAPI::setHook);
+	ClassDB::bind_method(D_METHOD("configure_gc", "What", "Data"), &LuaAPI::configure_gc);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
 	ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
@@ -41,6 +42,15 @@ void LuaAPI::_bind_methods() {
 	BIND_ENUM_CONSTANT(HOOK_MASK_RETURN);
 	BIND_ENUM_CONSTANT(HOOK_MASK_LINE);
 	BIND_ENUM_CONSTANT(HOOK_MASK_COUNT);
+
+	BIND_ENUM_CONSTANT(GC_STOP);
+	BIND_ENUM_CONSTANT(GC_RESTART);
+	BIND_ENUM_CONSTANT(GC_COLLECT);
+	BIND_ENUM_CONSTANT(GC_COUNT);
+	BIND_ENUM_CONSTANT(GC_COUNTB);
+	BIND_ENUM_CONSTANT(GC_STEP);
+	BIND_ENUM_CONSTANT(GC_SETPAUSE);
+	BIND_ENUM_CONSTANT(GC_SETSTEPMUL);
 }
 
 // Calls LuaState::bindLibs()

@@ -39,12 +39,16 @@ LuaError *LuaState::exposeObjectConstructor(String name, Object *obj) {
 		Variant *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
 		Variant ret = inner_obj->call("new");
 
+#ifndef LAPI_GDEXTENSION
+		*userdata = ret;
+#else
 		// If the type being created is a RefCounted, increase its refcount.
 		if (RefCounted *ref = Object::cast_to<RefCounted>(ret.operator Object *()); ref != nullptr) {
 			ref->reference();
 		}
 
 		memmove(userdata, (void *)&ret, sizeof(Variant));
+#endif
 
 		luaL_setmetatable(inner_state, "mt_Object");
 
@@ -517,11 +521,14 @@ void LuaState::createObjectMetatable() {
 	});
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+#ifdef LAPI_GDEXTENSION
 		// If object is a RefCounted
 		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
 		if (ref != nullptr) {
 			ref->unreference();
 		}
+
+#endif
 
 		return 0;
 	});
@@ -753,6 +760,18 @@ void LuaState::createCallableMetatable() {
 // Create metatable for any Callable and saves it at LUA_REGISTRYINDEX with name "mt_Callable"
 void LuaState::createCallableExtraMetatable() {
 	luaL_newmetatable(L, "mt_CallableExtra");
+
+	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+#ifdef LAPI_GDEXTENSION
+		// If object is a RefCounted
+		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
+		if (ref != nullptr) {
+			ref->unreference();
+		}
+
+#endif
+		return 0;
+	});
 
 	lua_pushstring(L, "__call");
 	lua_pushcfunction(L, LuaCallableExtra::call);
