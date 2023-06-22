@@ -36,16 +36,17 @@ LuaError *LuaState::exposeObjectConstructor(String name, Object *obj) {
 	lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
 		Object *inner_obj = (Object *)lua_touserdata(inner_state, lua_upvalueindex(1));
 
-		// We can't store the variant directly in the userdata. It will causes crashes.
-		Variant *var = memnew(Variant);
-		*var = inner_obj->call("new");
+		Variant *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
+		Variant ret = inner_obj->call("new");
 
-		void *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
-		memcpy(userdata, (void *)var, sizeof(Variant));
+		// If the type being created is a RefCounted, increase its refcount.
+		if (RefCounted *ref = Object::cast_to<RefCounted>(ret.operator Object *()); ref != nullptr) {
+			ref->reference();
+		}
+
+		memmove(userdata, (void *)&ret, sizeof(Variant));
+
 		luaL_setmetatable(inner_state, "mt_Object");
-
-		if (Ref<LuaAPI> lua = (Ref<LuaAPI>)OBJ; lua.is_valid())
-			lua->addOwnedObject(userdata, var);
 
 		return 1;
 	}),
@@ -513,6 +514,16 @@ void LuaState::createObjectMetatable() {
 
 		LuaState::pushVariant(inner_state, arg1.call("__call", Ref<LuaAPI>(OBJ), LuaTuple::fromArray(args)));
 		return 1;
+	});
+
+	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
+		// If object is a RefCounted
+		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
+		if (ref != nullptr) {
+			ref->unreference();
+		}
+
+		return 0;
 	});
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__tostring", {

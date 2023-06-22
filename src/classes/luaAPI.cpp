@@ -13,11 +13,6 @@ LuaAPI::LuaAPI() {
 }
 
 LuaAPI::~LuaAPI() {
-	for (auto &[key, val] : ownedObjects) {
-		if (val != nullptr) {
-			memdelete(val);
-		}
-	}
 	lua_close(lState);
 }
 

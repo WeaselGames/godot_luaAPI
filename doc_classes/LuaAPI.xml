@@ -88,6 +88,13 @@
 				Sets the hook for the state. The hook will be called on the events specified by the mask. The count specifies how many instructions should be executed before the hook is called. If count is 0, the hook will be called on every instruction. The hook will be called with the following arguments: [code]hook(parent, event, line)[/code]. The parent is the LuaAPI object that owns the current state.
 			</description>
 		</method>
+		<method name="configure_gc">
+			<return type="int" />
+			<param index="0" name="option" type="int" />
+			<param index="1" name="data" type="int" />
+			<description>
+				Controls the garbage collector. The option can be one of the following: [code]GC_STOP[/code], [code]GC_RESTART[/code], [code]GC_COLLECT[/code], [code]GC_COUNT[/code], [code]GC_STEP[/code], [code]GC_SETPAUSE[/code], [code]GC_SETSTEPMUL[/code]. The data is the argument for the option. Returns the result of the option.
+			</description>
 	</methods>
 	<members>
 		<member name="permissive" type="bool" setter="set_permissive" getter="get_permissive" default="false">
@@ -95,7 +102,7 @@
 		</member>
 	</members>
 	<constants>
-		<constant name="HOOK_MASK_CALL" value="1" enum="HookMask">
+		<constant name="GC_STOP" value="1" enum="HookMask">
 			Specifies on which events the hook will be called.
 		</constant>
 		<constant name="HOOK_MASK_RETURN" value="2" enum="HookMask">
@@ -106,6 +113,31 @@
 		</constant>
 		<constant name="HOOK_MASK_COUNT" value="8" enum="HookMask">
 			Specifies on which events the hook will be called.
+		</constant>
+
+		<constant name="GC_STOP" value="0" enum="GCOption">
+			Stops the garbage collector.
+		</constant>
+		<constant name="GC_RESTART" value="1" enum="GCOption">
+			Restarts the garbage collector.
+		</constant>
+		<constant name="GC_COLLECT" value="2" enum="GCOption">
+			Performs a full garbage-collection cycle.
+		</constant>
+		<constant name="GC_COUNT" value="3" enum="GCOption">
+			Returns the current amount of memory (in Kbytes) in use by Lua.
+		</constant>
+		<constant name="GC_COUNTB" value="4" enum="GCOption">
+			Returns the remainder of dividing the current amount of bytes of memory in use by Lua by 1024.
+		</constant>
+		<constant name="GC_STEP" value="5" enum="GCOption">
+			Performs an incremental step of garbage collection.
+		</constant>
+		<constant name="GC_SETPAUSE" value="6" enum="GCOption">
+			Sets [code]data[/code] as the new value for the pause of the collector.
+		</constant>
+		<constant name="GC_SETSTEPMUL" value="7" enum="GCOption">
+			Sets [code]data[/code] as the new value for the step multiplier of the collector.
 		</constant>
 	</constants>
 </class>
