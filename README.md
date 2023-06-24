@@ -39,7 +39,7 @@ Features
 - Choose which libraries you want Lua to have access to.
 - LuaError type which is used to report any errors this addon or Lua run into.
 - LuaCoroutine type which creates a Lua thread. This is not a OS thread but a coroutine.
-- Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/objects/).
+- Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/latest/examples/objects/).
 - Objects can override most of the Lua metamethods. I.E. __index by defining a function with the same name.
 - Callables passed as userdata, which allows you to push a Callable as a Lua function.
 - Basic types are passed as userdata (currently: Vector2, Vector3, Color, Rect2, Plane) with a useful metatable. This means you can do things like:
