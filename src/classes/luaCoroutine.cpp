@@ -11,7 +11,7 @@
 void LuaCoroutine::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("bind", "lua"), &LuaCoroutine::bind);
 	ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaCoroutine::setHook);
-	ClassDB::bind_method(D_METHOD("resume"), &LuaCoroutine::resume);
+	ClassDB::bind_method(D_METHOD("resume", "Args"), &LuaCoroutine::resume);
 	ClassDB::bind_method(D_METHOD("yield_await", "Args"), &LuaCoroutine::yieldAwait);
 	ClassDB::bind_method(D_METHOD("yield_state", "Args"), &LuaCoroutine::yield);
 
@@ -32,7 +32,7 @@ void LuaCoroutine::_bind_methods() {
 void LuaCoroutine::bind(Ref<LuaAPI> lua) {
 	parent = lua;
 	tState = lua->newThreadState();
-	state.setState(tState, this, false);
+	state.setState(tState, lua.ptr(), false);
 
 	// register the yield method
 	lua_register(tState, "yield", luaYield);
@@ -43,7 +43,7 @@ void LuaCoroutine::bindExisting(Ref<LuaAPI> lua, lua_State *tState) {
 	done = false;
 	parent = lua;
 	this->tState = tState;
-	state.setState(tState, this, false);
+	state.setState(tState, lua.ptr(), false);
 
 	// register the yield method
 	lua_register(tState, "yield", luaYield);
@@ -83,10 +83,6 @@ LuaError *LuaCoroutine::pushGlobalVariant(String name, Variant var) {
 // Calls LuaState::callFunction()
 Variant LuaCoroutine::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
-}
-
-Ref<LuaAPI> LuaCoroutine::getParent() {
-	return parent;
 }
 
 // loads a string into the threads state

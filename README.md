@@ -14,8 +14,6 @@ About
 ![Logo](.github/LuaAPI.png)
 Art created by [Alex](https://www.instagram.com/redheadalex1)
 
-***WARNING!!!*** this is a **beta** version of the addon made for Godot v4.0-stable. Which means frequent recompiles may be required and compatibility is not guaranteed between updates.
-
 This is a Godot addon that adds Lua API support via GDScript, C# or GDExtension. Importantly this is **NOT** meant to be a replacement for or alternative to GDScript. This addon provides no functionality to program your game out of the box. This addon allows you to create custom Modding API's in a sandboxed environment. You have control of what people can and can not do within that sandbox.
 
 To use you can either [Compile from source](#compiling) or you can download one of the [release builds](#release-builds).
@@ -39,7 +37,6 @@ Features
 - Push any Variant as a global.
 - Call Lua functions from GDScript.
 - Choose which libraries you want Lua to have access to.
-- Custom LuaCallable type which allows you to get a Lua function as a Callable. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/lua_callable/).
 - LuaError type which is used to report any errors this addon or Lua run into.
 - LuaCoroutine type which creates a Lua thread. This is not a OS thread but a coroutine.
 - Object passed as userdata. See [wiki](https://luaapi.weaselgames.info/v2.0-beta/examples/objects/).
@@ -72,9 +69,7 @@ Release Builds
 
 TODO
 -----
-- Finish v2 documentation
 - Workaround for lack of CallableCustoms in GDExtension
-- More up to date todo list on the v2 [project](https://github.com/WeaselGames/godot_luaAPI/projects/1)
 
 Compiling
 ------------
@@ -97,7 +92,7 @@ var lua: LuaAPI = LuaAPI.new()
 func _lua_print(message: String) -> void:
 	print(message)
 
-func _ready():
+func _ready() -> void:
 	lua.push_variant("print", _lua_print)
 	lua.push_variant("message", "Hello lua!")
 
@@ -122,7 +117,7 @@ func _ready():
 		print("ERROR %d: %s" % [err.type, err.message])
 		return
 
-	var message = val.call()
+	var message = val.call([])
 	print(message)
 ```
 Contributing And Feature Requests

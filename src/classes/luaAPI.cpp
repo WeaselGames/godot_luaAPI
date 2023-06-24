@@ -2,6 +2,8 @@
 
 #include "luaCoroutine.h"
 
+#include <luaState.h>
+
 #ifdef LAPI_GDEXTENSION
 #include <godot_cpp/classes/file_access.hpp>
 #endif
@@ -28,6 +30,7 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
 	ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
+	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
 
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
@@ -75,6 +78,31 @@ Variant LuaAPI::pullVariant(String name) {
 // Calls LuaState::callFunction()
 Variant LuaAPI::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
+}
+
+// Invokes the passed lua reference
+Variant LuaAPI::callFunctionRef(Array args, int funcRef) {
+	lua_pushcfunction(lState, LuaState::luaErrorHandler);
+
+	// Getting the lua function via the reference stored in funcRef
+	lua_rawgeti(lState, LUA_REGISTRYINDEX, funcRef);
+
+	// Push all the argument on to the stack
+	for (int i = 0; i < args.size(); i++) {
+		LuaState::pushVariant(lState, args[i]);
+	}
+
+	Variant toReturn;
+	// execute the function using a protected call.
+	int ret = lua_pcall(lState, args.size(), 1, -2 - args.size());
+	if (ret != LUA_OK) {
+		toReturn = LuaState::handleError(lState, ret);
+	} else {
+		toReturn = LuaState::getVariant(lState, -1, this);
+	}
+
+	lua_pop(lState, 1);
+	return toReturn;
 }
 
 // Calls LuaState::pushGlobalVariant()

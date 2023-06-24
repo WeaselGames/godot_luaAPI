@@ -7,13 +7,9 @@
 
 #include <util.h>
 
-#ifndef LAPI_GDXTENSION
-#include <classes/luaCallable.h>
-#endif
-
-void LuaState::setState(lua_State *L, RefCounted *obj, bool bindAPI) {
+void LuaState::setState(lua_State *L, LuaAPI *api, bool bindAPI) {
 	this->L = L;
-	this->obj = obj;
+	this->api = api;
 	if (!bindAPI) {
 		return;
 	}
@@ -22,8 +18,8 @@ void LuaState::setState(lua_State *L, RefCounted *obj, bool bindAPI) {
 	lua_register(L, "print", luaPrint);
 
 	// saving the object into registry
-	lua_pushstring(L, "__OBJECT");
-	lua_pushlightuserdata(L, obj);
+	lua_pushstring(L, "__LAPI__");
+	lua_pushlightuserdata(L, api);
 	lua_rawset(L, LUA_REGISTRYINDEX);
 
 	// Creating basic types metatables and saving them in registry
@@ -142,7 +138,7 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 	lua_pushstring(L, "__HOOK");
 	pushVariant(hook);
 	lua_settable(L, LUA_REGISTRYINDEX);
-	lua_sethook(L, LuaCoroutine::luaHook, mask, count);
+	lua_sethook(L, luaHook, mask, count);
 }
 
 // Returns true if a lua function exists with the given name
@@ -156,7 +152,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 
 // get a value at the given index and return as a variant
 Variant LuaState::getVar(int index) const {
-	return getVariant(L, index, obj);
+	return getVariant(L, index, api);
 }
 
 // Pull a global variant from Lua to GDScript
@@ -212,6 +208,15 @@ LuaError *LuaState::handleError(int lua_error) const {
 // --------------
 // STATIC METHODS
 // --------------
+
+LuaAPI *LuaState::getAPI(lua_State *state) {
+	lua_pushstring(state, "__LAPI__");
+	lua_rawget(state, LUA_REGISTRYINDEX);
+	LuaAPI *api = (LuaAPI *)lua_touserdata(state, -1);
+	lua_pop(state, 1);
+
+	return api;
+}
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
 LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
@@ -418,13 +423,15 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 		case Variant::Type::CALLABLE: {
 			Callable callable = var.operator Callable();
 			if (callable.is_custom()) {
-#ifndef LAPI_GDEXTENSION
-				// If the callable type is a luaCallable, just push the actual lua function onto the stack.
-				if (LuaCallable *luaCallable = dynamic_cast<LuaCallable *>(callable.get_custom()); luaCallable != nullptr) {
-					lua_rawgeti(state, LUA_REGISTRYINDEX, luaCallable->getFuncRef());
-					break;
+				// If the type being pushed is a lua function ref, push the ref instead.
+				if (LuaAPI *callObj = Object::cast_to<LuaAPI>(callable.get_object()); callObj != nullptr && (String)callable.get_method() == "call_function_ref") {
+					Array argBinds = callable.get_bound_arguments();
+					if (argBinds.size() == 1) {
+						lua_rawgeti(state, LUA_REGISTRYINDEX, (int)argBinds[0]);
+						break;
+					}
 				}
-#endif
+
 				Ref<LuaCallableExtra> callableCustom;
 				callableCustom.instantiate();
 				callableCustom->setInfo(callable, 0, false, false);
@@ -449,7 +456,7 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 }
 
 // gets a variant at a given index
-Variant LuaState::getVariant(lua_State *state, int index, const RefCounted *obj) {
+Variant LuaState::getVariant(lua_State *state, int index, LuaAPI *api) {
 	Variant result;
 	int type = lua_type(state, index);
 	switch (type) {
@@ -483,7 +490,7 @@ Variant LuaState::getVariant(lua_State *state, int index, const RefCounted *obj)
 #else
 					lua_rawgeti(state, index, i);
 #endif
-					array.push_back(getVariant(state, -1, obj));
+					array.push_back(getVariant(state, -1, api));
 					lua_pop(state, 1);
 				}
 				result = array;
@@ -493,8 +500,8 @@ Variant LuaState::getVariant(lua_State *state, int index, const RefCounted *obj)
 			lua_pushnil(state); /* first key */
 			Dictionary dict;
 			while (lua_next(state, (index < 0) ? (index - 1) : (index)) != 0) {
-				Variant key = getVariant(state, -2, obj);
-				Variant value = getVariant(state, -1, obj);
+				Variant key = getVariant(state, -2, api);
+				Variant value = getVariant(state, -1, api);
 				dict[key] = value;
 				lua_pop(state, 1);
 			}
@@ -502,21 +509,17 @@ Variant LuaState::getVariant(lua_State *state, int index, const RefCounted *obj)
 			break;
 		}
 		case LUA_TFUNCTION: {
-#ifndef LAPI_GDEXTENSION
-			// Put function on the top of the stack and get a ref to it. This will create a copy of the function.
 			lua_pushvalue(state, index);
-			LuaCallable *callable = memnew(LuaCallable(Ref<RefCounted>(obj), luaL_ref(state, LUA_REGISTRYINDEX), state));
-			result = Callable(callable);
-#else
-			result = LuaError::newError("LuaCallable's are not supported with GDExtension.", LuaError::ERR_RUNTIME);
-#endif
+			Array binds;
+			binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
+			result = Callable(api, "call_function_ref").bindv(binds);
 			break;
 		}
 		case LUA_TTHREAD: {
 			lua_State *tState = lua_tothread(state, index);
 			Ref<LuaCoroutine> thread;
 			thread.instantiate();
-			thread->bindExisting((Ref<LuaAPI>)obj, tState);
+			thread->bindExisting(api, tState);
 			result = thread;
 			break;
 		}
@@ -713,13 +716,10 @@ int LuaState::luaPrint(lua_State *state) {
 // Used as the __call metamethod for mt_Callable.
 // All exposed gdscript functions are called vis this method.
 int LuaState::luaCallableCall(lua_State *state) {
-	lua_pushstring(state, "__OBJECT");
-	lua_rawget(state, LUA_REGISTRYINDEX);
-	RefCounted *OBJ = (RefCounted *)lua_touserdata(state, -1);
-	lua_pop(state, 1);
+	LuaAPI *api = getAPI(state);
 
 	int argc = lua_gettop(state) - 1; // We subtract 1 because the callable its self will be counted
-	Callable callable = (Callable)LuaState::getVariant(state, 1, OBJ);
+	Callable callable = (Callable)LuaState::getVariant(state, 1, api);
 
 	Array args;
 	args.resize(argc);
@@ -728,7 +728,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 
 	int index = 2; // we start at 2, 1 is the callable
 	for (int i = 0; i < argc; i++) {
-		args[i] = LuaState::getVariant(state, index++, OBJ);
+		args[i] = LuaState::getVariant(state, index++, api);
 		if (args[i].get_type() != Variant::Type::OBJECT) {
 			if (LuaError *err = Object::cast_to<LuaError>(args[i].operator Object *()); err != nullptr) {
 				lua_pushstring(state, err->getMessage().ascii().get_data());
@@ -777,18 +777,15 @@ int LuaState::luaCallableCall(lua_State *state) {
 #else
 
 int LuaState::luaCallableCall(lua_State *state) {
-	lua_pushstring(state, "__OBJECT");
-	lua_rawget(state, LUA_REGISTRYINDEX);
-	RefCounted *OBJ = (RefCounted *)lua_touserdata(state, -1);
-	lua_pop(state, 1);
+	LuaAPI *api = getAPI(state);
 
 	int argc = lua_gettop(state) - 1; // We subtract 1 because the callable its self will be counted
-	Callable callable = (Callable)LuaState::getVariant(state, 1, OBJ);
+	Callable callable = (Callable)LuaState::getVariant(state, 1, api);
 
 	Array args;
 	int index = 2; // we start at 2, 1 is the callable
 	for (int i = 0; i < argc; i++) {
-		Variant var = LuaState::getVariant(state, index++, OBJ);
+		Variant var = LuaState::getVariant(state, index++, api);
 		if (var.get_type() == Variant::Type::OBJECT) {
 			if (LuaError *err = dynamic_cast<LuaError *>(var.operator Object *()); err != nullptr) {
 				lua_pushstring(state, err->getMessage().ascii().get_data());
@@ -825,13 +822,10 @@ int LuaState::luaCallableCall(lua_State *state) {
 // This function is invoked whenever a function is called on one of the userdata types
 // excluding mt_Callable or mt_Object if __index is overwritten
 int LuaState::luaUserdataFuncCall(lua_State *state) {
-	lua_pushstring(state, "__OBJECT");
-	lua_rawget(state, LUA_REGISTRYINDEX);
-	RefCounted *OBJ = (RefCounted *)lua_touserdata(state, -1);
-	lua_pop(state, 1);
+	LuaAPI *api = getAPI(state);
 
 	Variant *obj = (Variant *)lua_touserdata(state, lua_upvalueindex(1));
-	String fName = LuaState::getVariant(state, lua_upvalueindex(2), OBJ);
+	String fName = LuaState::getVariant(state, lua_upvalueindex(2), api);
 
 	int argc = lua_gettop(state);
 	Array args;
@@ -839,7 +833,7 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	Vector<const Variant *> mem_args;
 	mem_args.resize(argc);
 	for (int i = 0; i < argc; i++) {
-		args[i] = LuaState::getVariant(state, i + 1, OBJ);
+		args[i] = LuaState::getVariant(state, i + 1, api);
 		mem_args.write[i] = &args[i];
 	}
 
@@ -882,15 +876,12 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	return 1;
 }
 
-void LuaCoroutine::luaHook(lua_State *state, lua_Debug *ar) {
-	lua_pushstring(state, "__OBJECT");
-	lua_rawget(state, LUA_REGISTRYINDEX);
-	RefCounted *OBJ = (RefCounted *)lua_touserdata(state, -1);
-	lua_pop(state, 1);
+void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
+	LuaAPI *api = getAPI(state);
 
 	lua_pushstring(state, "__HOOK");
 	lua_rawget(state, LUA_REGISTRYINDEX);
-	Callable hook = LuaState::getVariant(state, -1, OBJ);
+	Callable hook = LuaState::getVariant(state, -1, api);
 	lua_pop(state, 1);
 
 	if (hook.is_null()) {
@@ -899,7 +890,7 @@ void LuaCoroutine::luaHook(lua_State *state, lua_Debug *ar) {
 
 #ifndef LAPI_GDEXTENSION
 	Array args;
-	args.append(OBJ);
+	args.append(Ref<LuaAPI>(api));
 	args.append(ar->event);
 	args.append(ar->currentline);
 
@@ -930,7 +921,7 @@ void LuaCoroutine::luaHook(lua_State *state, lua_Debug *ar) {
 	}
 #else
 	Array args;
-	args.append(OBJ);
+	args.append(Ref<LuaAPI>(api));
 	args.append(ar->event);
 	args.append(ar->currentline);
 

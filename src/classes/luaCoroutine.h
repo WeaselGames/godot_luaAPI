@@ -39,8 +39,6 @@ public:
 	LuaError *pushGlobalVariant(String name, Variant var);
 	LuaError *yield(Array args);
 
-	Ref<LuaAPI> getParent();
-
 	Variant resume(Array args);
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
@@ -48,7 +46,6 @@ public:
 	bool isDone();
 
 	static int luaYield(lua_State *state);
-	static void luaHook(lua_State *state, lua_Debug *ar);
 
 	inline lua_State *getLuaState() {
 		return tState;

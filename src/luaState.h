@@ -5,7 +5,6 @@
 #include "core/object/ref_counted.h"
 #include "core/variant/callable.h"
 #else
-#include <classes/luaCallable.h>
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/templates/vmap.hpp>
@@ -14,9 +13,11 @@
 #include <classes/luaError.h>
 #include <lua/lua.hpp>
 
+class LuaAPI;
+
 class LuaState {
 public:
-	void setState(lua_State *state, RefCounted *obj, bool bindAPI);
+	void setState(lua_State *state, LuaAPI *lua, bool bindAPI);
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
@@ -33,6 +34,8 @@ public:
 	LuaError *exposeObjectConstructor(String name, Object *obj);
 	LuaError *handleError(int lua_error) const;
 
+	static LuaAPI *getAPI(lua_State *state);
+
 	static LuaError *pushVariant(lua_State *state, Variant var);
 	static LuaError *handleError(lua_State *state, int lua_error);
 #ifndef LAPI_GDEXTENSION
@@ -40,7 +43,7 @@ public:
 #else
 	static LuaError *handleError(const StringName &func, GDExtensionCallError error, const Variant **p_arguments, int argc);
 #endif
-	static Variant getVariant(lua_State *state, int index, const RefCounted *obj);
+	static Variant getVariant(lua_State *state, int index, LuaAPI *api);
 
 	// Lua functions
 	static int luaErrorHandler(lua_State *state);
@@ -51,8 +54,9 @@ public:
 	static void luaHook(lua_State *state, lua_Debug *ar);
 
 private:
+	LuaAPI *api = nullptr;
+
 	lua_State *L = nullptr;
-	RefCounted *obj = nullptr;
 
 	void exposeConstructors();
 	void createVector2Metatable();
