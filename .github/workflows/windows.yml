@@ -145,12 +145,12 @@ jobs:
 
           mv scripts/godot/bin/godot.windows.template_release.x86_64.luaAPI.exe scripts/godot/templates/windows_release_x86_64.exe || true
           mv scripts/godot/bin/godot.windows.template_debug.x86_64.luaAPI.exe scripts/godot/templates/windows_debug_x86_64.exe || true
-          mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.exe scripts/godot/templates/windows_release_x32_64.exe || true
+          mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.exe scripts/godot/templates/windows_release_x86_32.exe || true
           mv scripts/godot/bin/godot.windows.template_debug.x86_32.luaAPI.exe scripts/godot/templates/windows_debug_x86_32.exe || true
           
           mv scripts/godot/bin/godot.windows.template_release.x86_64.luaAPI.console.exe scripts/godot/templates/windows_release_x86_64_console.exe || true
           mv scripts/godot/bin/godot.windows.template_debug.x86_64.luaAPI.console.exe scripts/godot/templates/windows_debug_x86_64_console.exe || true
-          mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.console.exe scripts/godot/templates/windows_release_x32_64_console.exe || true
+          mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.console.exe scripts/godot/templates/windows_release_x86_32_console.exe || true
           mv scripts/godot/bin/godot.windows.template_debug.x86_32.luaAPI.console.exe scripts/godot/templates/windows_debug_x86_32_console.exe || true
 
           

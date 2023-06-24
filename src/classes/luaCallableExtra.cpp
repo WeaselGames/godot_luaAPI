@@ -1,7 +1,9 @@
 #include "luaCallableExtra.h"
 
-#include "luaState.h"
+#include "luaAPI.h"
 #include "luaTuple.h"
+
+#include <luaState.h>
 
 #ifndef LAPI_GDEXTENSION
 #include "core/variant/callable.h"
@@ -63,14 +65,11 @@ int LuaCallableExtra::getArgc() {
 
 // Used for the __call metamethod
 int LuaCallableExtra::call(lua_State *state) {
-	lua_pushstring(state, "__OBJECT");
-	lua_rawget(state, LUA_REGISTRYINDEX);
-	RefCounted *OBJ = (RefCounted *)lua_touserdata(state, -1);
-	lua_pop(state, 1);
+	LuaAPI *api = LuaState::getAPI(state);
 
 	int l_argc = lua_gettop(state) - 1; // We subtract 1 because the LuaCallableExtra is counted
 	int noneMulty = l_argc;
-	LuaCallableExtra *func = (LuaCallableExtra *)LuaState::getVariant(state, 1, OBJ).operator Object *();
+	LuaCallableExtra *func = (LuaCallableExtra *)LuaState::getVariant(state, 1, api).operator Object *();
 	if (func == nullptr) {
 		LuaError *err = LuaError::newError("Error during LuaCallableExtra::call func==null", LuaError::ERR_RUNTIME);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
@@ -84,18 +83,18 @@ int LuaCallableExtra::call(lua_State *state) {
 	Array args;
 
 	if (func->wantsRef) {
-		args.append(OBJ);
+		args.append(api);
 	}
 
 	int index = 2; // we start at 2 because the LuaCallableExtra is arg 1
 	for (int i = 0; i < noneMulty; i++) {
-		args.append(LuaState::getVariant(state, index++, OBJ));
+		args.append(LuaState::getVariant(state, index++, api));
 	}
 
 	if (func->isTuple) {
 		Array tupleArgs;
 		for (int i = noneMulty; i < l_argc; i++) {
-			tupleArgs.push_back(LuaState::getVariant(state, index++, OBJ));
+			tupleArgs.push_back(LuaState::getVariant(state, index++, api));
 		}
 		args.append(LuaTuple::fromArray(tupleArgs));
 	}

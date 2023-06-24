@@ -20,7 +20,7 @@
 			<return type="LuaError" />
 			<param index="0" name="args" type="Array" />
 			<description>
-				Must be called from a lua hook. Will yield the lua state and pass arguments to `reumse()`. Can be destructive.
+				Must be called from a lua hook. Will yield the lua state and pass arguments to `resume()`. Can be destructive.
 			</description>
 		</method>
 		<method name="bind">

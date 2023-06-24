@@ -48,6 +48,7 @@ public:
 
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
+	Variant callFunctionRef(Array args, int funcRef);
 
 	LuaError *doFile(String fileName);
 	LuaError *doString(String code);
@@ -82,7 +83,7 @@ private:
 	LuaState state;
 	lua_State *lState = nullptr;
 
-	bool permissive = false;
+	bool permissive = true;
 
 	LuaError *execute(int handlerIndex);
 };
