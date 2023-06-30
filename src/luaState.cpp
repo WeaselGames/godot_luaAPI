@@ -220,11 +220,6 @@ LuaAPI *LuaState::getAPI(lua_State *state) {
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
 LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
-	if (var.is_null()) {
-		lua_pushnil(state);
-		return nullptr;
-	}
-
 	switch (var.get_type()) {
 		case Variant::Type::NIL:
 			lua_pushnil(state);
@@ -355,6 +350,10 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			break;
 		}
 		case Variant::Type::OBJECT: {
+			if (var.operator Object *() == nullptr) {
+				lua_pushnil(state);
+				break;
+			}
 // If the type being pushed is a lua error, Raise a error
 #ifndef LAPI_GDEXTENSION
 			if (LuaError *err = Object::cast_to<LuaError>(var.operator Object *()); err != nullptr) {
