@@ -350,6 +350,11 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			break;
 		}
 		case Variant::Type::OBJECT: {
+			if (var.is_null())
+			{
+				lua_pushnil(state);
+				break;
+			}
 // If the type being pushed is a lua error, Raise a error
 #ifndef LAPI_GDEXTENSION
 			if (LuaError *err = Object::cast_to<LuaError>(var.operator Object *()); err != nullptr) {
