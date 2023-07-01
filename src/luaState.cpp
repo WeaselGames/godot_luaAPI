@@ -271,8 +271,9 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			Dictionary dict = var.operator Dictionary();
 			lua_createtable(state, 0, dict.size());
 
+			Array keys = dict.keys();
 			for (int i = 0; i < dict.size(); i++) {
-				Variant key = dict.keys()[i];
+				Variant key = keys[i];
 				Variant value = dict[key];
 
 				LuaError *err = pushVariant(state, key);
