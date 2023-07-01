@@ -354,7 +354,8 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 				lua_pushnil(state);
 				break;
 			}
-// If the type being pushed is a lua error, Raise a error
+
+			// If the type being pushed is a lua error, Raise a error
 #ifndef LAPI_GDEXTENSION
 			if (LuaError *err = Object::cast_to<LuaError>(var.operator Object *()); err != nullptr) {
 #else
@@ -398,7 +399,7 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			}
 #endif
 
-// If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
+			// If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
 #ifndef LAPI_GDEXTENSION
 			if (LuaCallableExtra *func = Object::cast_to<LuaCallableExtra>(var.operator Object *()); func != nullptr) {
 #else
@@ -892,12 +893,12 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 		return;
 	}
 
-#ifndef LAPI_GDEXTENSION
 	Array args;
 	args.append(Ref<LuaAPI>(api));
 	args.append(ar->event);
 	args.append(ar->currentline);
 
+#ifndef LAPI_GDEXTENSION
 	const int argc = 3;
 	const Variant *p_args[argc];
 	for (int i = 0; i < argc; i++) {
@@ -924,11 +925,6 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 		lua_error(state);
 	}
 #else
-	Array args;
-	args.append(Ref<LuaAPI>(api));
-	args.append(ar->event);
-	args.append(ar->currentline);
-
 	Variant returned = hook.callv(args);
 
 	LuaError *err = LuaState::pushVariant(state, returned);
