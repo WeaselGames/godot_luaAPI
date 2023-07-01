@@ -24,7 +24,7 @@ on:
       - "project/demo/*"
 
 env:
-  GODOT_VERSION: ${{ vars.GODOT_VERSION }}
+  GODOT_VERSION: 4.0.3
 
 jobs:
   static-checks:
@@ -37,6 +37,7 @@ jobs:
     uses: ./.github/workflows/linux.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
 
   macos-build:
     name: 🍎 macOS
@@ -44,6 +45,7 @@ jobs:
     uses: ./.github/workflows/macos-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
   
   macos-package:
     name: 🍎 macOS Package
@@ -58,6 +60,7 @@ jobs:
     uses: ./.github/workflows/android-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
   
   android-package:
     name: 🤖 Android Package
@@ -71,6 +74,7 @@ jobs:
     uses: ./.github/workflows/ios-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
   
   ios-package:
     name: 🍎 IOS Package
@@ -84,6 +88,7 @@ jobs:
     uses: ./.github/workflows/web.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
 
   windows-build:
     name: 🎨 Windows
@@ -91,6 +96,7 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
   
   gdextension-build:
     name: ⚙️ GDExtension
@@ -98,6 +104,7 @@ jobs:
     uses: ./.github/workflows/gdextension.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: ${{ env.GODOT_VERSION }}
   
   module-unit-tests:
     name: ⚙️ Module Unit Tests
@@ -108,6 +115,8 @@ jobs:
     name: ⚙️ GDExtension Unit Tests
     needs: gdextension-build
     uses: ./.github/workflows/gdextension-unit-tests.yml
+    with:
+      godot_version: ${{ env.GODOT_VERSION }}
 
   template-version-file:
     name: 📝 Create template version file
