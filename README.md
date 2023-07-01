@@ -4,7 +4,6 @@
   * [About](#about)
   * [Features](#features)
   * [Release Builds](#release-builds)
-  * [TODO](#todo)
   * [Compiling](#compiling)
   * [Getting Started](#getting-started)
   * [Contributing And Feature Requests](#contributing-and-feature-requests)
@@ -66,10 +65,6 @@ Release Builds
 - [🍎 MacOS Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/macos-editor-luajit.zip)
 - [🗜️ Export Templates](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/export-templates.tpz)
 - For previous versions see [releases](https://github.com/WeaselGames/godot_luaAPI/releases)
-
-TODO
------
-- Workaround for lack of CallableCustoms in GDExtension
 
 Compiling
 ------------
