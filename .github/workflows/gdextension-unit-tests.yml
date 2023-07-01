@@ -1,6 +1,11 @@
 name: ⚙️ GDExtension Unit Tests
 on:
   workflow_call:
+    inputs:
+      godot_version:
+        description: "Version of godot to be used"
+        required: true
+        type: string
   
 env:
   BASE_BRANCH: main
@@ -12,8 +17,8 @@ jobs:
     name: GDExtension Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: Download godot ${{ vars.GODOT_VERSION }}
-        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ vars.GODOT_VERSION }}/Godot_v${{ vars.GODOT_VERSION }}-stable_linux.x86_64.zip
+      - name: Download godot ${{ inputs.godot_version }}
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ inputs.godot_version }}/Godot_v${{ inputs.godot_version }}-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip
@@ -42,8 +47,8 @@ jobs:
     name: LuaJIT GDExtension Unit Tests
     steps:
       - uses: actions/checkout@v3
-      - name: Download godot ${{ vars.GODOT_VERSION }}
-        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ vars.GODOT_VERSION }}/Godot_v${{ vars.GODOT_VERSION }}-stable_linux.x86_64.zip
+      - name: Download godot ${{ inputs.godot_version }}
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ inputs.godot_version }}/Godot_v${{ inputs.godot_version }}-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip

@@ -7,9 +7,15 @@ on:
         required: true
         type: boolean
         default: false
+      
+      godot_version:
+        description: "Version of godot to be used"
+        required: true
+        type: string
+
 env:
   BASE_BRANCH: main
-  GODOT_VERSION: ${{ vars.GODOT_VERSION }}-stable
+  GODOT_VERSION: ${{ inputs.godot_version }}-stable
 
 jobs:
   gdextension:
