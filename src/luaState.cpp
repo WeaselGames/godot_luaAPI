@@ -370,10 +370,10 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 
 // If the type being pushed is a tuple, push its content instead.
 #ifndef LAPI_GDEXTENSION
-			if (LuaTuple *tuple = Object::cast_to<LuaTuple>(var.operator Object *()); tuple != nullptr) {
+			if (Ref<LuaTuple> tuple = Object::cast_to<LuaTuple>(var.operator Object *()); tuple.is_valid()) {
 #else
 			// blame this on https://github.com/godotengine/godot-cpp/issues/995
-			if (LuaTuple *tuple = dynamic_cast<LuaTuple *>(var.operator Object *()); tuple != nullptr) {
+			if (Ref<LuaTuple> tuple = dynamic_cast<LuaTuple *>(var.operator Object *()); tuple.is_valid()) {
 #endif
 				for (int i = 0; i < tuple->size(); i++) {
 					Variant value = tuple->get(i);
@@ -384,53 +384,54 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 
 // If the type being pushed is a thread, push a LUA_TTHREAD state.
 #ifndef LAPI_GDEXTENSION
-			if (LuaCoroutine *thread = Object::cast_to<LuaCoroutine>(var.operator Object *()); thread != nullptr) {
+			if (Ref<LuaCoroutine> thread = Object::cast_to<LuaCoroutine>(var.operator Object *()); thread.is_valid()) {
 #else
 			// blame this on https://github.com/godotengine/godot-cpp/issues/995
-			if (LuaCoroutine *thread = dynamic_cast<LuaCoroutine *>(var.operator Object *()); thread != nullptr) {
+			if (Ref<LuaCoroutine> thread = dynamic_cast<LuaCoroutine *>(var.operator Object *()); thread.is_valid()) {
 #endif
 				return LuaError::newError("pushing threads is currently not supported.", LuaError::ERR_TYPE);
 				break;
 			}
 
-#ifdef LAPI_GDEXTENSION
 			// If the type being pushed is a RefCounted, increase its refcount.
-			if (RefCounted *ref = Object::cast_to<RefCounted>(var.operator Object *()); ref != nullptr) {
+			if (Ref<RefCounted> ref = Object::cast_to<RefCounted>(var.operator Object *()); ref.is_valid()) {
 				ref->reference();
 			}
-#endif
 
 			// If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
 #ifndef LAPI_GDEXTENSION
-			if (LuaCallableExtra *func = Object::cast_to<LuaCallableExtra>(var.operator Object *()); func != nullptr) {
+			if (Ref<LuaCallableExtra> func = Object::cast_to<LuaCallableExtra>(var.operator Object *()); func.is_valid()) {
 #else
 			// blame this on https://github.com/godotengine/godot-cpp/issues/995
-			if (LuaCallableExtra *func = dynamic_cast<LuaCallableExtra *>(var.operator Object *()); func != nullptr) {
+			if (Ref<LuaCallableExtra> func = dynamic_cast<LuaCallableExtra *>(var.operator Object *()); func.is_valid()) {
 #endif
 				Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-#ifndef LAPI_GDEXTENSION
-				*userdata = var;
-#else
 				memmove(userdata, (void *)&var, sizeof(Variant));
-#endif
 				luaL_setmetatable(state, "mt_CallableExtra");
 				break;
 			}
 
 			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-#ifndef LAPI_GDEXTENSION
-			*userdata = var;
-#else
 			memmove(userdata, (void *)&var, sizeof(Variant));
-#endif
 			luaL_setmetatable(state, "mt_Object");
 			break;
 		}
 		case Variant::Type::CALLABLE: {
 			Callable callable = var.operator Callable();
+
+			if (!callable.is_valid() || callable.is_null()) {
+				lua_pushnil(state);
+				break;
+			}
+
 			if (callable.is_custom()) {
-				// If the type being pushed is a lua function ref, push the ref instead.
-				if (LuaAPI *callObj = Object::cast_to<LuaAPI>(callable.get_object()); callObj != nullptr && (String)callable.get_method() == "call_function_ref") {
+// If the type being pushed is a lua function ref, push the ref instead.
+#ifndef LAPI_GDEXTENSION
+				LuaAPI *callObj = Object::cast_to<LuaAPI>(callable.get_object());
+#else
+				LuaAPI *callObj = dynamic_cast<LuaAPI *>(callable.get_object());
+#endif
+				if (callObj != nullptr && (String)callable.get_method() == "call_function_ref") {
 					Array argBinds = callable.get_bound_arguments();
 					if (argBinds.size() == 1) {
 						lua_rawgeti(state, LUA_REGISTRYINDEX, (int)argBinds[0]);
@@ -446,11 +447,7 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			}
 
 			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
-#ifndef LAPI_GDEXTENSION
-			*userdata = var;
-#else
 			memmove(userdata, (void *)&var, sizeof(Variant));
-#endif
 			luaL_setmetatable(state, "mt_Callable");
 			break;
 		}
