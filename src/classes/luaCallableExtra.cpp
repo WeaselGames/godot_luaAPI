@@ -76,6 +76,7 @@ int LuaCallableExtra::call(lua_State *state) {
 		lua_error(state);
 		return 0;
 	}
+
 	if (func->isTuple) {
 		noneMulty = func->argc - 1; // We subtract one because the tuple is countedA
 	}

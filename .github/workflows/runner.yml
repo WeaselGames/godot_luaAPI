@@ -24,7 +24,7 @@ on:
       - "project/demo/*"
 
 env:
-  GODOT_VERSION: 4.0.3
+  GODOT_VERSION: 4.1
 
 jobs:
   static-checks:
@@ -37,7 +37,7 @@ jobs:
     uses: ./.github/workflows/linux.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
 
   macos-build:
     name: 🍎 macOS
@@ -45,7 +45,7 @@ jobs:
     uses: ./.github/workflows/macos-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
   
   macos-package:
     name: 🍎 macOS Package
@@ -60,7 +60,7 @@ jobs:
     uses: ./.github/workflows/android-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
   
   android-package:
     name: 🤖 Android Package
@@ -74,7 +74,7 @@ jobs:
     uses: ./.github/workflows/ios-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
   
   ios-package:
     name: 🍎 IOS Package
@@ -88,7 +88,7 @@ jobs:
     uses: ./.github/workflows/web.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
 
   windows-build:
     name: 🎨 Windows
@@ -96,7 +96,7 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
   
   gdextension-build:
     name: ⚙️ GDExtension
@@ -104,7 +104,7 @@ jobs:
     uses: ./.github/workflows/gdextension.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.0.3
+      godot_version: 4.1
   
   module-unit-tests:
     name: ⚙️ Module Unit Tests
@@ -116,7 +116,7 @@ jobs:
     needs: gdextension-build
     uses: ./.github/workflows/gdextension-unit-tests.yml
     with:
-      godot_version: 4.0.3
+      godot_version: 4.1
 
   template-version-file:
     name: 📝 Create template version file
@@ -126,7 +126,7 @@ jobs:
       - name: Create version file
         run: |
           mkdir -p ${{ github.workspace }}/bin/templates
-          echo ${{ env.GODOT_VERSION }}.stable > ${{ github.workspace }}/bin/templates/version.txt
+          echo ${{ env.GODOT_VERSION }}.rc2 > ${{ github.workspace }}/bin/templates/version.txt
       - name: Upload version file
         uses: actions/upload-artifact@v2
         with:
