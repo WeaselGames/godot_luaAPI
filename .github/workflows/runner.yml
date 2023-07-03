@@ -6,9 +6,9 @@ on:
     branches:
       - "*"
     paths-ignore:
-      - "**/README.md"
+      - "README.md"
+      - "LICENSE"
       - "**/*.png"
-      - "**/LICENSE"
       - ".github/ISSUE_TEMPLATE/*"
       - ".github/CODEOWNERS"
       - "project/demo/*"
