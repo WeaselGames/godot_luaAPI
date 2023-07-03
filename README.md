@@ -68,8 +68,8 @@ Release Builds
 
 Compiling
 ------------
-This build is for godot 4.0-stable.
-- Start by cloning the Godot 4.0-stable [source](https://github.com/godotengine/godot) with this command `git clone -b 4.0 https://github.com/godotengine/godot`
+This build is for godot 4.1.
+- Start by cloning the Godot 4.1 [source](https://github.com/godotengine/godot) with this command `git clone https://github.com/godotengine/godot`
 - Next change directories into the modules folder and clone this repo into a folder named luaAPI with this command `git clone --recurse-submodules https://github.com/WeaselGames/godot_luaAPI luaAPI`. Make sure to use --recurse-submodules to pull the submodules as well.
 
 - Now you can follow the Godot build instructions on their [site](https://docs.godotengine.org/en/stable/contributing/development/compiling).
