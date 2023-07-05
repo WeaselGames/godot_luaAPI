@@ -31,43 +31,19 @@ LuaError *LuaState::exposeObjectConstructor(String name, Object *obj) {
 	}
 	lua_pushlightuserdata(L, obj);
 
-#ifndef LAPI_GDEXTENSION
-
 	lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
 		Object *inner_obj = (Object *)lua_touserdata(inner_state, lua_upvalueindex(1));
 
 		Variant *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
 		Variant ret = inner_obj->call("new");
 
-		*userdata = ret;
+		memnew_placement(userdata, Variant(ret));
 
 		luaL_setmetatable(inner_state, "mt_Object");
 
 		return 1;
 	}),
 			1);
-
-#else
-
-	lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
-		Object *inner_obj = (Object *)lua_touserdata(inner_state, lua_upvalueindex(1));
-
-		Variant *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
-		Variant ret = inner_obj->call("new");
-
-		// If the type being created is a RefCounted, increase its refcount.
-		if (RefCounted *ref = Object::cast_to<RefCounted>(ret.operator Object *()); ref != nullptr) {
-			ref->reference();
-		}
-
-		memmove(userdata, (void *)&ret, sizeof(Variant));
-
-		luaL_setmetatable(inner_state, "mt_Object");
-
-		return 1;
-	}),
-			1);
-#endif
 
 	lua_setglobal(L, name.ascii().get_data());
 	return nullptr;
@@ -521,18 +497,21 @@ void LuaState::createObjectMetatable() {
 	});
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-		// If object is a RefCounted
-		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
-		if (ref != nullptr) {
-			ref->unreference();
+		// We need to manually uncount the ref
+		if (Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1); ref.is_valid()) {
+			ref->~RefCounted();
 		}
 
 		if (!arg1.has_method("__gc")) {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__gc", api));
-		return 1;
+		// just in case they want to raise an error
+		Variant ret = arg1.call("__gc", api);
+		if (LuaError *err = dynamic_cast<LuaError *>(ret.operator Object *())) {
+			LuaState::pushVariant(inner_state, ret);
+		}
+		return 0;
 	});
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__tostring", {
@@ -764,9 +743,9 @@ void LuaState::createCallableExtraMetatable() {
 	luaL_newmetatable(L, "mt_CallableExtra");
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
-		Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1);
-		if (ref != nullptr) {
-			ref->unreference();
+		// We need to manually uncount the ref
+		if (Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1); ref.is_valid()) {
+			ref->~RefCounted();
 		}
 
 		return 0;
