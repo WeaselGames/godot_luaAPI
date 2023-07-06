@@ -11,7 +11,7 @@ import subprocess
 from shutil import copytree, ignore_patterns
 
 # godot v4.0.0-beta10
-godot_ver = "master" # os.getenv("GODOT_VERSION", "4.0")
+godot_ver = os.getenv("GODOT_VERSION", "4.1-stable")
 godot_url = "https://github.com/godotengine/godot"
 godot_dir = Dir("godot")
 

@@ -126,7 +126,7 @@ jobs:
       - name: Create version file
         run: |
           mkdir -p ${{ github.workspace }}/bin/templates
-          echo ${{ env.GODOT_VERSION }}.rc2 > ${{ github.workspace }}/bin/templates/version.txt
+          echo ${{ env.GODOT_VERSION }}.stable > ${{ github.workspace }}/bin/templates/version.txt
       - name: Upload version file
         uses: actions/upload-artifact@v2
         with:
