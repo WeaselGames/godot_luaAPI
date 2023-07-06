@@ -7,15 +7,14 @@
 // These 2 macros helps us in constructing general metamethods.
 // We can use "lua" as a "Lua" pointer and arg1, arg2, ..., arg5 as Variants objects
 // Check examples in createVector2Metatable
-#define LUA_LAMBDA_TEMPLATE(_f_)                                  \
-	[](lua_State *inner_state) -> int {                           \
-		LuaAPI *api = LuaState::getAPI(inner_state);              \
-		Variant arg1 = LuaState::getVariant(inner_state, 1, api); \
-		Variant arg2 = LuaState::getVariant(inner_state, 2, api); \
-		Variant arg3 = LuaState::getVariant(inner_state, 3, api); \
-		Variant arg4 = LuaState::getVariant(inner_state, 4, api); \
-		Variant arg5 = LuaState::getVariant(inner_state, 5, api); \
-		_f_                                                       \
+#define LUA_LAMBDA_TEMPLATE(_f_)                             \
+	[](lua_State *inner_state) -> int {                      \
+		Variant arg1 = LuaState::getVariant(inner_state, 1); \
+		Variant arg2 = LuaState::getVariant(inner_state, 2); \
+		Variant arg3 = LuaState::getVariant(inner_state, 3); \
+		Variant arg4 = LuaState::getVariant(inner_state, 4); \
+		Variant arg5 = LuaState::getVariant(inner_state, 5); \
+		_f_                                                  \
 	}
 
 #define LUA_METAMETHOD_TEMPLATE(lua_state, metatable_index, metamethod_name, _f_) \
@@ -412,6 +411,8 @@ void LuaState::createObjectMetatable() {
 	luaL_newmetatable(L, "mt_Object");
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__index", {
+		Ref<LuaAPI> api = getAPI(inner_state);
+
 		// If object overrides
 		if (arg1.has_method("__index")) {
 			LuaState::pushVariant(inner_state, arg1.call("__index", Ref<LuaAPI>(api), arg2));
@@ -460,6 +461,8 @@ void LuaState::createObjectMetatable() {
 	});
 
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__newindex", {
+		Ref<LuaAPI> api = getAPI(inner_state);
+
 		// If object overrides
 		if (arg1.has_method("__newindex")) {
 			LuaState::pushVariant(inner_state, arg1.call("__newindex", Ref<LuaAPI>(api), arg2, arg3));
@@ -489,10 +492,10 @@ void LuaState::createObjectMetatable() {
 
 		Array args;
 		for (int i = 1; i < argc; i++) {
-			args.push_back(LuaState::getVariant(inner_state, i + 1, api));
+			args.push_back(LuaState::getVariant(inner_state, i + 1));
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__call", Ref<LuaAPI>(api), LuaTuple::fromArray(args)));
+		LuaState::pushVariant(inner_state, arg1.call("__call", Ref<LuaAPI>(getAPI(inner_state)), LuaTuple::fromArray(args)));
 		return 1;
 	});
 
@@ -507,7 +510,7 @@ void LuaState::createObjectMetatable() {
 		}
 
 		// just in case they want to raise an error
-		Variant ret = arg1.call("__gc", api);
+		Variant ret = arg1.call("__gc", getAPI(inner_state));
 		if (LuaError *err = dynamic_cast<LuaError *>(ret.operator Object *())) {
 			LuaState::pushVariant(inner_state, ret);
 		}
@@ -520,7 +523,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__tostring", api));
+		LuaState::pushVariant(inner_state, arg1.call("__tostring"));
 		return 1;
 	});
 
@@ -530,7 +533,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__metatable", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__metatable", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -540,7 +543,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__len", api));
+		LuaState::pushVariant(inner_state, arg1.call("__len"));
 		return 1;
 	});
 
@@ -550,7 +553,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__unm", api));
+		LuaState::pushVariant(inner_state, arg1.call("__unm"));
 		return 1;
 	});
 
@@ -560,7 +563,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__add", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__add", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -570,7 +573,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__sub", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__sub", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -580,7 +583,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__mul", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__mul", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -590,7 +593,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__div", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__div", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -600,7 +603,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__idiv", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__idiv", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -610,7 +613,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__mod", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__mod", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -620,7 +623,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__pow", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__pow", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -630,7 +633,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__concat", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__concat", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -640,7 +643,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__band", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__band", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -650,7 +653,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__bor", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__bor", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -660,7 +663,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__bxor", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__bxor", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -670,7 +673,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__bnot", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__bnot", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -680,7 +683,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__shl", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__shl", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -690,7 +693,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__shr", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__shr", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -700,7 +703,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__eq", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__eq", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -710,7 +713,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__lt", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__lt", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 
@@ -720,7 +723,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__le", Ref<LuaAPI>(api), arg2));
+		LuaState::pushVariant(inner_state, arg1.call("__le", Ref<LuaAPI>(getAPI(inner_state)), arg2));
 		return 1;
 	});
 

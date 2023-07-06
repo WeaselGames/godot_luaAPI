@@ -98,7 +98,7 @@ Variant LuaAPI::callFunctionRef(Array args, int funcRef) {
 	if (ret != LUA_OK) {
 		toReturn = LuaState::handleError(lState, ret);
 	} else {
-		toReturn = LuaState::getVariant(lState, -1, this);
+		toReturn = LuaState::getVariant(lState, -1);
 	}
 
 	lua_pop(lState, 1);

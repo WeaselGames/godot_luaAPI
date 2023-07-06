@@ -15,10 +15,10 @@ void initialize_luaAPI_module(ModuleInitializationLevel p_level) {
 	}
 
 	ClassDB::register_class<LuaAPI>();
+	ClassDB::register_class<LuaCallableExtra>();
 	ClassDB::register_class<LuaCoroutine>();
 	ClassDB::register_class<LuaError>();
 	ClassDB::register_class<LuaTuple>();
-	ClassDB::register_class<LuaCallableExtra>();
 }
 
 void uninitialize_luaAPI_module(ModuleInitializationLevel p_level) {
