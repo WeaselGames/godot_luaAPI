@@ -1,5 +1,6 @@
 #include "luaState.h"
 #include "lua/lua.h"
+
 #include <classes/luaAPI.h>
 #include <classes/luaCallableExtra.h>
 #include <classes/luaCoroutine.h>
@@ -9,7 +10,6 @@
 
 void LuaState::setState(lua_State *L, LuaAPI *api, bool bindAPI) {
 	this->L = L;
-	this->api = api;
 	if (!bindAPI) {
 		return;
 	}
@@ -152,7 +152,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 
 // get a value at the given index and return as a variant
 Variant LuaState::getVar(int index) const {
-	return getVariant(L, index, api);
+	return getVariant(L, index);
 }
 
 // Pull a global variant from Lua to GDScript
@@ -406,6 +406,10 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 					Array argBinds = callable.get_bound_arguments();
 					if (argBinds.size() == 1) {
 						lua_rawgeti(state, LUA_REGISTRYINDEX, (int)argBinds[0]);
+						lua_State *refState = callObj->getState();
+						if (refState != state) {
+							lua_xmove(refState, state, 1);
+						}
 						break;
 					}
 				}
@@ -431,8 +435,9 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 }
 
 // gets a variant at a given index
-Variant LuaState::getVariant(lua_State *state, int index, LuaAPI *api) {
+Variant LuaState::getVariant(lua_State *state, int index) {
 	Variant result;
+
 	int type = lua_type(state, index);
 	switch (type) {
 		case LUA_TSTRING:
@@ -465,7 +470,7 @@ Variant LuaState::getVariant(lua_State *state, int index, LuaAPI *api) {
 #else
 					lua_rawgeti(state, index, i);
 #endif
-					array.push_back(getVariant(state, -1, api));
+					array.push_back(getVariant(state, -1));
 					lua_pop(state, 1);
 				}
 				result = array;
@@ -475,8 +480,8 @@ Variant LuaState::getVariant(lua_State *state, int index, LuaAPI *api) {
 			lua_pushnil(state); /* first key */
 			Dictionary dict;
 			while (lua_next(state, (index < 0) ? (index - 1) : (index)) != 0) {
-				Variant key = getVariant(state, -2, api);
-				Variant value = getVariant(state, -1, api);
+				Variant key = getVariant(state, -2);
+				Variant value = getVariant(state, -1);
 				dict[key] = value;
 				lua_pop(state, 1);
 			}
@@ -487,14 +492,14 @@ Variant LuaState::getVariant(lua_State *state, int index, LuaAPI *api) {
 			lua_pushvalue(state, index);
 			Array binds;
 			binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
-			result = Callable(api, "call_function_ref").bindv(binds);
+			result = Callable(getAPI(state), "call_function_ref").bindv(binds);
 			break;
 		}
 		case LUA_TTHREAD: {
 			lua_State *tState = lua_tothread(state, index);
 			Ref<LuaCoroutine> thread;
 			thread.instantiate();
-			thread->bindExisting(api, tState);
+			thread->bindExisting(getAPI(state), tState);
 			result = thread;
 			break;
 		}
@@ -691,10 +696,8 @@ int LuaState::luaPrint(lua_State *state) {
 // Used as the __call metamethod for mt_Callable.
 // All exposed gdscript functions are called vis this method.
 int LuaState::luaCallableCall(lua_State *state) {
-	LuaAPI *api = getAPI(state);
-
 	int argc = lua_gettop(state) - 1; // We subtract 1 because the callable its self will be counted
-	Callable callable = (Callable)LuaState::getVariant(state, 1, api);
+	Callable callable = (Callable)LuaState::getVariant(state, 1);
 
 	Array args;
 	args.resize(argc);
@@ -703,7 +706,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 
 	int index = 2; // we start at 2, 1 is the callable
 	for (int i = 0; i < argc; i++) {
-		args[i] = LuaState::getVariant(state, index++, api);
+		args[i] = LuaState::getVariant(state, index++);
 		if (args[i].get_type() != Variant::Type::OBJECT) {
 			if (LuaError *err = Object::cast_to<LuaError>(args[i].operator Object *()); err != nullptr) {
 				lua_pushstring(state, err->getMessage().ascii().get_data());
@@ -752,15 +755,13 @@ int LuaState::luaCallableCall(lua_State *state) {
 #else
 
 int LuaState::luaCallableCall(lua_State *state) {
-	LuaAPI *api = getAPI(state);
-
 	int argc = lua_gettop(state) - 1; // We subtract 1 because the callable its self will be counted
-	Callable callable = (Callable)LuaState::getVariant(state, 1, api);
+	Callable callable = (Callable)LuaState::getVariant(state, 1);
 
 	Array args;
 	int index = 2; // we start at 2, 1 is the callable
 	for (int i = 0; i < argc; i++) {
-		Variant var = LuaState::getVariant(state, index++, api);
+		Variant var = LuaState::getVariant(state, index++);
 		if (var.get_type() == Variant::Type::OBJECT) {
 			if (LuaError *err = dynamic_cast<LuaError *>(var.operator Object *()); err != nullptr) {
 				lua_pushstring(state, err->getMessage().ascii().get_data());
@@ -797,10 +798,8 @@ int LuaState::luaCallableCall(lua_State *state) {
 // This function is invoked whenever a function is called on one of the userdata types
 // excluding mt_Callable or mt_Object if __index is overwritten
 int LuaState::luaUserdataFuncCall(lua_State *state) {
-	LuaAPI *api = getAPI(state);
-
 	Variant *obj = (Variant *)lua_touserdata(state, lua_upvalueindex(1));
-	String fName = LuaState::getVariant(state, lua_upvalueindex(2), api);
+	String fName = LuaState::getVariant(state, lua_upvalueindex(2));
 
 	int argc = lua_gettop(state);
 	Array args;
@@ -808,7 +807,7 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	Vector<const Variant *> mem_args;
 	mem_args.resize(argc);
 	for (int i = 0; i < argc; i++) {
-		args[i] = LuaState::getVariant(state, i + 1, api);
+		args[i] = LuaState::getVariant(state, i + 1);
 		mem_args.write[i] = &args[i];
 	}
 
@@ -852,11 +851,9 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 }
 
 void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
-	LuaAPI *api = getAPI(state);
-
 	lua_pushstring(state, "__HOOK");
 	lua_rawget(state, LUA_REGISTRYINDEX);
-	Callable hook = LuaState::getVariant(state, -1, api);
+	Callable hook = LuaState::getVariant(state, -1);
 	lua_pop(state, 1);
 
 	if (hook.is_null()) {
@@ -864,7 +861,7 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 	}
 
 	Array args;
-	args.append(Ref<LuaAPI>(api));
+	args.append(Ref<LuaAPI>(getAPI(state)));
 	args.append(ar->event);
 	args.append(ar->currentline);
 

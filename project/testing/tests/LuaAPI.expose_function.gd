@@ -85,17 +85,17 @@ func _process(delta):
 
 	var result1 = lua.pull_variant("result1")
 	if not result1:
-		errors.append("result1 is false")
+		errors.append(LuaError.new_error("result1 is false"))
 		fail()
 
 	var result2 = lua.pull_variant("result2")
 	if not result2:
-		errors.append("result2 is false")
+		errors.append(LuaError.new_error("result2 is false"))
 		fail()
 
 	var result3 = lua.pull_variant("result3")
 	if not result3 == 10:
-		errors.append("result3 is not 10 but is %d" % result3)
+		errors.append(LuaError.new_error("result3 is not 10 but is %d" % result3))
 		fail()
 
 	done = true

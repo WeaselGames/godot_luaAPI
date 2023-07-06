@@ -43,7 +43,7 @@ public:
 #else
 	static LuaError *handleError(const StringName &func, GDExtensionCallError error, const Variant **p_arguments, int argc);
 #endif
-	static Variant getVariant(lua_State *state, int index, LuaAPI *api);
+	static Variant getVariant(lua_State *state, int index);
 
 	// Lua functions
 	static int luaErrorHandler(lua_State *state);
@@ -54,8 +54,6 @@ public:
 	static void luaHook(lua_State *state, lua_Debug *ar);
 
 private:
-	LuaAPI *api = nullptr;
-
 	lua_State *L = nullptr;
 
 	void exposeConstructors();
