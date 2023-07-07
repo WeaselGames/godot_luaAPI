@@ -510,7 +510,7 @@ void LuaState::createObjectMetatable() {
 		}
 
 		// just in case they want to raise an error
-		Variant ret = arg1.call("__gc", getAPI(inner_state));
+		Variant ret = arg1.call("__gc", Ref<LuaAPI>(getAPI(inner_state)));
 		if (LuaError *err = dynamic_cast<LuaError *>(ret.operator Object *())) {
 			LuaState::pushVariant(inner_state, ret);
 		}
@@ -523,7 +523,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__tostring"));
+		LuaState::pushVariant(inner_state, arg1.call("__tostring", Ref<LuaAPI>(getAPI(inner_state))));
 		return 1;
 	});
 
@@ -543,7 +543,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__len"));
+		LuaState::pushVariant(inner_state, arg1.call("__len", Ref<LuaAPI>(getAPI(inner_state))));
 		return 1;
 	});
 
@@ -553,7 +553,7 @@ void LuaState::createObjectMetatable() {
 			return 0;
 		}
 
-		LuaState::pushVariant(inner_state, arg1.call("__unm"));
+		LuaState::pushVariant(inner_state, arg1.call("__unm", Ref<LuaAPI>(getAPI(inner_state))));
 		return 1;
 	});
 
