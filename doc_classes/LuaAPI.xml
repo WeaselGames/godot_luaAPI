@@ -104,10 +104,20 @@
 			<description>
 				Controls the garbage collector. The option can be one of the following: [code]GC_STOP[/code], [code]GC_RESTART[/code], [code]GC_COLLECT[/code], [code]GC_COUNT[/code], [code]GC_STEP[/code], [code]GC_SETPAUSE[/code], [code]GC_SETSTEPMUL[/code]. The data is the argument for the option. Returns the result of the option.
 			</description>
+		</method>
+		<method name="get_memory_usage">
+			<return type="int" />
+			<description>
+				Returns the current memory usage of the state in bytes.
+			</description>
+		</method>
 	</methods>
 	<members>
 		<member name="permissive" type="bool" setter="set_permissive" getter="get_permissive" default="true">
 			When set to true all methods will be allowed on Objects be default and lua_fields is treated as a blacklist. When set to false, lua_fields is treated as a whitelist.
+		</member>
+		<member name="memory_limit" type="int" setter="set_memory_limit" getter="get_memory_limit" default="0">
+			Sets the memory limit for the state in bytes. If the limit is 0, there is no limit.
 		</member>
 	</members>
 	<constants>
