@@ -9,7 +9,8 @@
 #endif
 
 LuaAPI::LuaAPI() {
-	lState = luaL_newstate();
+	lState = lua_newstate(&LuaAPI::luaAlloc, (void *)&luaAllocData);
+
 	// Creating lua state instance
 	state.setState(lState, this, true);
 }
@@ -25,7 +26,8 @@ void LuaAPI::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
 	ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaAPI::setHook);
-	ClassDB::bind_method(D_METHOD("configure_gc", "What", "Data"), &LuaAPI::configure_gc);
+	ClassDB::bind_method(D_METHOD("configure_gc", "What", "Data"), &LuaAPI::configureGC);
+	ClassDB::bind_method(D_METHOD("get_memory_usage"), &LuaAPI::getMemoryUsage);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
 	ClassDB::bind_method(D_METHOD("expose_constructor", "LuaConstructorName", "Object"), &LuaAPI::exposeObjectConstructor);
@@ -39,7 +41,11 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_permissive", "value"), &LuaAPI::setPermissive);
 	ClassDB::bind_method(D_METHOD("get_permissive"), &LuaAPI::getPermissive);
 
+	ClassDB::bind_method(D_METHOD("set_memory_limit", "limit"), &LuaAPI::setMemoryLimit);
+	ClassDB::bind_method(D_METHOD("get_memory_limit"), &LuaAPI::getMemoryLimit);
+
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "permissive"), "set_permissive", "get_permissive");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "memory_limit"), "set_memory_limit", "get_memory_limit");
 
 	BIND_ENUM_CONSTANT(HOOK_MASK_CALL);
 	BIND_ENUM_CONSTANT(HOOK_MASK_RETURN);
@@ -63,6 +69,30 @@ void LuaAPI::bindLibraries(Array libs) {
 
 void LuaAPI::setHook(Callable hook, int mask, int count) {
 	return state.setHook(hook, mask, count);
+}
+
+int LuaAPI::configureGC(int what, int data) {
+	return lua_gc(lState, what, data);
+}
+
+void LuaAPI::setPermissive(bool value) {
+	permissive = value;
+}
+
+bool LuaAPI::getPermissive() const {
+	return permissive;
+}
+
+void LuaAPI::setMemoryLimit(int limit) {
+	luaAllocData.memoryLimit = limit;
+}
+
+int LuaAPI::getMemoryLimit() const {
+	return luaAllocData.memoryLimit;
+}
+
+int LuaAPI::getMemoryUsage() const {
+	return luaAllocData.memoryUsed;
 }
 
 // Calls LuaState::luaFunctionExists()
@@ -203,4 +233,32 @@ lua_State *LuaAPI::newThreadState() {
 // returns state
 lua_State *LuaAPI::getState() {
 	return lState;
+}
+
+void *LuaAPI::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize) {
+	LuaAllocData *data = (LuaAllocData *)ud;
+	if (nsize == 0) {
+		if (ptr != nullptr) {
+			data->memoryUsed -= osize;
+			memfree(ptr);
+		}
+		return nullptr;
+	}
+
+	if (ptr == nullptr) {
+		if (data->memoryLimit != 0 && data->memoryUsed + nsize > data->memoryLimit) {
+			return nullptr;
+		}
+
+		data->memoryUsed += nsize;
+		return memalloc(nsize);
+	}
+
+	if (data->memoryLimit != 0 && data->memoryUsed - osize + nsize > data->memoryLimit) {
+		return nullptr;
+	}
+
+	data->memoryUsed -= osize;
+	data->memoryUsed += nsize;
+	return memrealloc(ptr, nsize);
 }

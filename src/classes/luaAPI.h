@@ -32,17 +32,14 @@ public:
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
-	inline int configure_gc(int what, int data) {
-		return lua_gc(lState, what, data);
-	}
+	void setPermissive(bool value);
+	bool getPermissive() const;
 
-	inline void setPermissive(bool value) {
-		permissive = value;
-	}
+	void setMemoryLimit(int limit);
+	int getMemoryLimit() const;
 
-	inline bool getPermissive() const {
-		return permissive;
-	}
+	int configureGC(int what, int data);
+	int getMemoryUsage() const;
 
 	bool luaFunctionExists(String functionName);
 
@@ -82,6 +79,15 @@ public:
 private:
 	LuaState state;
 	lua_State *lState = nullptr;
+
+	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
+
+	struct LuaAllocData {
+		int memoryUsed = 0;
+		int memoryLimit = 0;
+	};
+
+	LuaAllocData luaAllocData;
 
 	bool permissive = true;
 
