@@ -31,7 +31,6 @@ public:
 
 	LuaError *pushVariant(Variant var) const;
 	LuaError *pushGlobalVariant(String name, Variant var);
-	LuaError *exposeObjectConstructor(String name, Object *obj);
 	LuaError *handleError(int lua_error) const;
 
 	static LuaAPI *getAPI(lua_State *state);

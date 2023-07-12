@@ -22,32 +22,6 @@
 	lua_pushcfunction(lua_state, LUA_LAMBDA_TEMPLATE(_f_));                       \
 	lua_settable(lua_state, metatable_index - 2);
 
-// Expose the constructor for a object to lua
-LuaError *LuaState::exposeObjectConstructor(String name, Object *obj) {
-	// Make sure we are able to call new
-	if (!obj->has_method("new")) {
-		return LuaError::newError("during \"LuaState::exposeObjectConstructor\" method 'new' does not exist.", LuaError::ERR_RUNTIME);
-	}
-	lua_pushlightuserdata(L, obj);
-
-	lua_pushcclosure(L, LUA_LAMBDA_TEMPLATE({
-		Object *inner_obj = (Object *)lua_touserdata(inner_state, lua_upvalueindex(1));
-
-		Variant *userdata = (Variant *)lua_newuserdata(inner_state, sizeof(Variant));
-		Variant ret = inner_obj->call("new");
-
-		memnew_placement(userdata, Variant(ret));
-
-		luaL_setmetatable(inner_state, "mt_Object");
-
-		return 1;
-	}),
-			1);
-
-	lua_setglobal(L, name.ascii().get_data());
-	return nullptr;
-}
-
 // Expose the default constructors
 void LuaState::exposeConstructors() {
 	lua_pushcfunction(L, LUA_LAMBDA_TEMPLATE({
