@@ -41,14 +41,6 @@
 				Loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors.
 			</description>
 		</method>
-		<method name="expose_constructor">
-			<return type="LuaError" />
-			<param index="0" name="LuaConstructorName" type="String" />
-			<param index="1" name="Object" type="Object" />
-			<description>
-				Accepts any object that has a new() method. Allows lua to call the constructor aka the new() method. Exposed as a global with the given name.
-			</description>
-		</method>
 		<method name="function_exists">
 			<return type="bool" />
 			<param index="0" name="LuaFunctionName" type="String" />

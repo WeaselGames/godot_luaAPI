@@ -53,7 +53,6 @@ public:
 	LuaError *doFile(String fileName);
 	LuaError *doString(String code);
 	LuaError *pushGlobalVariant(String name, Variant var);
-	LuaError *exposeObjectConstructor(String name, Object *obj);
 
 	Ref<LuaCoroutine> newCoroutine();
 	Ref<LuaCoroutine> getRunningCoroutine();
