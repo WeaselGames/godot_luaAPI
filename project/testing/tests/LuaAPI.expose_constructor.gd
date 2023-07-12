@@ -13,7 +13,7 @@ func _ready():
 
 	lua = LuaAPI.new()
 	lua.permissive = true
-	var err = lua.expose_constructor("TestObj", TestObject)
+	var err = lua.push_variant("TestObj", TestObject.new)
 	if err is LuaError:
 		errors.append(err)
 		fail()
@@ -21,7 +21,7 @@ func _ready():
 	# testName and testDescription are for any needed context about the test.
 	testName = "LuaAPI.expose_constructor"
 	testDescription = "
-Test LuaAPI.expose_constructor.
+Test LuaAPI.push_variant with a object constructor.
 Exoposes a object constructor for TestObject which contains one variable. A string
 lua calls the constructor and then sets the string to 'Hello from lua!'.
 We also test pulling it back to GD and confirm the contents of the string.
