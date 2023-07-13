@@ -1,6 +1,7 @@
 #include "luaAPI.h"
 
 #include "luaCoroutine.h"
+#include "luaObjectMetatable.h"
 
 #include <luaState.h>
 
@@ -10,6 +11,9 @@
 
 LuaAPI::LuaAPI() {
 	lState = lua_newstate(&LuaAPI::luaAlloc, (void *)&luaAllocData);
+	Ref<LuaDefaultObjectMetatable> mt;
+	mt.instantiate();
+	objectMetatable = mt;
 
 	// Creating lua state instance
 	state.setState(lState, this, true);
@@ -37,13 +41,13 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 	ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
 
-	ClassDB::bind_method(D_METHOD("set_permissive", "value"), &LuaAPI::setPermissive);
-	ClassDB::bind_method(D_METHOD("get_permissive"), &LuaAPI::getPermissive);
+	ClassDB::bind_method(D_METHOD("set_object_metatable", "value"), &LuaAPI::setObjectMetatable);
+	ClassDB::bind_method(D_METHOD("get_object_metatable"), &LuaAPI::getObjectMetatable);
 
 	ClassDB::bind_method(D_METHOD("set_memory_limit", "limit"), &LuaAPI::setMemoryLimit);
 	ClassDB::bind_method(D_METHOD("get_memory_limit"), &LuaAPI::getMemoryLimit);
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "permissive"), "set_permissive", "get_permissive");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "object_metatable"), "set_object_metatable", "get_object_metatable");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "memory_limit"), "set_memory_limit", "get_memory_limit");
 
 	BIND_ENUM_CONSTANT(HOOK_MASK_CALL);
@@ -74,12 +78,12 @@ int LuaAPI::configureGC(int what, int data) {
 	return lua_gc(lState, what, data);
 }
 
-void LuaAPI::setPermissive(bool value) {
-	permissive = value;
+void LuaAPI::setObjectMetatable(Ref<LuaObjectMetatable> value) {
+	objectMetatable = value;
 }
 
-bool LuaAPI::getPermissive() const {
-	return permissive;
+Ref<LuaObjectMetatable> LuaAPI::getObjectMetatable() const {
+	return objectMetatable;
 }
 
 void LuaAPI::setMemoryLimit(int limit) {
@@ -240,19 +244,19 @@ void *LuaAPI::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize) {
 	}
 
 	if (ptr == nullptr) {
-		if (data->memoryLimit != 0 && data->memoryUsed + nsize > data->memoryLimit) {
+		if (data->memoryLimit != 0 && data->memoryUsed + (int)nsize > data->memoryLimit) {
 			return nullptr;
 		}
 
-		data->memoryUsed += nsize;
+		data->memoryUsed += (int)nsize;
 		return memalloc(nsize);
 	}
 
-	if (data->memoryLimit != 0 && data->memoryUsed - osize + nsize > data->memoryLimit) {
+	if (data->memoryLimit != 0 && data->memoryUsed - (int)osize + (int)nsize > data->memoryLimit) {
 		return nullptr;
 	}
 
-	data->memoryUsed -= osize;
-	data->memoryUsed += nsize;
+	data->memoryUsed -= (int)osize;
+	data->memoryUsed += (int)nsize;
 	return memrealloc(ptr, nsize);
 }

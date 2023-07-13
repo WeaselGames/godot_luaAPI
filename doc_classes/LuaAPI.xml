@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="LuaAPI" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="LuaAPI" inherits="RefCounted" version="4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Execute Lua code at runtime and make your own API.
 	</brief_description>
@@ -105,8 +105,8 @@
 		</method>
 	</methods>
 	<members>
-		<member name="permissive" type="bool" setter="set_permissive" getter="get_permissive" default="true">
-			When set to true all methods will be allowed on Objects be default and lua_fields is treated as a blacklist. When set to false, lua_fields is treated as a whitelist.
+		<member name="object_metatable" type="LuaObjectMetatable" setter="set_object_metatable" getter="get_object_metatable" default="LuaDefaultObjectMetatable">
+			This is the default LuaMetatable to use for object which do not define a lua_metatable field. By default it is a LuaDefaultObjectMetatable. You can change this to a custom metatable to change the behavior of all objects.
 		</member>
 		<member name="memory_limit" type="int" setter="set_memory_limit" getter="get_memory_limit" default="0">
 			Sets the memory limit for the state in bytes. If the limit is 0, there is no limit.

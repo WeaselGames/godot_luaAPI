@@ -40,7 +40,6 @@ func _ready():
 	id = 9940
 
 	lua = LuaAPI.new()
-	lua.permissive = true
 	lua.set_meta("isValid", true)
 	var err = lua.push_variant("test1", LuaCallableExtra.with_tuple(testFuncTuple, 2))
 	if err is LuaError:

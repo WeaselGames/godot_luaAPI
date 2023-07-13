@@ -3,6 +3,7 @@
 #include "src/classes/luaCallableExtra.h"
 #include "src/classes/luaCoroutine.h"
 #include "src/classes/luaError.h"
+#include "src/classes/luaObjectMetatable.h"
 #include "src/classes/luaTuple.h"
 
 #ifdef LAPI_GDEXTENSION
@@ -18,6 +19,8 @@ void initialize_luaAPI_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<LuaCallableExtra>();
 	ClassDB::register_class<LuaCoroutine>();
 	ClassDB::register_class<LuaError>();
+	ClassDB::register_class<LuaObjectMetatable>();
+	ClassDB::register_class<LuaDefaultObjectMetatable>();
 	ClassDB::register_class<LuaTuple>();
 }
 
