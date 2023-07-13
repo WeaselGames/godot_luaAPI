@@ -26,6 +26,8 @@ def get_doc_classes():
         "LuaError",
         "LuaTuple",
         "LuaCallableExtra",
+        "LuaObjectMetatable",
+        "LuaDefaultObjectMetatable",
     ]
 
 def get_doc_path():

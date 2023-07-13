@@ -9,7 +9,6 @@ func _ready():
 	id = 9500
 
 	lua = LuaAPI.new()
-	lua.permissive = true
 	co = lua.new_coroutine()
 
 	co.load_string("

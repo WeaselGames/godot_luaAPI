@@ -12,7 +12,6 @@ func _ready():
 	id = 9950
 
 	lua = LuaAPI.new()
-	lua.permissive = true
 	var err = lua.push_variant("TestObj", TestObject.new)
 	if err is LuaError:
 		errors.append(err)

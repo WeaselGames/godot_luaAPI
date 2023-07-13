@@ -8,7 +8,6 @@ func _ready():
 	id = 9990
 
 	lua = LuaAPI.new()
-	lua.permissive = true
 
 	# testName and testDescription are for any needed context about the test.
 	testName = "LuaAPI.do_file()"

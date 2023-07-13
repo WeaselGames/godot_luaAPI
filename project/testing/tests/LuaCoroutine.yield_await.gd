@@ -13,7 +13,6 @@ func _ready():
 	id = 9490
 
 	lua = LuaAPI.new()
-	lua.permissive = true
 	co = lua.new_coroutine()
 	co.push_variant("test_yield_await", _test_yield_await)
 

@@ -8,7 +8,6 @@ func _ready():
 	id = 9825
 
 	lua = LuaAPI.new()
-	lua.permissive = true
 
 	# testName and testDescription are for any needed context about the test.
 	testName = "General.base_types"

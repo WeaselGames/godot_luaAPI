@@ -18,6 +18,7 @@ using namespace godot;
 #endif
 
 class LuaCoroutine;
+class LuaObjectMetatable;
 
 class LuaAPI : public RefCounted {
 	GDCLASS(LuaAPI, RefCounted);
@@ -32,8 +33,8 @@ public:
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
-	void setPermissive(bool value);
-	bool getPermissive() const;
+	void setObjectMetatable(Ref<LuaObjectMetatable> value);
+	Ref<LuaObjectMetatable> getObjectMetatable() const;
 
 	void setMemoryLimit(int limit);
 	int getMemoryLimit() const;
@@ -79,6 +80,8 @@ private:
 	LuaState state;
 	lua_State *lState = nullptr;
 
+	Ref<LuaObjectMetatable> objectMetatable;
+
 	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
 
 	struct LuaAllocData {
@@ -87,8 +90,6 @@ private:
 	};
 
 	LuaAllocData luaAllocData;
-
-	bool permissive = true;
 
 	LuaError *execute(int handlerIndex);
 };
