@@ -41,13 +41,9 @@ Variant LuaObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, Variant index)
 	return ret;
 }
 
-LuaError *LuaObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) {
-	LuaError *ret = nullptr;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__newindex, obj, api, index, value, ret);
-#else
-	ret = dynamic_cast<LuaError *>((Object *)call("__newindex", obj, api, index, value));
-#endif
+Ref<LuaError> LuaObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) {
+	Ref<LuaError> ret;
+	VIRTUAL_CALL(__newindex, ret, obj, api, index, value);
 	return ret;
 }
 
@@ -57,13 +53,9 @@ Variant LuaObjectMetatable::__call(Object *obj, Ref<LuaAPI> api, Ref<LuaTuple> a
 	return ret;
 }
 
-LuaError *LuaObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
-	LuaError *ret = nullptr;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__gc, obj, api, ret);
-#else
-	ret = dynamic_cast<LuaError *>((Object *)call("__gc", obj, api));
-#endif
+Ref<LuaError> LuaObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
+	Ref<LuaError> ret;
+	VIRTUAL_CALL(__gc, ret, obj, api);
 	return ret;
 }
 
@@ -219,14 +211,14 @@ Variant LuaDefaultObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, Variant
 		fields = obj->call("lua_fields");
 	}
 
-	if ((!permissive && fields.has(index)) || (permissive && !fields.has(index))) {
-		return obj->get(index);
+	if ((!permissive && fields.has((String)index)) || (permissive && !fields.has((String)index))) {
+		return obj->get((String)index);
 	}
 
 	return Variant();
 }
 
-LuaError *LuaDefaultObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) {
+Ref<LuaError> LuaDefaultObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) {
 	if (obj->has_method("__newindex")) {
 		Variant ret = obj->call("__newindex", api, index, value);
 		if (ret.get_type() == Variant::OBJECT) {
@@ -259,7 +251,7 @@ Variant LuaDefaultObjectMetatable::__call(Object *obj, Ref<LuaAPI> api, Ref<LuaT
 	return Variant();
 }
 
-LuaError *LuaDefaultObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
+Ref<LuaError> LuaDefaultObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
 	if (obj->has_method("__gc")) {
 		Variant ret = obj->call("__gc", api);
 		if (ret.get_type() == Variant::OBJECT) {

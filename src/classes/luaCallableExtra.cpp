@@ -69,8 +69,7 @@ int LuaCallableExtra::call(lua_State *state) {
 	int noneMulty = l_argc;
 	LuaCallableExtra *func = (LuaCallableExtra *)LuaState::getVariant(state, 1).operator Object *();
 	if (func == nullptr) {
-		LuaError *err = LuaError::newError("Error during LuaCallableExtra::call func==null", LuaError::ERR_RUNTIME);
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, "Error during LuaCallableExtra::call func==null");
 		lua_error(state);
 		return 0;
 	}
@@ -111,7 +110,7 @@ int LuaCallableExtra::call(lua_State *state) {
 	Callable::CallError error;
 	func->function.callp(p_args, args.size(), returned, error);
 	if (error.error != error.CALL_OK) {
-		LuaError *err = LuaState::handleError(func->function.get_method(), error, p_args, args.size());
+		Ref<LuaError> err = LuaState::handleError(func->function.get_method(), error, p_args, args.size());
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;

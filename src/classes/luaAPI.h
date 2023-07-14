@@ -48,9 +48,9 @@ public:
 	Variant callFunction(String functionName, Array args);
 	Variant callFunctionRef(Array args, int funcRef);
 
-	LuaError *doFile(String fileName);
-	LuaError *doString(String code);
-	LuaError *pushGlobalVariant(String name, Variant var);
+	Ref<LuaError> doFile(String fileName);
+	Ref<LuaError> doString(String code);
+	Ref<LuaError> pushGlobalVariant(String name, Variant var);
 
 	Ref<LuaCoroutine> newCoroutine();
 	Ref<LuaCoroutine> getRunningCoroutine();
@@ -91,7 +91,7 @@ private:
 
 	LuaAllocData luaAllocData;
 
-	LuaError *execute(int handlerIndex);
+	Ref<LuaError> execute(int handlerIndex);
 };
 
 VARIANT_ENUM_CAST(LuaAPI::HookMask)

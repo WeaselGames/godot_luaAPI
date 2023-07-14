@@ -408,8 +408,8 @@ void LuaState::createObjectMetatable() {
 		}
 
 		if (mt.is_valid()) {
-			LuaError *err = mt->__newindex(arg1, api, arg2, arg3);
-			if (err != nullptr) {
+			Ref<LuaError> err = mt->__newindex(arg1, api, arg2, arg3);
+			if (!err.is_null()) {
 				LuaState::pushVariant(inner_state, err);
 				return 1;
 			}
@@ -450,8 +450,8 @@ void LuaState::createObjectMetatable() {
 		}
 
 		if (mt.is_valid()) {
-			LuaError *err = mt->__gc(arg1, api);
-			if (err != nullptr) {
+			Ref<LuaError> err = mt->__gc(arg1, api);
+			if (!err.is_null()) {
 				LuaState::pushVariant(inner_state, err);
 			}
 		}

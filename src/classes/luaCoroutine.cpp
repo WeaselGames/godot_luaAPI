@@ -56,8 +56,8 @@ void LuaCoroutine::setHook(Callable hook, int mask, int count) {
 Signal LuaCoroutine::yieldAwait(Array args) {
 	lua_pop(tState, 1); // Pop function off top of stack.
 	for (int i = 0; i < args.size(); i++) {
-		LuaError *err = state.pushVariant(args[i]);
-		if (err != nullptr) {
+		Ref<LuaError> err = state.pushVariant(args[i]);
+		if (!err.is_null()) {
 			// Raise an error on the lua state, error should be passed to reumse()
 			state.pushVariant(err);
 		}
@@ -76,7 +76,7 @@ Variant LuaCoroutine::pullVariant(String name) {
 }
 
 // Calls LuaState::pushGlobalVariant()
-LuaError *LuaCoroutine::pushGlobalVariant(String name, Variant var) {
+Ref<LuaError> LuaCoroutine::pushGlobalVariant(String name, Variant var) {
 	return state.pushGlobalVariant(name, var);
 }
 
@@ -86,7 +86,7 @@ Variant LuaCoroutine::callFunction(String functionName, Array args) {
 }
 
 // loads a string into the threads state
-LuaError *LuaCoroutine::loadString(String code) {
+Ref<LuaError> LuaCoroutine::loadString(String code) {
 	done = false;
 	int ret = luaL_loadstring(tState, code.ascii().get_data());
 	if (ret != LUA_OK) {
@@ -95,7 +95,7 @@ LuaError *LuaCoroutine::loadString(String code) {
 	return nullptr;
 }
 
-LuaError *LuaCoroutine::loadFile(String fileName) {
+Ref<LuaError> LuaCoroutine::loadFile(String fileName) {
 #ifndef LAPI_GDEXTENSION
 	done = false;
 	Error error;
@@ -119,14 +119,14 @@ LuaError *LuaCoroutine::loadFile(String fileName) {
 	return nullptr;
 }
 
-LuaError *LuaCoroutine::yield(Array args) {
+Ref<LuaError> LuaCoroutine::yield(Array args) {
 	Array ret;
 	if (int count = lua_gettop(tState); count > 0) {
 		lua_pop(tState, count);
 	}
 	for (int i = 0; i < args.size(); i++) {
-		LuaError *err = state.pushVariant(args[i]);
-		if (err != nullptr) {
+		Ref<LuaError> err = state.pushVariant(args[i]);
+		if (!err.is_null()) {
 			return err;
 		}
 	}
@@ -177,8 +177,8 @@ Variant LuaCoroutine::resume(Array args) {
 	}
 
 	for (int i = 0; i < args.size(); i++) {
-		LuaError *err = state.pushVariant(args[i]);
-		if (err != nullptr) {
+		Ref<LuaError> err = state.pushVariant(args[i]);
+		if (!err.is_null()) {
 			return err;
 		}
 	}
@@ -233,8 +233,8 @@ Variant LuaCoroutine::resume(Array args) {
 	}
 
 	for (int i = 0; i < args.size(); i++) {
-		LuaError *err = state.pushVariant(args[i]);
-		if (err != nullptr) {
+		Ref<LuaError> err = state.pushVariant(args[i]);
+		if (!err.is_null()) {
 			return err;
 		}
 	}

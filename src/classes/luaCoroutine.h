@@ -34,10 +34,10 @@ public:
 
 	bool luaFunctionExists(String functionName);
 
-	LuaError *loadString(String code);
-	LuaError *loadFile(String fileName);
-	LuaError *pushGlobalVariant(String name, Variant var);
-	LuaError *yield(Array args);
+	Ref<LuaError> loadString(String code);
+	Ref<LuaError> loadFile(String fileName);
+	Ref<LuaError> pushGlobalVariant(String name, Variant var);
+	Ref<LuaError> yield(Array args);
 
 	Variant resume(Array args);
 	Variant pullVariant(String name);

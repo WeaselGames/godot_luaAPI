@@ -21,8 +21,9 @@ void LuaError::_bind_methods() {
 }
 
 // Create a new error
-LuaError *LuaError::newError(String msg, ErrorType type) {
-	LuaError *err = memnew(LuaError);
+Ref<LuaError> LuaError::newError(String msg, ErrorType type) {
+	Ref<LuaError> err;
+	err.instantiate();
 	err->setInfo(msg, static_cast<LuaError::ErrorType>(type));
 	return err;
 }

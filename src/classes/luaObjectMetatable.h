@@ -24,9 +24,9 @@ protected:
 
 #ifndef LAPI_GDEXTENSION
 	GDVIRTUAL3R(Variant, __index, Object *, Ref<LuaAPI>, Variant);
-	GDVIRTUAL4R(LuaError *, __newindex, Object *, Ref<LuaAPI>, Variant, Variant);
+	GDVIRTUAL4R(Ref<LuaError>, __newindex, Object *, Ref<LuaAPI>, Variant, Variant);
 	GDVIRTUAL3R(Variant, __call, Object *, Ref<LuaAPI>, Ref<LuaTuple>);
-	GDVIRTUAL2R(LuaError *, __gc, Object *, Ref<LuaAPI>);
+	GDVIRTUAL2R(Ref<LuaError>, __gc, Object *, Ref<LuaAPI>);
 	GDVIRTUAL2R(String, __tostring, Object *, Ref<LuaAPI>);
 	GDVIRTUAL2R(Variant, __metatable, Object *, Ref<LuaAPI>);
 	GDVIRTUAL2R(int, __len, Object *, Ref<LuaAPI>);
@@ -52,9 +52,9 @@ protected:
 
 public:
 	virtual Variant __index(Object *obj, Ref<LuaAPI> api, Variant index);
-	virtual LuaError *__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value);
+	virtual Ref<LuaError> __newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value);
 	virtual Variant __call(Object *obj, Ref<LuaAPI> api, Ref<LuaTuple> args);
-	virtual LuaError *__gc(Object *obj, Ref<LuaAPI> api);
+	virtual Ref<LuaError> __gc(Object *obj, Ref<LuaAPI> api);
 	virtual String __tostring(Object *obj, Ref<LuaAPI> api);
 	virtual Variant __metatable(Object *obj, Ref<LuaAPI> api);
 	virtual int __len(Object *obj, Ref<LuaAPI> api);
@@ -90,9 +90,9 @@ protected:
 
 public:
 	Variant __index(Object *obj, Ref<LuaAPI> api, Variant index) override;
-	LuaError *__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) override;
+	Ref<LuaError> __newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) override;
 	Variant __call(Object *obj, Ref<LuaAPI> api, Ref<LuaTuple> args) override;
-	LuaError *__gc(Object *obj, Ref<LuaAPI> api) override;
+	Ref<LuaError> __gc(Object *obj, Ref<LuaAPI> api) override;
 	String __tostring(Object *obj, Ref<LuaAPI> api) override;
 	Variant __metatable(Object *obj, Ref<LuaAPI> api) override;
 	int __len(Object *obj, Ref<LuaAPI> api) override;

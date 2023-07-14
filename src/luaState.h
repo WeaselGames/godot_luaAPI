@@ -29,18 +29,18 @@ public:
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
 
-	LuaError *pushVariant(Variant var) const;
-	LuaError *pushGlobalVariant(String name, Variant var);
-	LuaError *handleError(int lua_error) const;
+	Ref<LuaError> pushVariant(Variant var) const;
+	Ref<LuaError> pushGlobalVariant(String name, Variant var);
+	Ref<LuaError> handleError(int lua_error) const;
 
 	static LuaAPI *getAPI(lua_State *state);
 
-	static LuaError *pushVariant(lua_State *state, Variant var);
-	static LuaError *handleError(lua_State *state, int lua_error);
+	static Ref<LuaError> pushVariant(lua_State *state, Variant var);
+	static Ref<LuaError> handleError(lua_State *state, int lua_error);
 #ifndef LAPI_GDEXTENSION
-	static LuaError *handleError(const StringName &func, Callable::CallError error, const Variant **p_arguments, int argc);
+	static Ref<LuaError> handleError(const StringName &func, Callable::CallError error, const Variant **p_arguments, int argc);
 #else
-	static LuaError *handleError(const StringName &func, GDExtensionCallError error, const Variant **p_arguments, int argc);
+	static Ref<LuaError> handleError(const StringName &func, GDExtensionCallError error, const Variant **p_arguments, int argc);
 #endif
 	static Variant getVariant(lua_State *state, int index);
 
