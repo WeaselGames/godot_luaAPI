@@ -28,13 +28,13 @@ public:
 
 	void setInfo(Callable function, int argc, bool isTuple, bool wantsRef);
 
-	void setTuple(bool isTuple);
+	void setTuple(bool value);
 	bool getTuple();
 
-	void setWantsRef(bool wantsRef);
+	void setWantsRef(bool value);
 	bool getWantsRef();
 
-	void setArgc(int argc);
+	void setArgc(int value);
 	int getArgc();
 
 	static int call(lua_State *state);

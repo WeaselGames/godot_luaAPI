@@ -39,10 +39,10 @@ void LuaCoroutine::bind(Ref<LuaAPI> lua) {
 }
 
 // binds the thread to a lua object
-void LuaCoroutine::bindExisting(Ref<LuaAPI> lua, lua_State *tState) {
+void LuaCoroutine::bindExisting(Ref<LuaAPI> lua, lua_State *L) {
 	done = false;
 	parent = lua;
-	this->tState = tState;
+	this->tState = L;
 	state.setState(tState, lua.ptr(), false);
 
 	// register the yield method

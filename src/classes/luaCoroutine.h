@@ -27,7 +27,7 @@ protected:
 
 public:
 	void bind(Ref<LuaAPI> lua);
-	void bindExisting(Ref<LuaAPI> lua, lua_State *tState);
+	void bindExisting(Ref<LuaAPI> lua, lua_State *L);
 	void setHook(Callable hook, int mask, int count);
 
 	Signal yieldAwait(Array args);

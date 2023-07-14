@@ -36,11 +36,11 @@ public:
 	void setObjectMetatable(Ref<LuaObjectMetatable> value);
 	Ref<LuaObjectMetatable> getObjectMetatable() const;
 
-	void setMemoryLimit(int limit);
-	int getMemoryLimit() const;
+	void setMemoryLimit(uint64_t limit);
+	uint64_t getMemoryLimit() const;
 
 	int configureGC(int what, int data);
-	int getMemoryUsage() const;
+	uint64_t getMemoryUsage() const;
 
 	bool luaFunctionExists(String functionName);
 
@@ -85,8 +85,8 @@ private:
 	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
 
 	struct LuaAllocData {
-		int memoryUsed = 0;
-		int memoryLimit = 0;
+		uint64_t memoryUsed = 0;
+		uint64_t memoryLimit = 0;
 	};
 
 	LuaAllocData luaAllocData;

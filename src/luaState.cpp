@@ -8,8 +8,8 @@
 
 #include <util.h>
 
-void LuaState::setState(lua_State *L, LuaAPI *api, bool bindAPI) {
-	this->L = L;
+void LuaState::setState(lua_State *state, LuaAPI *api, bool bindAPI) {
+	this->L = state;
 	if (!bindAPI) {
 		return;
 	}

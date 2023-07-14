@@ -86,15 +86,15 @@ Ref<LuaObjectMetatable> LuaAPI::getObjectMetatable() const {
 	return objectMetatable;
 }
 
-void LuaAPI::setMemoryLimit(int limit) {
+void LuaAPI::setMemoryLimit(uint64_t limit) {
 	luaAllocData.memoryLimit = limit;
 }
 
-int LuaAPI::getMemoryLimit() const {
+uint64_t LuaAPI::getMemoryLimit() const {
 	return luaAllocData.memoryLimit;
 }
 
-int LuaAPI::getMemoryUsage() const {
+uint64_t LuaAPI::getMemoryUsage() const {
 	return luaAllocData.memoryUsed;
 }
 
@@ -244,19 +244,19 @@ void *LuaAPI::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize) {
 	}
 
 	if (ptr == nullptr) {
-		if (data->memoryLimit != 0 && data->memoryUsed + (int)nsize > data->memoryLimit) {
+		if (data->memoryLimit != 0 && data->memoryUsed + (uint64_t)nsize > data->memoryLimit) {
 			return nullptr;
 		}
 
-		data->memoryUsed += (int)nsize;
+		data->memoryUsed += (uint64_t)nsize;
 		return memalloc(nsize);
 	}
 
-	if (data->memoryLimit != 0 && data->memoryUsed - (int)osize + (int)nsize > data->memoryLimit) {
+	if (data->memoryLimit != 0 && data->memoryUsed - (uint64_t)osize + (uint64_t)nsize > data->memoryLimit) {
 		return nullptr;
 	}
 
-	data->memoryUsed -= (int)osize;
-	data->memoryUsed += (int)nsize;
+	data->memoryUsed -= (uint64_t)osize;
+	data->memoryUsed += (uint64_t)nsize;
 	return memrealloc(ptr, nsize);
 }

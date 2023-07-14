@@ -39,16 +39,16 @@ void LuaCallableExtra::setInfo(Callable function, int argc, bool isTuple, bool w
 	this->wantsRef = wantsRef;
 }
 
-void LuaCallableExtra::setTuple(bool isTuple) {
-	this->isTuple = isTuple;
+void LuaCallableExtra::setTuple(bool value) {
+	this->isTuple = value;
 }
 
-void LuaCallableExtra::setWantsRef(bool wantsRef) {
-	this->wantsRef = wantsRef;
+void LuaCallableExtra::setWantsRef(bool value) {
+	this->wantsRef = value;
 }
 
-void LuaCallableExtra::setArgc(int argc) {
-	this->argc = argc;
+void LuaCallableExtra::setArgc(int value) {
+	this->argc = value;
 }
 
 bool LuaCallableExtra::getTuple() {
