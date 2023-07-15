@@ -58,7 +58,7 @@
 			<param index="1" name="lua" type="LuaAPI" />
 			<param index="2" name="args" type="LuaTuple" />
 			<description>
-                The bitwise NOT (unary ~) operation. Behavior similar to the bitwise AND operation.
+                The call operation. Used when the object is called as a function.
 			</description>
 		</method>
 		<method name="__concat" qualifiers="virtual">
@@ -109,12 +109,10 @@
 			<return type="Variant" />
 			<param index="0" name="obj" type="Object" />
 			<param index="1" name="lua" type="LuaAPI" />
-			<param index="2" name="index" type="String" />
+			<param index="2" name="index" type="Variant" />
 			<description>
                 The indexing access operation table[key]. This event happens when table is not a table or when key is not present in table. The metavalue is looked up in the metatable of table.
-                
-                The metavalue for this event can be either a function, a table, or any value with an __index metavalue. If it is a function, it is called with table and key as arguments, and the result of the call (adjusted to one value) is the result of the operation. Otherwise, the final result is the result of indexing this metavalue with key. This indexing is regular, not raw, and therefore can trigger another __index metavalue. 
-			</description>
+            </description>
 		</method>
 		<method name="__le" qualifiers="virtual">
 			<return type="bool" />
@@ -172,7 +170,7 @@
 			<return type="LuaError" />
 			<param index="0" name="obj" type="Object" />
 			<param index="1" name="lua" type="LuaAPI" />
-			<param index="2" name="index" type="String" />
+			<param index="2" name="index" type="Variant" />
 			<param index="3" name="value" type="Variant" />
 			<description>
                 The indexing assignment table[key] = value. Like the index event, this event happens when table is not a table or when key is not present in table. The metavalue is looked up in the metatable of table.

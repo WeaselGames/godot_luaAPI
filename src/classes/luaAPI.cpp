@@ -86,15 +86,15 @@ Ref<LuaObjectMetatable> LuaAPI::getObjectMetatable() const {
 	return objectMetatable;
 }
 
-void LuaAPI::setMemoryLimit(int limit) {
+void LuaAPI::setMemoryLimit(uint64_t limit) {
 	luaAllocData.memoryLimit = limit;
 }
 
-int LuaAPI::getMemoryLimit() const {
+uint64_t LuaAPI::getMemoryLimit() const {
 	return luaAllocData.memoryLimit;
 }
 
-int LuaAPI::getMemoryUsage() const {
+uint64_t LuaAPI::getMemoryUsage() const {
 	return luaAllocData.memoryUsed;
 }
 
@@ -139,12 +139,12 @@ Variant LuaAPI::callFunctionRef(Array args, int funcRef) {
 }
 
 // Calls LuaState::pushGlobalVariant()
-LuaError *LuaAPI::pushGlobalVariant(String name, Variant var) {
+Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {
 	return state.pushGlobalVariant(name, var);
 }
 
 // addFile() calls luaL_loadfille with the absolute file path
-LuaError *LuaAPI::doFile(String fileName) {
+Ref<LuaError> LuaAPI::doFile(String fileName) {
 	// push the error handler onto the stack
 	lua_pushcfunction(lState, LuaState::luaErrorHandler);
 
@@ -172,14 +172,14 @@ LuaError *LuaAPI::doFile(String fileName) {
 		return state.handleError(ret);
 	}
 
-	LuaError *err = execute(-2);
+	Ref<LuaError> err = execute(-2);
 	// pop the error handler from the stack
 	lua_pop(lState, 1);
 	return err;
 }
 
 // Loads string into lua state and executes the top of the stack
-LuaError *LuaAPI::doString(String code) {
+Ref<LuaError> LuaAPI::doString(String code) {
 	// push the error handler onto the stack
 	lua_pushcfunction(lState, LuaState::luaErrorHandler);
 	int ret = luaL_loadstring(lState, code.ascii().get_data());
@@ -187,14 +187,14 @@ LuaError *LuaAPI::doString(String code) {
 		return state.handleError(ret);
 	}
 
-	LuaError *err = execute(-2);
+	Ref<LuaError> err = execute(-2);
 	// pop the error handler from the stack
 	lua_pop(lState, 1);
 	return err;
 }
 
 // Execute the current lua stack, return error as string if one occurs, otherwise return String()
-LuaError *LuaAPI::execute(int handlerIndex) {
+Ref<LuaError> LuaAPI::execute(int handlerIndex) {
 	int ret = lua_pcall(lState, 0, 0, handlerIndex);
 	if (ret != LUA_OK) {
 		return state.handleError(ret);
@@ -244,19 +244,19 @@ void *LuaAPI::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize) {
 	}
 
 	if (ptr == nullptr) {
-		if (data->memoryLimit != 0 && data->memoryUsed + (int)nsize > data->memoryLimit) {
+		if (data->memoryLimit != 0 && data->memoryUsed + (uint64_t)nsize > data->memoryLimit) {
 			return nullptr;
 		}
 
-		data->memoryUsed += (int)nsize;
+		data->memoryUsed += (uint64_t)nsize;
 		return memalloc(nsize);
 	}
 
-	if (data->memoryLimit != 0 && data->memoryUsed - (int)osize + (int)nsize > data->memoryLimit) {
+	if (data->memoryLimit != 0 && data->memoryUsed - (uint64_t)osize + (uint64_t)nsize > data->memoryLimit) {
 		return nullptr;
 	}
 
-	data->memoryUsed -= (int)osize;
-	data->memoryUsed += (int)nsize;
+	data->memoryUsed -= (uint64_t)osize;
+	data->memoryUsed += (uint64_t)nsize;
 	return memrealloc(ptr, nsize);
 }

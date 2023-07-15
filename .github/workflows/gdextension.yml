@@ -183,6 +183,7 @@ jobs:
         if: ${{ startsWith(matrix.opts.identifier, 'windows-') }}
         shell: sh
         run: |
+          sudo apt-get update
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
@@ -237,7 +238,7 @@ jobs:
       - name: Compile extension
         shell: sh
         run: |
-          scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' ${{ matrix.opts.args }}
+          PATH=/opt/buildroot/bin:$PATH scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' ${{ matrix.opts.args }}
           ls -l project/addons/luaAPI/bin/
       - name: Strip bins
         if: "!startsWith(matrix.opts.identifier, 'windows-') && startsWith(matrix.opts.arch, 'x86_')"
@@ -360,6 +361,7 @@ jobs:
         if: ${{ startsWith(matrix.opts.identifier, 'windows-') }}
         shell: sh
         run: |
+          sudo apt-get update
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix

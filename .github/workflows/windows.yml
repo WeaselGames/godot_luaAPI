@@ -91,6 +91,7 @@ jobs:
         if: ${{ matrix.opts.runner != 'windows-latest' }}
         shell: sh
         run: |
+          sudo apt update
           sudo apt install gcc-multilib g++-multilib
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix

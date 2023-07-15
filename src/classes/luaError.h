@@ -29,7 +29,7 @@ public:
 		ERR_ERR = LUA_ERRERR,
 		ERR_FILE = LUA_ERRFILE,
 	};
-	static LuaError *newError(String msg, ErrorType type);
+	static Ref<LuaError> newError(String msg, ErrorType type);
 
 	void setInfo(String msg, ErrorType type);
 	bool operator==(const ErrorType type);

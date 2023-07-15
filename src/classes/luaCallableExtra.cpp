@@ -39,16 +39,16 @@ void LuaCallableExtra::setInfo(Callable function, int argc, bool isTuple, bool w
 	this->wantsRef = wantsRef;
 }
 
-void LuaCallableExtra::setTuple(bool isTuple) {
-	this->isTuple = isTuple;
+void LuaCallableExtra::setTuple(bool value) {
+	this->isTuple = value;
 }
 
-void LuaCallableExtra::setWantsRef(bool wantsRef) {
-	this->wantsRef = wantsRef;
+void LuaCallableExtra::setWantsRef(bool value) {
+	this->wantsRef = value;
 }
 
-void LuaCallableExtra::setArgc(int argc) {
-	this->argc = argc;
+void LuaCallableExtra::setArgc(int value) {
+	this->argc = value;
 }
 
 bool LuaCallableExtra::getTuple() {
@@ -69,8 +69,7 @@ int LuaCallableExtra::call(lua_State *state) {
 	int noneMulty = l_argc;
 	LuaCallableExtra *func = (LuaCallableExtra *)LuaState::getVariant(state, 1).operator Object *();
 	if (func == nullptr) {
-		LuaError *err = LuaError::newError("Error during LuaCallableExtra::call func==null", LuaError::ERR_RUNTIME);
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, "Error during LuaCallableExtra::call func==null");
 		lua_error(state);
 		return 0;
 	}
@@ -111,7 +110,7 @@ int LuaCallableExtra::call(lua_State *state) {
 	Callable::CallError error;
 	func->function.callp(p_args, args.size(), returned, error);
 	if (error.error != error.CALL_OK) {
-		LuaError *err = LuaState::handleError(func->function.get_method(), error, p_args, args.size());
+		Ref<LuaError> err = LuaState::handleError(func->function.get_method(), error, p_args, args.size());
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;
@@ -128,20 +127,23 @@ int LuaCallableExtra::call(lua_State *state) {
 	return 1;
 }
 
-LuaCallableExtra *LuaCallableExtra::withTuple(Callable func, int argc) {
-	LuaCallableExtra *toReturn = memnew(LuaCallableExtra);
+Ref<LuaCallableExtra> LuaCallableExtra::withTuple(Callable func, int argc) {
+	Ref<LuaCallableExtra> toReturn;
+	toReturn.instantiate();
 	toReturn->setInfo(func, argc, true, false);
 	return toReturn;
 }
 
-LuaCallableExtra *LuaCallableExtra::withRef(Callable func) {
-	LuaCallableExtra *toReturn = memnew(LuaCallableExtra);
+Ref<LuaCallableExtra> LuaCallableExtra::withRef(Callable func) {
+	Ref<LuaCallableExtra> toReturn;
+	toReturn.instantiate();
 	toReturn->setInfo(func, 0, false, true);
 	return toReturn;
 }
 
-LuaCallableExtra *LuaCallableExtra::withRefAndTuple(Callable func, int argc) {
-	LuaCallableExtra *toReturn = memnew(LuaCallableExtra);
+Ref<LuaCallableExtra> LuaCallableExtra::withRefAndTuple(Callable func, int argc) {
+	Ref<LuaCallableExtra> toReturn;
+	toReturn.instantiate();
 	toReturn->setInfo(func, argc, true, true);
 	return toReturn;
 }

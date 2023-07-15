@@ -2,6 +2,9 @@
 
 #ifdef LAPI_GDEXTENSION
 #define GDVIRTUAL_BIND(m, ...) BIND_VIRTUAL_METHOD(LuaObjectMetatable, m);
+#define VIRTUAL_CALL(m, r, ...) r = call(#m, __VA_ARGS__);
+#else
+#define VIRTUAL_CALL(m, r, ...) GDVIRTUAL_CALL(m, __VA_ARGS__, r);
 #endif
 
 void LuaObjectMetatable::_bind_methods() {
@@ -32,253 +35,153 @@ void LuaObjectMetatable::_bind_methods() {
 	GDVIRTUAL_BIND(__le, "obj", "lua", "other");
 }
 
-Variant LuaObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, String index) {
+Variant LuaObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, Variant index) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__index, obj, api, index, ret);
-#else
-	ret = call("__index", obj, api, index);
-#endif
+	VIRTUAL_CALL(__index, ret, obj, api, index);
 	return ret;
 }
 
-LuaError *LuaObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, String index, Variant value) {
-	LuaError *ret = nullptr;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__newindex, obj, api, index, value, ret);
-#else
-	ret = dynamic_cast<LuaError *>((Object *)call("__newindex", obj, api, index, value));
-#endif
+Ref<LuaError> LuaObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) {
+	Ref<LuaError> ret;
+	VIRTUAL_CALL(__newindex, ret, obj, api, index, value);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__call(Object *obj, Ref<LuaAPI> api, Ref<LuaTuple> args) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__call, obj, api, args, ret);
-#else
-	ret = call("__call", obj, api, args);
-#endif
+	VIRTUAL_CALL(__call, ret, obj, api, args);
 	return ret;
 }
 
-LuaError *LuaObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
-	LuaError *ret = nullptr;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__gc, obj, api, ret);
-#else
-	ret = dynamic_cast<LuaError *>((Object *)call("__gc", obj, api));
-#endif
+Ref<LuaError> LuaObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
+	Ref<LuaError> ret;
+	VIRTUAL_CALL(__gc, ret, obj, api);
 	return ret;
 }
 
 String LuaObjectMetatable::__tostring(Object *obj, Ref<LuaAPI> api) {
 	String ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__tostring, obj, api, ret);
-#else
-	ret = call("__tostring", obj, api);
-#endif
+	VIRTUAL_CALL(__tostring, ret, obj, api);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__metatable(Object *obj, Ref<LuaAPI> api) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__metatable, obj, api, ret);
-#else
-	ret = call("__metatable", obj, api);
-#endif
+	VIRTUAL_CALL(__metatable, ret, obj, api);
 	return ret;
 }
 
 int LuaObjectMetatable::__len(Object *obj, Ref<LuaAPI> api) {
 	int ret = 0;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__len, obj, api, ret);
-#else
-	ret = call("__len", obj, api);
-#endif
+	VIRTUAL_CALL(__len, ret, obj, api);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__unm(Object *obj, Ref<LuaAPI> api) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__unm, obj, api, ret);
-#else
-	ret = call("__unm", obj, api);
-#endif
+	VIRTUAL_CALL(__unm, ret, obj, api);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__add(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__add, obj, api, other, ret);
-#else
-	ret = call("__add", obj, api, other);
-#endif
+	VIRTUAL_CALL(__add, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__sub(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__sub, obj, api, other, ret);
-#else
-	ret = call("__sub", obj, api, other);
-#endif
+	VIRTUAL_CALL(__sub, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__mul(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__mul, obj, api, other, ret);
-#else
-	ret = call("__mul", obj, api, other);
-#endif
+	VIRTUAL_CALL(__mul, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__div(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__div, obj, api, other, ret);
-#else
-	ret = call("__div", obj, api, other);
-#endif
+	VIRTUAL_CALL(__div, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__idiv(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__idiv, obj, api, other, ret);
-#else
-	ret = call("__idiv", obj, api, other);
-#endif
+	VIRTUAL_CALL(__idiv, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__mod(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__mod, obj, api, other, ret);
-#else
-	ret = call("__mod", obj, api, other);
-#endif
+	VIRTUAL_CALL(__mod, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__pow(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__pow, obj, api, other, ret);
-#else
-	ret = call("__pow", obj, api, other);
-#endif
+	VIRTUAL_CALL(__pow, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__band(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__band, obj, api, other, ret);
-#else
-	ret = call("__band", obj, api, other);
-#endif
+	VIRTUAL_CALL(__band, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__bor(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__bor, obj, api, other, ret);
-#else
-	ret = call("__bor", obj, api, other);
-#endif
+	VIRTUAL_CALL(__bor, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__bxor(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__bxor, obj, api, other, ret);
-#else
-	ret = call("__bxor", obj, api, other);
-#endif
+	VIRTUAL_CALL(__bxor, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__bnot(Object *obj, Ref<LuaAPI> api) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__bnot, obj, api, ret);
-#else
-	ret = call("__bnot", obj, api);
-#endif
+	VIRTUAL_CALL(__bnot, ret, obj, api);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__shl(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__shl, obj, api, other, ret);
-#else
-	ret = call("__shl", obj, api, other);
-#endif
+	VIRTUAL_CALL(__shl, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__shr(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__shr, obj, api, other, ret);
-#else
-	ret = call("__shr", obj, api, other);
-#endif
+	VIRTUAL_CALL(__shr, ret, obj, api, other);
 	return ret;
 }
 
 Variant LuaObjectMetatable::__concat(Object *obj, Ref<LuaAPI> api, Variant other) {
 	Variant ret;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__concat, obj, api, other, ret);
-#else
-	ret = call("__concat", obj, api, other);
-#endif
+	VIRTUAL_CALL(__concat, ret, obj, api, other);
 	return ret;
 }
 
 bool LuaObjectMetatable::__eq(Object *obj, Ref<LuaAPI> api, Variant other) {
 	bool ret = false;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__eq, obj, api, other, ret);
-#else
-	ret = call("__eq", obj, api, other);
-#endif
+	VIRTUAL_CALL(__eq, ret, obj, api, other);
 	return ret;
 }
 
 bool LuaObjectMetatable::__lt(Object *obj, Ref<LuaAPI> api, Variant other) {
 	bool ret = false;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__lt, obj, api, other, ret);
-#else
-	ret = call("__lt", obj, api, other);
-#endif
+	VIRTUAL_CALL(__lt, ret, obj, api, other);
 	return ret;
 }
 
 bool LuaObjectMetatable::__le(Object *obj, Ref<LuaAPI> api, Variant other) {
 	bool ret = false;
-#ifndef LAPI_GDEXTENSION
-	GDVIRTUAL_CALL(__le, obj, api, other, ret);
-#else
-	ret = call("__le", obj, api, other);
-#endif
+	VIRTUAL_CALL(__le, ret, obj, api, other);
 	return ret;
 }
 
@@ -298,7 +201,7 @@ bool LuaDefaultObjectMetatable::getPermissive() const {
 	return permissive;
 }
 
-Variant LuaDefaultObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, String index) {
+Variant LuaDefaultObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, Variant index) {
 	if (obj->has_method("__index")) {
 		return obj->call("__index", api, index);
 	}
@@ -308,14 +211,14 @@ Variant LuaDefaultObjectMetatable::__index(Object *obj, Ref<LuaAPI> api, String 
 		fields = obj->call("lua_fields");
 	}
 
-	if ((!permissive && fields.has(index)) || (permissive && !fields.has(index))) {
-		return obj->get(index);
+	if ((!permissive && fields.has((String)index)) || (permissive && !fields.has((String)index))) {
+		return obj->get((String)index);
 	}
 
 	return Variant();
 }
 
-LuaError *LuaDefaultObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, String index, Variant value) {
+Ref<LuaError> LuaDefaultObjectMetatable::__newindex(Object *obj, Ref<LuaAPI> api, Variant index, Variant value) {
 	if (obj->has_method("__newindex")) {
 		Variant ret = obj->call("__newindex", api, index, value);
 		if (ret.get_type() == Variant::OBJECT) {
@@ -348,7 +251,7 @@ Variant LuaDefaultObjectMetatable::__call(Object *obj, Ref<LuaAPI> api, Ref<LuaT
 	return Variant();
 }
 
-LuaError *LuaDefaultObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
+Ref<LuaError> LuaDefaultObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
 	if (obj->has_method("__gc")) {
 		Variant ret = obj->call("__gc", api);
 		if (ret.get_type() == Variant::OBJECT) {

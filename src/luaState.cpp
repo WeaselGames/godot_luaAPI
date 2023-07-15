@@ -8,8 +8,8 @@
 
 #include <util.h>
 
-void LuaState::setState(lua_State *L, LuaAPI *api, bool bindAPI) {
-	this->L = L;
+void LuaState::setState(lua_State *state, LuaAPI *api, bool bindAPI) {
+	this->L = state;
 	if (!bindAPI) {
 		return;
 	}
@@ -187,21 +187,21 @@ Variant LuaState::callFunction(String functionName, Array args) {
 }
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
-LuaError *LuaState::pushVariant(Variant var) const {
+Ref<LuaError> LuaState::pushVariant(Variant var) const {
 	return LuaState::pushVariant(L, var);
 }
 
 // Call pushVariant() and set it to a global name
-LuaError *LuaState::pushGlobalVariant(String name, Variant var) {
-	LuaError *err = pushVariant(var);
-	if (err == nullptr) {
+Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
+	Ref<LuaError> err = pushVariant(var);
+	if (err.is_null()) {
 		lua_setglobal(L, name.ascii().get_data());
-		return err;
+		return nullptr;
 	}
 	return err;
 }
 
-LuaError *LuaState::handleError(int lua_error) const {
+Ref<LuaError> LuaState::handleError(int lua_error) const {
 	return LuaState::handleError(L, lua_error);
 }
 
@@ -219,7 +219,7 @@ LuaAPI *LuaState::getAPI(lua_State *state) {
 }
 
 // Push a GD Variant to the lua stack and returns a error if the type is not supported
-LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
+Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 	switch (var.get_type()) {
 		case Variant::Type::NIL:
 			lua_pushnil(state);
@@ -253,13 +253,13 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 				Variant key = i + 1;
 				Variant value = array[i];
 
-				LuaError *err = pushVariant(state, key);
-				if (err != nullptr) {
+				Ref<LuaError> err = pushVariant(state, key);
+				if (!err.is_null()) {
 					return err;
 				}
 
 				err = pushVariant(state, value);
-				if (err != nullptr) {
+				if (!err.is_null()) {
 					return err;
 				}
 
@@ -276,13 +276,13 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 				Variant key = keys[i];
 				Variant value = dict[key];
 
-				LuaError *err = pushVariant(state, key);
-				if (err != nullptr) {
+				Ref<LuaError> err = pushVariant(state, key);
+				if (!err.is_null()) {
 					return err;
 				}
 
 				err = pushVariant(state, value);
-				if (err != nullptr) {
+				if (!err.is_null()) {
 					return err;
 				}
 
@@ -334,10 +334,10 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 
 			// If the type being pushed is a lua error, Raise a error
 #ifndef LAPI_GDEXTENSION
-			if (LuaError *err = Object::cast_to<LuaError>(var.operator Object *()); err != nullptr) {
+			if (Ref<LuaError> err = Object::cast_to<LuaError>(var.operator Object *()); !err.is_null()) {
 #else
 			// blame this on https://github.com/godotengine/godot-cpp/issues/995
-			if (LuaError *err = dynamic_cast<LuaError *>(var.operator Object *()); err != nullptr) {
+			if (Ref<LuaError> err = dynamic_cast<LuaError *>(var.operator Object *()); !err.is_null()) {
 #endif
 				lua_pushstring(state, err->getMessage().ascii().get_data());
 				lua_error(state);
@@ -398,15 +398,15 @@ LuaError *LuaState::pushVariant(lua_State *state, Variant var) {
 			if (callable.is_custom()) {
 				// If the type being pushed is a lua function ref, push the ref instead.
 #ifndef LAPI_GDEXTENSION
-				LuaAPI *callObj = Object::cast_to<LuaAPI>(callable.get_object());
+				Ref<LuaAPI> callObj = Object::cast_to<LuaAPI>(callable.get_object());
 #else
-				LuaAPI *callObj = dynamic_cast<LuaAPI *>(callable.get_object());
+				Ref<LuaAPI> callObj = dynamic_cast<LuaAPI *>(callable.get_object());
 #endif
-				if (callObj != nullptr && (String)callable.get_method() == "call_function_ref") {
+				if (callObj.is_valid() && (String)callable.get_method() == "call_function_ref") {
 					Array argBinds = callable.get_bound_arguments();
 					if (argBinds.size() == 1) {
-						lua_rawgeti(state, LUA_REGISTRYINDEX, (int)argBinds[0]);
 						lua_State *refState = callObj->getState();
+						lua_rawgeti(refState, LUA_REGISTRYINDEX, (int)argBinds[0]);
 						if (refState != state) {
 							lua_xmove(refState, state, 1);
 						}
@@ -513,7 +513,7 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
-LuaError *LuaState::handleError(lua_State *state, int lua_error) {
+Ref<LuaError> LuaState::handleError(lua_State *state, int lua_error) {
 	String msg;
 	switch (lua_error) {
 		case LUA_ERRRUN: {
@@ -551,7 +551,7 @@ LuaError *LuaState::handleError(lua_State *state, int lua_error) {
 
 #ifndef LAPI_GDEXTENSION
 // for handling callable errors.
-LuaError *LuaState::handleError(const StringName &func, Callable::CallError error, const Variant **p_arguments, int argc) {
+Ref<LuaError> LuaState::handleError(const StringName &func, Callable::CallError error, const Variant **p_arguments, int argc) {
 	switch (error.error) {
 		case Callable::CallError::CALL_ERROR_INVALID_ARGUMENT: {
 			return LuaError::newError(
@@ -597,7 +597,7 @@ LuaError *LuaState::handleError(const StringName &func, Callable::CallError erro
 
 #else
 
-LuaError *LuaState::handleError(const StringName &func, GDExtensionCallError error, const Variant **p_arguments, int argc) {
+Ref<LuaError> LuaState::handleError(const StringName &func, GDExtensionCallError error, const Variant **p_arguments, int argc) {
 	switch (error.error) {
 		case GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT: {
 			return LuaError::newError(
@@ -708,7 +708,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 	for (int i = 0; i < argc; i++) {
 		args[i] = LuaState::getVariant(state, index++);
 		if (args[i].get_type() != Variant::Type::OBJECT) {
-			if (LuaError *err = Object::cast_to<LuaError>(args[i].operator Object *()); err != nullptr) {
+			if (Ref<LuaError> err = Object::cast_to<LuaError>(args[i].operator Object *()); !err.is_null()) {
 				lua_pushstring(state, err->getMessage().ascii().get_data());
 				lua_error(state);
 				return 0;
@@ -724,7 +724,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 	Callable::CallError error;
 	callable.callp(p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
-		LuaError *err = LuaState::handleError(callable.get_method(), error, p_args, argc);
+		Ref<LuaError> err = LuaState::handleError(callable.get_method(), error, p_args, argc);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;
@@ -735,8 +735,8 @@ int LuaState::luaCallableCall(lua_State *state) {
 		return lua_yield(state, lua_gettop(state));
 	}
 
-	LuaError *err = LuaState::pushVariant(state, returned);
-	if (err != nullptr) {
+	Ref<LuaError> err = LuaState::pushVariant(state, returned);
+	if (!err.is_null()) {
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;
@@ -763,7 +763,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 	for (int i = 0; i < argc; i++) {
 		Variant var = LuaState::getVariant(state, index++);
 		if (var.get_type() == Variant::Type::OBJECT) {
-			if (LuaError *err = dynamic_cast<LuaError *>(var.operator Object *()); err != nullptr) {
+			if (Ref<LuaError> err = dynamic_cast<LuaError *>(var.operator Object *()); !err.is_null()) {
 				lua_pushstring(state, err->getMessage().ascii().get_data());
 				lua_error(state);
 				return 0;
@@ -779,8 +779,8 @@ int LuaState::luaCallableCall(lua_State *state) {
 		return lua_yield(state, lua_gettop(state));
 	}
 
-	LuaError *err = LuaState::pushVariant(state, returned);
-	if (err != nullptr) {
+	Ref<LuaError> err = LuaState::pushVariant(state, returned);
+	if (!err.is_null()) {
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;
@@ -818,7 +818,7 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	Callable::CallError error;
 	obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
-		LuaError *err = LuaState::handleError(fName, error, p_args, argc);
+		Ref<LuaError> err = LuaState::handleError(fName, error, p_args, argc);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;
@@ -827,7 +827,7 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	GDExtensionCallError error;
 	obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
 	if (error.error != GDEXTENSION_CALL_OK) {
-		LuaError *err = LuaState::handleError(fName, error, p_args, argc);
+		Ref<LuaError> err = LuaState::handleError(fName, error, p_args, argc);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return 0;
@@ -876,7 +876,7 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 	Callable::CallError error;
 	hook.callp(p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
-		LuaError *err = LuaState::handleError(hook.get_method(), error, p_args, argc);
+		Ref<LuaError> err = LuaState::handleError(hook.get_method(), error, p_args, argc);
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 		return;
@@ -885,19 +885,13 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 	if (returned.get_type() == Variant::NIL) {
 		return;
 	}
-
-	LuaError *err = LuaState::pushVariant(state, returned);
-	if (err != nullptr) {
-		lua_pushstring(state, err->getMessage().ascii().get_data());
-		lua_error(state);
-	}
 #else
 	Variant returned = hook.callv(args);
+#endif
 
-	LuaError *err = LuaState::pushVariant(state, returned);
-	if (err != nullptr) {
+	Ref<LuaError> err = LuaState::pushVariant(state, returned);
+	if (!err.is_null()) {
 		lua_pushstring(state, err->getMessage().ascii().get_data());
 		lua_error(state);
 	}
-#endif
 }
