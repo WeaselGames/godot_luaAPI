@@ -22,9 +22,9 @@ protected:
 	static void _bind_methods();
 
 public:
-	static LuaCallableExtra *withTuple(Callable function, int argc);
-	static LuaCallableExtra *withRef(Callable function);
-	static LuaCallableExtra *withRefAndTuple(Callable function, int argc);
+	static Ref<LuaCallableExtra> withTuple(Callable function, int argc);
+	static Ref<LuaCallableExtra> withRef(Callable function);
+	static Ref<LuaCallableExtra> withRefAndTuple(Callable function, int argc);
 
 	void setInfo(Callable function, int argc, bool isTuple, bool wantsRef);
 

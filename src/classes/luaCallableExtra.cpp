@@ -127,20 +127,23 @@ int LuaCallableExtra::call(lua_State *state) {
 	return 1;
 }
 
-LuaCallableExtra *LuaCallableExtra::withTuple(Callable func, int argc) {
-	LuaCallableExtra *toReturn = memnew(LuaCallableExtra);
+Ref<LuaCallableExtra> LuaCallableExtra::withTuple(Callable func, int argc) {
+	Ref<LuaCallableExtra> toReturn;
+	toReturn.instantiate();
 	toReturn->setInfo(func, argc, true, false);
 	return toReturn;
 }
 
-LuaCallableExtra *LuaCallableExtra::withRef(Callable func) {
-	LuaCallableExtra *toReturn = memnew(LuaCallableExtra);
+Ref<LuaCallableExtra> LuaCallableExtra::withRef(Callable func) {
+	Ref<LuaCallableExtra> toReturn;
+	toReturn.instantiate();
 	toReturn->setInfo(func, 0, false, true);
 	return toReturn;
 }
 
-LuaCallableExtra *LuaCallableExtra::withRefAndTuple(Callable func, int argc) {
-	LuaCallableExtra *toReturn = memnew(LuaCallableExtra);
+Ref<LuaCallableExtra> LuaCallableExtra::withRefAndTuple(Callable func, int argc) {
+	Ref<LuaCallableExtra> toReturn;
+	toReturn.instantiate();
 	toReturn->setInfo(func, argc, true, true);
 	return toReturn;
 }
