@@ -20,7 +20,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	static LuaTuple *fromArray(Array elms);
+	static Ref<LuaTuple> fromArray(Array elms);
 
 	void pushBack(Variant var);
 	void pushFront(Variant var);

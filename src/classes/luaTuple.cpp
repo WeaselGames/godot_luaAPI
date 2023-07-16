@@ -15,8 +15,9 @@ void LuaTuple::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("to_array"), &LuaTuple::toArray);
 }
 
-LuaTuple *LuaTuple::fromArray(Array elms) {
-	LuaTuple *tuple = memnew(LuaTuple);
+Ref<LuaTuple> LuaTuple::fromArray(Array elms) {
+	Ref<LuaTuple> tuple;
+	tuple.instantiate();
 	tuple->elements = elms;
 	return tuple;
 }
