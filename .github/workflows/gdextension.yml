@@ -170,6 +170,7 @@ jobs:
         if: ${{ startsWith(matrix.opts.arch, 'x86_32') }}
         shell: sh
         run: |
+          sudo apt-get update
           sudo apt install gcc-multilib g++-multilib
       
       - name: Set up Java 11 (Android)
@@ -355,6 +356,7 @@ jobs:
         if: ${{ startsWith(matrix.opts.arch, 'x86_32') }}
         shell: sh
         run: |
+          sudo apt-get update
           sudo apt install gcc-multilib g++-multilib
 
       - name: (Windows) Install mingw64
