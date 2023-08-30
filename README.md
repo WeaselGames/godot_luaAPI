@@ -109,7 +109,7 @@ func _ready() -> void:
 
 	var val = lua.pull_variant("get_message")
 	if val is LuaError:
-		print("ERROR %d: %s" % [err.type, err.message])
+		print("ERROR %d: %s" % [val.type, val.message])
 		return
 
 	var message = val.call([])
