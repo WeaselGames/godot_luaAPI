@@ -27,6 +27,6 @@ func _ready():
 	
 	var ret = lua.call_function("get_message", [])
 	if ret is LuaError:
-		print("ERROR %d: %s" % [err.type, err.message])
+		print("ERROR %d: %s" % [ret.type, ret.message])
 		return
 	print(ret)
