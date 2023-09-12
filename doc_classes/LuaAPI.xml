@@ -45,7 +45,14 @@
 			<return type="bool" />
 			<param index="0" name="LuaFunctionName" type="String" />
 			<description>
-				Returns [code]true[/code] only if [code]LuaFunctionName[/code] is defined in current Lua's state as a function.
+				Returns [code]true[/code] only if [code]LuaFunctionName[/code] is defined in the global environment table as a function.
+			</description>
+		</method>
+		<method name="registry_function_exists">
+			<return type="bool" />
+			<param index="0" name="LuaFunctionName" type="String" />
+			<description>
+				Returns [code]true[/code] only if [code]LuaFunctionName[/code] is defined in the registry table as a function.
 			</description>
 		</method>
 		<method name="call_function">
@@ -54,6 +61,14 @@
 			<param index="1" name="Args" type="Array" />
 			<description>
 				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with Lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if Lua returns no value it will be null. If an error occurs while calling this function, a LuaError object will be returned.
+			</description>
+		</method>
+		<method name="call_function_registry">
+			<return type="Variant" />
+			<param index="0" name="LuaFunctionName" type="String" />
+			<param index="1" name="Args" type="Array" />
+			<description>
+				Calls a function from the registry table inside current Lua state. You may want to check if the function actually exists with [code]registry_function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if Lua returns no value it will be null. If an error occurs while calling this function, a LuaError object will be returned.
 			</description>
 		</method>
 		<method name="call_function_ref">
@@ -78,6 +93,21 @@
 			<param index="1" name="var" type="Variant" />
 			<description>
 				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
+			</description>
+		</method>
+		<method name="get_registry">
+			<return type="Variant" />
+			<param index="0" name="Name" type="String" />
+			<description>
+				Will pull a copy of a Variant from lua's registry table.
+			</description>
+		</method>
+		<method name="set_registry">
+			<return type="LuaError" />
+			<param index="0" name="Name" type="String" />
+			<param index="1" name="var" type="Variant" />
+			<description>
+				Will push a copy of a Variant to lua's registry table. Returns a error if the type is not supported.
 			</description>
 		</method>
 		<method name="set_hook">
