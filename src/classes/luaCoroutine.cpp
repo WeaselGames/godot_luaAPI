@@ -26,7 +26,6 @@ void LuaCoroutine::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaCoroutine::getRegistryKey);
 	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaCoroutine::setRegistryKey);
 	ClassDB::bind_method(D_METHOD("call_function_registry", "LuaFunctionName", "Args"), &LuaCoroutine::callFunctionRegistry);
-	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
 	ClassDB::bind_method(D_METHOD("registry_function_exists", "LuaFunctionName"), &LuaCoroutine::luaFunctionExistsRegistry);
 
 	// This signal is only meant to be used by await when yield_await is called.
