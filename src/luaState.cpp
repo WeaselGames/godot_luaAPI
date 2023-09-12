@@ -148,12 +148,12 @@ bool LuaState::luaFunctionExists(String functionName) {
 	lua_pushglobaltable(L);
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
-#end
+#endif
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -175,7 +175,7 @@ bool LuaState::luaFunctionExistsRegistry(String functionName) {
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -201,12 +201,12 @@ Variant LuaState::pullVariant(String name) {
 	lua_pushglobaltable(L);
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
-#end
+#endif
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -226,7 +226,7 @@ Variant LuaState::getRegistryKey(String name) {
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -247,7 +247,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	String last = strs.get(strs.size() - 1);
 	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
@@ -282,12 +282,12 @@ Variant LuaState::callFunction(String functionName, Array args) {
 	lua_pushglobaltable(L);
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
-#end
+#endif
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -323,7 +323,7 @@ Variant LuaState::callFunctionRegistry(String functionName, Array args) {
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -360,12 +360,12 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 	lua_pushglobaltable(L);
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
-#end
+#endif
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
 #else
 	PackedStringArray strs = functionName.split(".");
-#end
+#endif
 	String last = strs.get(strs.size() - 1);
 	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
