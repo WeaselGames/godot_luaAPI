@@ -162,6 +162,25 @@ Variant LuaState::pullVariant(String name) {
 	lua_pop(L, 1);
 	return val;
 }
+Variant LuaState::getRegistryKey(String name) {
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_getfield(L, name.ascii().get_data());
+	Variant val = getVar(-1);
+	lua_pop(L, 2);
+	return val;
+}
+
+Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	Ref<LuaError> err = pushVariant(var);
+	if (err.is_null()) {
+		lua_setfield(L, 2, name.ascii().get_data());
+		lua_pop(L, 1);
+		return nullptr;
+	}
+	lua_pop(L, 1);
+	return err;
+}
 
 // call a Lua function from GDScript
 Variant LuaState::callFunction(String functionName, Array args) {
