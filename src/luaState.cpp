@@ -248,7 +248,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 #else
 	PackedStringArray strs = name.split(".");
 #endif
-	String last = strs.get(strs.size() - 1);
+	String last = strs[strs.size() - 1];
 	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -366,7 +366,7 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 #else
 	PackedStringArray strs = name.split(".");
 #endif
-	String last = strs.get(strs.size() - 1);
+	String last = strs[strs.size() - 1];
 	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
