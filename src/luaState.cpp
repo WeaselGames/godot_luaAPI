@@ -259,7 +259,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, -2);
 	}
-	if (lua_isnil(L, 1)) {
+	if (lua_isnil(L, -1)) {
 		return LuaError::newError("cannot index nil with string", LuaError::ERR_RUNTIME); // Make it look natural.
 	}
 	Ref<LuaError> err = pushVariant(var);
