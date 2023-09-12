@@ -150,6 +150,15 @@ bool LuaState::luaFunctionExists(String functionName) {
 	return type == LUA_TFUNCTION;
 }
 
+bool LuaState::luaFunctionExistsRegistry(String functionName) {
+	// LuaJIT does not return a type here
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_getfield(L, 1, name.ascii().get_data());
+	int type = lua_type(L, -1);
+	lua_pop(L, 2);
+	return type == LUA_TFUNCTION;
+}
+
 // get a value at the given index and return as a variant
 Variant LuaState::getVar(int index) const {
 	return getVariant(L, index);
@@ -189,6 +198,32 @@ Variant LuaState::callFunction(String functionName, Array args) {
 
 	// put global function name on stack
 	lua_getglobal(L, functionName.ascii().get_data());
+
+	// push args
+	for (int i = 0; i < args.size(); ++i) {
+		pushVariant(args[i]);
+	}
+
+	// error handlers index is -2 - args.size()
+	int ret = lua_pcall(L, args.size(), 1, -2 - args.size());
+	if (ret != LUA_OK) {
+		return handleError(ret);
+	}
+	Variant toReturn = getVar(-1); // get return value
+	lua_pop(L, 1); // pop err handler
+	return toReturn;
+}
+
+Variant LuaState::callFunctionRegistry(String functionName, Array args) {
+	// push the error handler on to the stack
+	lua_pushcfunction(L, luaErrorHandler);
+
+	// put function name on stack
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_getfield(L, 1, name.ascii().get_data());
+
+	// remove the registry table from the stack
+	lua_remove(L, 2);
 
 	// push args
 	for (int i = 0; i < args.size(); ++i) {
