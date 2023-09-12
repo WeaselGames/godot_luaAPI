@@ -153,7 +153,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 bool LuaState::luaFunctionExistsRegistry(String functionName) {
 	// LuaJIT does not return a type here
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	lua_getfield(L, 1, name.ascii().get_data());
+	lua_getfield(L, 1, functionName.ascii().get_data());
 	int type = lua_type(L, -1);
 	lua_pop(L, 2);
 	return type == LUA_TFUNCTION;
@@ -220,7 +220,7 @@ Variant LuaState::callFunctionRegistry(String functionName, Array args) {
 
 	// put function name on stack
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	lua_getfield(L, 1, name.ascii().get_data());
+	lua_getfield(L, 1, functionName.ascii().get_data());
 
 	// remove the registry table from the stack
 	lua_remove(L, 2);
