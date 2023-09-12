@@ -37,8 +37,10 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaAPI::getRegistryKey);
 	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaAPI::setRegistryKey);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
+	ClassDB::bind_method(D_METHOD("call_function_registry", "LuaFunctionName", "Args"), &LuaAPI::callFunctionRegistry);
 	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
+	ClassDB::bind_method(D_METHOD("registry_function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExistsRegistry);
 
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 	ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
@@ -113,6 +115,11 @@ bool LuaAPI::luaFunctionExists(String functionName) {
 	return state.luaFunctionExists(functionName);
 }
 
+// Calls LuaState::luaFunctionExistsRegistry()
+bool LuaAPI::luaFunctionExists(String functionName) {
+	return state.luaFunctionExistsRegistry(functionName);
+}
+
 // Calls LuaState::pullVariant()
 Variant LuaAPI::pullVariant(String name) {
 	return state.pullVariant(name);
@@ -121,6 +128,11 @@ Variant LuaAPI::pullVariant(String name) {
 // Calls LuaState::callFunction()
 Variant LuaAPI::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
+}
+
+// Calls LuaState::callFunctionRegistry()
+Variant LuaAPI::callFunctionRegistry(String functionName, Array args) {
+	return state.callFunctionRegistry(functionName, args);
 }
 
 // Invokes the passed lua reference
