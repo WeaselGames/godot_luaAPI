@@ -144,9 +144,11 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 // Returns true if a lua function exists with the given name
 bool LuaState::luaFunctionExists(String functionName) {
 	// LuaJIT does not return a type here
-	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	lua_geti(L, -1, LUA_RIDX_GLOBALS);
-	lua_remove(L, -2);
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L,LUA_GLOBALSINDEX);
+#end
 	Vector<String> strs = functionName.split(".");
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -187,9 +189,11 @@ Variant LuaState::getVar(int index) const {
 
 // Pull a global variant from Lua to GDScript
 Variant LuaState::pullVariant(String name) {
-	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	lua_geti(L, -1, LUA_RIDX_GLOBALS);
-	lua_remove(L, -2);
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L,LUA_GLOBALSINDEX);
+#end
 	Vector<String> strs = name.split(".");
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -254,9 +258,11 @@ Variant LuaState::callFunction(String functionName, Array args) {
 	lua_pushcfunction(L, luaErrorHandler);
 
 	// put global function name on stack
-	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	lua_geti(L, -1, LUA_RIDX_GLOBALS);
-	lua_remove(L, -2);
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L,LUA_GLOBALSINDEX);
+#end
 	Vector<String> strs = functionName.split(".");
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -322,6 +328,11 @@ Ref<LuaError> LuaState::pushVariant(Variant var) const {
 
 // Call pushVariant() and set it to a global name
 Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L,LUA_GLOBALSINDEX);
+#end
 	Vector<String> strs = name.split(".");
 	String last = strs.get(strs.size() - 1);
 	strs.remove_at(strs.size() - 1);
