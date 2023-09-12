@@ -152,7 +152,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 	int type = lua_type(L, -1);
@@ -170,7 +170,7 @@ bool LuaState::luaFunctionExistsRegistry(String functionName) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 	int type = lua_type(L, -1);
@@ -193,7 +193,7 @@ Variant LuaState::pullVariant(String name) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 	Variant val = getVar(-1);
@@ -209,7 +209,7 @@ Variant LuaState::getRegistryKey(String name) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 	Variant val = getVar(-1);
@@ -228,7 +228,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 	if (lua_isnil(L, 1)) {
@@ -236,7 +236,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setfield(L, 2, last.ascii().get_data());
+		lua_setfield(L, -2, last.ascii().get_data());
 		lua_pop(L, 1);
 		return nullptr;
 	}
@@ -258,7 +258,7 @@ Variant LuaState::callFunction(String functionName, Array args) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 
@@ -290,7 +290,7 @@ Variant LuaState::callFunctionRegistry(String functionName, Array args) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 
@@ -328,12 +328,12 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, 1, str.ascii().get_data());
+		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, 2);
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setfield(L, 2)
+		lua_setfield(L, -2, last.ascii().get_data());
 		return nullptr;
 	}
 	return err;
