@@ -220,8 +220,8 @@ Variant LuaState::getRegistryKey(String name) {
 Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 	Vector<String> strs = name.split(".");
-	String last = strs.get(strs.size()-1);
-	strs.remove_at(strs.size()-1);
+	String last = strs.get(strs.size() - 1);
+	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
@@ -320,8 +320,8 @@ Ref<LuaError> LuaState::pushVariant(Variant var) const {
 // Call pushVariant() and set it to a global name
 Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 	Vector<String> strs = name.split(".");
-	String last = strs.get(strs.size()-1);
-	strs.remove_at(strs.size()-1);
+	String last = strs.get(strs.size() - 1);
+	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
 			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
