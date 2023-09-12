@@ -96,6 +96,14 @@ uint64_t LuaAPI::getMemoryLimit() const {
 	return luaAllocData.memoryLimit;
 }
 
+Variant LuaAPI::getRegistryKey(String name) {
+	return state.getRegistryKey(name);
+}
+
+Ref<LuaError> LuaAPI::setRegistryKey(String name, Variant var) {
+	return state.setRegistryKey(name, var);
+}
+
 uint64_t LuaAPI::getMemoryUsage() const {
 	return luaAllocData.memoryUsed;
 }
