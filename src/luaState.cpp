@@ -380,8 +380,10 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
 		lua_setfield(L, -2, last.ascii().get_data());
+		lua_pop(L, 1);
 		return nullptr;
 	}
+	lua_pop(L, 1);
 	return err;
 }
 
