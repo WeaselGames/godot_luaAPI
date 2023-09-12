@@ -164,7 +164,7 @@ Variant LuaState::pullVariant(String name) {
 }
 Variant LuaState::getRegistryKey(String name) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	lua_getfield(L, name.ascii().get_data());
+	lua_getfield(L, 1, name.ascii().get_data());
 	Variant val = getVar(-1);
 	lua_pop(L, 2);
 	return val;
