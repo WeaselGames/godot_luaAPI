@@ -203,9 +203,9 @@ Variant LuaState::pullVariant(String name) {
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #endif
 #ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
+	Vector<String> strs = name.split(".");
 #else
-	PackedStringArray strs = functionName.split(".");
+	PackedStringArray strs = name.split(".");
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -223,9 +223,9 @@ Variant LuaState::pullVariant(String name) {
 Variant LuaState::getRegistryKey(String name) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 #ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
+	Vector<String> strs = name.split(".");
 #else
-	PackedStringArray strs = functionName.split(".");
+	PackedStringArray strs = name.split(".");
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -244,9 +244,9 @@ Variant LuaState::getRegistryKey(String name) {
 Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 #ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
+	Vector<String> strs = name.split(".");
 #else
-	PackedStringArray strs = functionName.split(".");
+	PackedStringArray strs = name.split(".");
 #endif
 	String last = strs.get(strs.size() - 1);
 	strs.remove_at(strs.size() - 1);
@@ -362,9 +362,9 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #endif
 #ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
+	Vector<String> strs = name.split(".");
 #else
-	PackedStringArray strs = functionName.split(".");
+	PackedStringArray strs = name.split(".");
 #endif
 	String last = strs.get(strs.size() - 1);
 	strs.remove_at(strs.size() - 1);
