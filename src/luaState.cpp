@@ -147,7 +147,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 #ifndef LAPI_LUAJIT
 	lua_pushglobaltable(L);
 #else
-	lua_pushvalue(L,LUA_GLOBALSINDEX);
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #end
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
@@ -200,7 +200,7 @@ Variant LuaState::pullVariant(String name) {
 #ifndef LAPI_LUAJIT
 	lua_pushglobaltable(L);
 #else
-	lua_pushvalue(L,LUA_GLOBALSINDEX);
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #end
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
@@ -281,7 +281,7 @@ Variant LuaState::callFunction(String functionName, Array args) {
 #ifndef LAPI_LUAJIT
 	lua_pushglobaltable(L);
 #else
-	lua_pushvalue(L,LUA_GLOBALSINDEX);
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #end
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
@@ -359,7 +359,7 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 #ifndef LAPI_LUAJIT
 	lua_pushglobaltable(L);
 #else
-	lua_pushvalue(L,LUA_GLOBALSINDEX);
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #end
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
