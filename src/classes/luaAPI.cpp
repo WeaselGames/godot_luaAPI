@@ -116,7 +116,7 @@ bool LuaAPI::luaFunctionExists(String functionName) {
 }
 
 // Calls LuaState::luaFunctionExistsRegistry()
-bool LuaAPI::luaFunctionExists(String functionName) {
+bool LuaAPI::luaFunctionExistsRegistry(String functionName) {
 	return state.luaFunctionExistsRegistry(functionName);
 }
 
