@@ -144,7 +144,9 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 // Returns true if a lua function exists with the given name
 bool LuaState::luaFunctionExists(String functionName) {
 	// LuaJIT does not return a type here
-	lua_pushglobaltable(L);
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_geti(L, -1, LUA_RIDX_GLOBALS);
+	lua_remove(L, -2);
 	Vector<String> strs = functionName.split(".");
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -153,7 +155,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 	int type = lua_type(L, -1);
 	lua_pop(L, 1);
@@ -171,7 +173,7 @@ bool LuaState::luaFunctionExistsRegistry(String functionName) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 	int type = lua_type(L, -1);
 	lua_pop(L, 1);
@@ -185,7 +187,9 @@ Variant LuaState::getVar(int index) const {
 
 // Pull a global variant from Lua to GDScript
 Variant LuaState::pullVariant(String name) {
-	lua_pushglobaltable(L);
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_geti(L, -1, LUA_RIDX_GLOBALS);
+	lua_remove(L, -2);
 	Vector<String> strs = name.split(".");
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -194,7 +198,7 @@ Variant LuaState::pullVariant(String name) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 	Variant val = getVar(-1);
 	lua_pop(L, 1);
@@ -210,7 +214,7 @@ Variant LuaState::getRegistryKey(String name) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 	Variant val = getVar(-1);
 	lua_pop(L, 1);
@@ -229,7 +233,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 	if (lua_isnil(L, 1)) {
 		return LuaError::newError("cannot index nil with string", LuaError::ERR_RUNTIME); // Make it look natural.
@@ -250,7 +254,9 @@ Variant LuaState::callFunction(String functionName, Array args) {
 	lua_pushcfunction(L, luaErrorHandler);
 
 	// put global function name on stack
-	lua_pushglobaltable(L);
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	lua_geti(L, -1, LUA_RIDX_GLOBALS);
+	lua_remove(L, -2);
 	Vector<String> strs = functionName.split(".");
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
@@ -259,7 +265,7 @@ Variant LuaState::callFunction(String functionName, Array args) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 
 	// push args
@@ -291,11 +297,8 @@ Variant LuaState::callFunctionRegistry(String functionName, Array args) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
-
-	// remove the registry table from the stack
-	lua_remove(L, 2);
 
 	// push args
 	for (int i = 0; i < args.size(); ++i) {
@@ -329,7 +332,7 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 			break;
 		}
 		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, 2);
+		lua_remove(L, -2);
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
