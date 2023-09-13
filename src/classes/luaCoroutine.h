@@ -34,8 +34,8 @@ public:
 
 	bool luaFunctionExists(String functionName);
 
-	Variant getRegistry(String name);
-	Ref<LuaError> setRegistry(String name, Variant var);
+	Variant getRegistryValue(String name);
+	Ref<LuaError> setRegistryValue(String name, Variant var);
 
 	Ref<LuaError> loadString(String code);
 	Ref<LuaError> loadFile(String fileName);
