@@ -33,11 +33,9 @@ public:
 	Signal yieldAwait(Array args);
 
 	bool luaFunctionExists(String functionName);
-	bool luaFunctionExistsRegistry(String functionName);
 
 	Variant getRegistry(String name);
 	Ref<LuaError> setRegistry(String name, Variant var);
-	Variant callFunctionRegistry(String functionName, Array args);
 
 	Ref<LuaError> loadString(String code);
 	Ref<LuaError> loadFile(String fileName);
