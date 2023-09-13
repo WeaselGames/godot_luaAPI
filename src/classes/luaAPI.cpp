@@ -34,8 +34,8 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_memory_usage"), &LuaAPI::getMemoryUsage);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
-	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaAPI::getRegistryValue);
-	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaAPI::setRegistryValue);
+	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaAPI::getRegistryValue);
+	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaAPI::setRegistryValue);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
 	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
