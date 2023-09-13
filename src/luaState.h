@@ -56,9 +56,13 @@ public:
 	static int luaCallableCall(lua_State *state);
 
 	static void luaHook(lua_State *state, lua_Debug *ar);
-
+protected:
+	// Helper functions for recursive indexing
+	void indexForReading(String name); // Puts the object on the stack
+	String indexForWriting(String name); // Puts the table on the stack and gives the last name. (Please make sure the table is not nil.)
 private:
 	lua_State *L = nullptr;
+
 
 	void exposeConstructors();
 	void createVector2Metatable();
