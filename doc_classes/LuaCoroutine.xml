@@ -87,14 +87,14 @@
 				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
 			</description>
 		</method>
-		<method name="get_registry">
+		<method name="get_registry_value">
 			<return type="Variant" />
 			<param index="0" name="Name" type="String" />
 			<description>
 				Will pull a copy of a Variant from lua's registry table.
 			</description>
 		</method>
-		<method name="set_registry">
+		<method name="set_registry_value">
 			<return type="LuaError" />
 			<param index="0" name="Name" type="String" />
 			<param index="1" name="var" type="Variant" />
