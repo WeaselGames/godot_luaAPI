@@ -23,8 +23,8 @@ void LuaCoroutine::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaCoroutine::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaCoroutine::pullVariant);
-	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaCoroutine::getRegistryKey);
-	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaCoroutine::setRegistryKey);
+	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaCoroutine::getRegistry);
+	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaCoroutine::setRegistry);
 	ClassDB::bind_method(D_METHOD("call_function_registry", "LuaFunctionName", "Args"), &LuaCoroutine::callFunctionRegistry);
 	ClassDB::bind_method(D_METHOD("registry_function_exists", "LuaFunctionName"), &LuaCoroutine::luaFunctionExistsRegistry);
 
@@ -89,14 +89,14 @@ Variant LuaCoroutine::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
 }
 
-// Calls LuaState::getRegistryKey()
-Variant LuaCoroutine::getRegistryKey(String name) {
-	return state.getRegistryKey(name);
+// Calls LuaState::getRegistry()
+Variant LuaCoroutine::getRegistry(String name) {
+	return state.getRegistry(name);
 }
 
-// Calls LuaState::setRegistryKey()
-Ref<LuaError> LuaCoroutine::setRegistryKey(String name, Variant var) {
-	return state.setRegistryKey(name, var);
+// Calls LuaState::setRegistry()
+Ref<LuaError> LuaCoroutine::setRegistry(String name, Variant var) {
+	return state.setRegistry(name, var);
 }
 
 // Calls LuaState::luaFunctionExistsRegistry()
