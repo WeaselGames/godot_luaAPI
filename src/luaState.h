@@ -31,8 +31,6 @@ public:
 
 	Variant getRegistry(String name);
 	Ref<LuaError> setRegistry(String name, Variant var);
-	Variant callFunctionRegistry(String functionName, Array args);
-	bool luaFunctionExistsRegistry(String functionName);
 
 	Ref<LuaError> pushVariant(Variant var) const;
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
