@@ -35,8 +35,8 @@ public:
 	bool luaFunctionExists(String functionName);
 	bool luaFunctionExistsRegistry(String functionName);
 
-	Variant getRegistryKey(String name);
-	Ref<LuaError> setRegistryKey(String name, Variant var);
+	Variant getRegistry(String name);
+	Ref<LuaError> setRegistry(String name, Variant var);
 	Variant callFunctionRegistry(String functionName, Array args);
 
 	Ref<LuaError> loadString(String code);
