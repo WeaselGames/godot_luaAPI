@@ -208,7 +208,7 @@ Variant LuaState::pullVariant(String name) {
 	lua_pop(L, 1);
 	return val;
 }
-Variant LuaState::getRegistry(String name) {
+Variant LuaState::getRegistryValue(String name) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 	indexForReading(name);
 	Variant val = getVar(-1);
@@ -216,7 +216,7 @@ Variant LuaState::getRegistry(String name) {
 	return val;
 }
 
-Ref<LuaError> LuaState::setRegistry(String name, Variant var) {
+Ref<LuaError> LuaState::setRegistryValue(String name, Variant var) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 	String field = indexForWriting(name);
 	if (lua_isnil(L, -1)) {
