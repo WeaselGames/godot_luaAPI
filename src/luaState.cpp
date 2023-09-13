@@ -157,7 +157,8 @@ void LuaState::indexForReading(String name) {
 		lua_remove(L, -2);
 	}
 }
-String indexForWriting(String name) {
+
+String LuaState::indexForWriting(String name) {
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = name.split(".");
 #else
