@@ -37,10 +37,8 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaAPI::getRegistry);
 	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaAPI::setRegistry);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
-	ClassDB::bind_method(D_METHOD("call_function_registry", "LuaFunctionName", "Args"), &LuaAPI::callFunctionRegistry);
 	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
-	ClassDB::bind_method(D_METHOD("registry_function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExistsRegistry);
 
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 	ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
