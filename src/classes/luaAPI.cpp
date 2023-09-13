@@ -113,11 +113,6 @@ bool LuaAPI::luaFunctionExists(String functionName) {
 	return state.luaFunctionExists(functionName);
 }
 
-// Calls LuaState::luaFunctionExistsRegistry()
-bool LuaAPI::luaFunctionExistsRegistry(String functionName) {
-	return state.luaFunctionExistsRegistry(functionName);
-}
-
 // Calls LuaState::pullVariant()
 Variant LuaAPI::pullVariant(String name) {
 	return state.pullVariant(name);
@@ -126,11 +121,6 @@ Variant LuaAPI::pullVariant(String name) {
 // Calls LuaState::callFunction()
 Variant LuaAPI::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
-}
-
-// Calls LuaState::callFunctionRegistry()
-Variant LuaAPI::callFunctionRegistry(String functionName, Array args) {
-	return state.callFunctionRegistry(functionName, args);
 }
 
 // Invokes the passed lua reference
