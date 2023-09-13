@@ -137,15 +137,15 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 
 	lua_pushstring(L, "__HOOK");
 	pushVariant(hook);
-	lua_settable(L, LUA_INDEX);
+	lua_settable(L, LUA_REGISTRYINDEX);
 	lua_sethook(L, luaHook, mask, count);
 }
 
 void LuaState::indexForReading(String name) {
 #ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
+	Vector<String> strs = name.split(".");
 #else
-	PackedStringArray strs = functionName.split(".");
+	PackedStringArray strs = name.split(".");
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
