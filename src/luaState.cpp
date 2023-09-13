@@ -137,7 +137,7 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 
 	lua_pushstring(L, "__HOOK");
 	pushVariant(hook);
-	lua_settable(L, LUA_REGISTRYINDEX);
+	lua_settable(L, LUA_INDEX);
 	lua_sethook(L, luaHook, mask, count);
 }
 
@@ -186,15 +186,6 @@ bool LuaState::luaFunctionExists(String functionName) {
 #endif
 	indexForReading(functionName);
 	// LuaJIT does not return a type here
-	int type = lua_type(L, -1);
-	lua_pop(L, 1);
-	return type == LUA_TFUNCTION;
-}
-
-bool LuaState::luaFunctionExistsRegistry(String functionName) {
-	// LuaJIT does not return a type here
-	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	indexForReading(functionName);
 	int type = lua_type(L, -1);
 	lua_pop(L, 1);
 	return type == LUA_TFUNCTION;
@@ -256,28 +247,6 @@ Variant LuaState::callFunction(String functionName, Array args) {
 	// push args
 	for (int i = 0; i < args.size(); ++i) {
 		pushVariant(args[i]);
-	}
-
-	// error handlers index is -2 - args.size()
-	int ret = lua_pcall(L, args.size(), 1, -2 - args.size());
-	if (ret != LUA_OK) {
-		return handleError(ret);
-	}
-	Variant toReturn = getVar(-1); // get return value
-	lua_pop(L, 1); // pop err handler
-	return toReturn;
-}
-
-Variant LuaState::callFunctionRegistry(String functionName, Array args) {
-	// push the error handler on to the stack
-	lua_pushcfunction(L, luaErrorHandler);
-
-	lua_pushvalue(L, LUA_REGISTRYINDEX);
-	indexForReading(functionName);
-
-	// push args
-	for (int i = 0; i < args.size(); ++i) {
-		(args[i]);
 	}
 
 	// error handlers index is -2 - args.size()
