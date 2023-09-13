@@ -23,6 +23,8 @@ void LuaCoroutine::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaCoroutine::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaCoroutine::pullVariant);
+	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaCoroutine::getRegistryValue);
+	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaCoroutine::setRegistryValue);
 
 	// This signal is only meant to be used by await when yield_await is called.
 	ADD_SIGNAL(MethodInfo("coroutine_resume"));
@@ -83,6 +85,16 @@ Ref<LuaError> LuaCoroutine::pushGlobalVariant(String name, Variant var) {
 // Calls LuaState::callFunction()
 Variant LuaCoroutine::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
+}
+
+// Calls LuaState::getRegistryValue()
+Variant LuaCoroutine::getRegistryValue(String name) {
+	return state.getRegistryValue(name);
+}
+
+// Calls LuaState::setRegistryValue()
+Ref<LuaError> LuaCoroutine::setRegistryValue(String name, Variant var) {
+	return state.setRegistryValue(name, var);
 }
 
 // loads a string into the threads state

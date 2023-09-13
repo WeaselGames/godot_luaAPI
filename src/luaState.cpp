@@ -43,7 +43,7 @@ lua_State *LuaState::getState() const {
 
 #ifndef LAPI_LUAJIT
 
-// Binds lua librares with the lua state
+// Binds lua libraries with the lua state
 void LuaState::bindLibraries(Array libs) {
 	for (int i = 0; i < libs.size(); i++) {
 		String lib = ((String)libs[i]).to_lower();
@@ -85,7 +85,7 @@ void LuaState::bindLibraries(Array libs) {
 
 #else
 
-// Binds lua librares with the lua state
+// Binds lua libraries with the lua state
 void LuaState::bindLibraries(Array libs) {
 	for (int i = 0; i < libs.size(); i++) {
 		String lib = ((String)libs[i]).to_lower();
@@ -141,10 +141,52 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 	lua_sethook(L, luaHook, mask, count);
 }
 
+void LuaState::indexForReading(String name) {
+#ifndef LAPI_GDEXTENSION
+	Vector<String> strs = name.split(".");
+#else
+	PackedStringArray strs = name.split(".");
+#endif
+	for (String str : strs) {
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			lua_pop(L, 1);
+			lua_pushnil(L);
+			break;
+		}
+		lua_getfield(L, -1, str.ascii().get_data());
+		lua_remove(L, -2);
+	}
+}
+
+String LuaState::indexForWriting(String name) {
+#ifndef LAPI_GDEXTENSION
+	Vector<String> strs = name.split(".");
+#else
+	PackedStringArray strs = name.split(".");
+#endif
+	String last = strs[strs.size() - 1];
+	strs.remove_at(strs.size() - 1);
+	for (String str : strs) {
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			lua_pop(L, 1);
+			lua_pushnil(L);
+			break;
+		}
+		lua_getfield(L, -1, str.ascii().get_data());
+		lua_remove(L, -2);
+	}
+	return last;
+}
+
 // Returns true if a lua function exists with the given name
 bool LuaState::luaFunctionExists(String functionName) {
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
+#endif
+	indexForReading(functionName);
 	// LuaJIT does not return a type here
-	lua_getglobal(L, functionName.ascii().get_data());
 	int type = lua_type(L, -1);
 	lua_pop(L, 1);
 	return type == LUA_TFUNCTION;
@@ -157,10 +199,39 @@ Variant LuaState::getVar(int index) const {
 
 // Pull a global variant from Lua to GDScript
 Variant LuaState::pullVariant(String name) {
-	lua_getglobal(L, name.ascii().get_data());
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
+#endif
+	indexForReading(name);
 	Variant val = getVar(-1);
 	lua_pop(L, 1);
 	return val;
+}
+Variant LuaState::getRegistryValue(String name) {
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	indexForReading(name);
+	Variant val = getVar(-1);
+	lua_pop(L, 1);
+	return val;
+}
+
+Ref<LuaError> LuaState::setRegistryValue(String name, Variant var) {
+	lua_pushvalue(L, LUA_REGISTRYINDEX);
+	String field = indexForWriting(name);
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return LuaError::newError("cannot index nil with string", LuaError::ERR_RUNTIME); // Make it look natural.
+	}
+	Ref<LuaError> err = pushVariant(var);
+	if (err.is_null()) {
+		lua_setfield(L, -2, field.ascii().get_data());
+		lua_pop(L, 1);
+		return nullptr;
+	}
+	lua_pop(L, 1);
+	return err;
 }
 
 // call a Lua function from GDScript
@@ -168,9 +239,12 @@ Variant LuaState::callFunction(String functionName, Array args) {
 	// push the error handler on to the stack
 	lua_pushcfunction(L, luaErrorHandler);
 
-	// put global function name on stack
-	lua_getglobal(L, functionName.ascii().get_data());
-
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
+#endif
+	indexForReading(functionName);
 	// push args
 	for (int i = 0; i < args.size(); ++i) {
 		pushVariant(args[i]);
@@ -193,11 +267,23 @@ Ref<LuaError> LuaState::pushVariant(Variant var) const {
 
 // Call pushVariant() and set it to a global name
 Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
+#endif
+	String field = indexForWriting(name);
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return LuaError::newError("cannot index nil with string", LuaError::ERR_RUNTIME); // Make it look natural.
+	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setglobal(L, name.ascii().get_data());
+		lua_setfield(L, -2, field.ascii().get_data());
+		lua_pop(L, 1);
 		return nullptr;
 	}
+	lua_pop(L, 1);
 	return err;
 }
 
@@ -332,7 +418,7 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				break;
 			}
 
-			// If the type being pushed is a lua error, Raise a error
+			// If the type being pushed is a lua error, Raise an error
 #ifndef LAPI_GDEXTENSION
 			if (Ref<LuaError> err = Object::cast_to<LuaError>(var.operator Object *()); !err.is_null()) {
 #else
