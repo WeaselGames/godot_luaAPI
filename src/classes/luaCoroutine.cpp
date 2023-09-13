@@ -23,8 +23,8 @@ void LuaCoroutine::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaCoroutine::luaFunctionExists);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaCoroutine::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaCoroutine::pullVariant);
-	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaCoroutine::getRegistryValue);
-	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaCoroutine::setRegistryValue);
+	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaCoroutine::getRegistryValue);
+	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaCoroutine::setRegistryValue);
 
 	// This signal is only meant to be used by await when yield_await is called.
 	ADD_SIGNAL(MethodInfo("coroutine_resume"));
