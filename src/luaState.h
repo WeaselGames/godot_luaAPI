@@ -54,6 +54,7 @@ public:
 	static int luaCallableCall(lua_State *state);
 
 	static void luaHook(lua_State *state, lua_Debug *ar);
+
 private:
 	lua_State *L = nullptr;
 
