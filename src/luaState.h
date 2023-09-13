@@ -61,7 +61,6 @@ protected:
 private:
 	lua_State *L = nullptr;
 
-
 	void exposeConstructors();
 	void createVector2Metatable();
 	void createVector3Metatable();
