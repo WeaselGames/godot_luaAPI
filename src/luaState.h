@@ -29,8 +29,8 @@ public:
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
 
-	Variant getRegistryKey(String name);
-	Ref<LuaError> setRegistryKey(String name, Variant var);
+	Variant getRegistry(String name);
+	Ref<LuaError> setRegistry(String name, Variant var);
 	Variant callFunctionRegistry(String functionName, Array args);
 	bool luaFunctionExistsRegistry(String functionName);
 
