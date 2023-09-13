@@ -34,8 +34,8 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_memory_usage"), &LuaAPI::getMemoryUsage);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
-	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaAPI::getRegistry);
-	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaAPI::setRegistry);
+	ClassDB::bind_method(D_METHOD("get_registry", "Name"), &LuaAPI::getRegistryValue);
+	ClassDB::bind_method(D_METHOD("set_registry", "Name", "var"), &LuaAPI::setRegistryValue);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
 	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
@@ -96,12 +96,12 @@ uint64_t LuaAPI::getMemoryLimit() const {
 	return luaAllocData.memoryLimit;
 }
 
-Variant LuaAPI::getRegistry(String name) {
-	return state.getRegistry(name);
+Variant LuaAPI::getRegistryValue(String name) {
+	return state.getRegistryValue(name);
 }
 
-Ref<LuaError> LuaAPI::setRegistry(String name, Variant var) {
-	return state.setRegistry(name, var);
+Ref<LuaError> LuaAPI::setRegistryValue(String name, Variant var) {
+	return state.setRegistryValue(name, var);
 }
 
 uint64_t LuaAPI::getMemoryUsage() const {
