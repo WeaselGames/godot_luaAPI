@@ -48,8 +48,8 @@ public:
 	Variant callFunction(String functionName, Array args);
 	Variant callFunctionRef(Array args, int funcRef);
 
-	Variant getRegistry(String name);
-	Ref<LuaError> setRegistry(String name, Variant var);
+	Variant getRegistryValue(String name);
+	Ref<LuaError> setRegistryValue(String name, Variant var);
 
 	Ref<LuaError> doFile(String fileName);
 	Ref<LuaError> doString(String code);
