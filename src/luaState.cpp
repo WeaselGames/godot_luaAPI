@@ -220,7 +220,7 @@ Variant LuaState::pullVariant(String name) {
 	lua_pop(L, 1);
 	return val;
 }
-Variant LuaState::getRegistryKey(String name) {
+Variant LuaState::getRegistry(String name) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = name.split(".");
@@ -241,7 +241,7 @@ Variant LuaState::getRegistryKey(String name) {
 	return val;
 }
 
-Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
+Ref<LuaError> LuaState::setRegistry(String name, Variant var) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = name.split(".");
