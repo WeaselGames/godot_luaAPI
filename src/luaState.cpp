@@ -141,14 +141,7 @@ void LuaState::setHook(Callable hook, int mask, int count) {
 	lua_sethook(L, luaHook, mask, count);
 }
 
-// Returns true if a lua function exists with the given name
-bool LuaState::luaFunctionExists(String functionName) {
-	// LuaJIT does not return a type here
-#ifndef LAPI_LUAJIT
-	lua_pushglobaltable(L);
-#else
-	lua_pushvalue(L, LUA_GLOBALSINDEX);
-#endif
+void LuaState::indexForReading(String name) {
 #ifndef LAPI_GDEXTENSION
 	Vector<String> strs = functionName.split(".");
 #else
@@ -163,6 +156,36 @@ bool LuaState::luaFunctionExists(String functionName) {
 		lua_getfield(L, -1, str.ascii().get_data());
 		lua_remove(L, -2);
 	}
+}
+String indexForWriting(String name) {
+#ifndef LAPI_GDEXTENSION
+	Vector<String> strs = name.split(".");
+#else
+	PackedStringArray strs = name.split(".");
+#endif
+	String last = strs[strs.size() - 1];
+	strs.remove_at(strs.size() - 1);
+	for (String str : strs) {
+		if (lua_type(L, -1) != LUA_TTABLE) {
+			lua_pop(L, 1);
+			lua_pushnil(L);
+			break;
+		}
+		lua_getfield(L, -1, str.ascii().get_data());
+		lua_remove(L, -2);
+	}
+	return last;
+}
+
+// Returns true if a lua function exists with the given name
+bool LuaState::luaFunctionExists(String functionName) {
+#ifndef LAPI_LUAJIT
+	lua_pushglobaltable(L);
+#else
+	lua_pushvalue(L, LUA_GLOBALSINDEX);
+#endif
+	indexForReading(functionName);
+	// LuaJIT does not return a type here
 	int type = lua_type(L, -1);
 	lua_pop(L, 1);
 	return type == LUA_TFUNCTION;
@@ -171,20 +194,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 bool LuaState::luaFunctionExistsRegistry(String functionName) {
 	// LuaJIT does not return a type here
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
-#else
-	PackedStringArray strs = functionName.split(".");
-#endif
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
-	}
+	indexForReading(functionName);
 	int type = lua_type(L, -1);
 	lua_pop(L, 1);
 	return type == LUA_TFUNCTION;
@@ -202,40 +212,14 @@ Variant LuaState::pullVariant(String name) {
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #endif
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = name.split(".");
-#else
-	PackedStringArray strs = name.split(".");
-#endif
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
-	}
+	indexForReading(name);
 	Variant val = getVar(-1);
 	lua_pop(L, 1);
 	return val;
 }
 Variant LuaState::getRegistry(String name) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = name.split(".");
-#else
-	PackedStringArray strs = name.split(".");
-#endif
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
-	}
+	indexForReading(name);
 	Variant val = getVar(-1);
 	lua_pop(L, 1);
 	return val;
@@ -243,28 +227,14 @@ Variant LuaState::getRegistry(String name) {
 
 Ref<LuaError> LuaState::setRegistry(String name, Variant var) {
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = name.split(".");
-#else
-	PackedStringArray strs = name.split(".");
-#endif
-	String last = strs[strs.size() - 1];
-	strs.remove_at(strs.size() - 1);
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
-	}
+	String field = indexForWriting(name);
 	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
 		return LuaError::newError("cannot index nil with string", LuaError::ERR_RUNTIME); // Make it look natural.
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setfield(L, -2, last.ascii().get_data());
+		lua_setfield(L, -2, field.ascii().get_data());
 		lua_pop(L, 1);
 		return nullptr;
 	}
@@ -277,27 +247,12 @@ Variant LuaState::callFunction(String functionName, Array args) {
 	// push the error handler on to the stack
 	lua_pushcfunction(L, luaErrorHandler);
 
-	// put global function name on stack
 #ifndef LAPI_LUAJIT
 	lua_pushglobaltable(L);
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #endif
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
-#else
-	PackedStringArray strs = functionName.split(".");
-#endif
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
-	}
-
+	indexForReading(functionName);
 	// push args
 	for (int i = 0; i < args.size(); ++i) {
 		pushVariant(args[i]);
@@ -317,22 +272,8 @@ Variant LuaState::callFunctionRegistry(String functionName, Array args) {
 	// push the error handler on to the stack
 	lua_pushcfunction(L, luaErrorHandler);
 
-	// put function name on stack
 	lua_pushvalue(L, LUA_REGISTRYINDEX);
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = functionName.split(".");
-#else
-	PackedStringArray strs = functionName.split(".");
-#endif
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
-	}
+	indexForReading(functionName);
 
 	// push args
 	for (int i = 0; i < args.size(); ++i) {
@@ -361,25 +302,14 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 #else
 	lua_pushvalue(L, LUA_GLOBALSINDEX);
 #endif
-#ifndef LAPI_GDEXTENSION
-	Vector<String> strs = name.split(".");
-#else
-	PackedStringArray strs = name.split(".");
-#endif
-	String last = strs[strs.size() - 1];
-	strs.remove_at(strs.size() - 1);
-	for (String str : strs) {
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1);
-			lua_pushnil(L);
-			break;
-		}
-		lua_getfield(L, -1, str.ascii().get_data());
-		lua_remove(L, -2);
+	String field = indexForWriting(name);
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return LuaError::newError("cannot index nil with string", LuaError::ERR_RUNTIME); // Make it look natural.
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setfield(L, -2, last.ascii().get_data());
+		lua_setfield(L, -2, field.ascii().get_data());
 		lua_pop(L, 1);
 		return nullptr;
 	}
