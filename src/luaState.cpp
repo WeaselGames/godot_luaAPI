@@ -156,7 +156,7 @@ bool LuaState::luaFunctionExists(String functionName) {
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -178,7 +178,7 @@ bool LuaState::luaFunctionExistsRegistry(String functionName) {
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -209,7 +209,7 @@ Variant LuaState::pullVariant(String name) {
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -229,7 +229,7 @@ Variant LuaState::getRegistryKey(String name) {
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -252,7 +252,7 @@ Ref<LuaError> LuaState::setRegistryKey(String name, Variant var) {
 	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -290,7 +290,7 @@ Variant LuaState::callFunction(String functionName, Array args) {
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -326,7 +326,7 @@ Variant LuaState::callFunctionRegistry(String functionName, Array args) {
 #endif
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
@@ -370,7 +370,7 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 	strs.remove_at(strs.size() - 1);
 	for (String str : strs) {
 		if (lua_type(L, -1) != LUA_TTABLE) {
-			lua_pop(L, 1); // Please do not do unforeseen consequences thanks.
+			lua_pop(L, 1);
 			lua_pushnil(L);
 			break;
 		}
