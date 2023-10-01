@@ -100,7 +100,7 @@ Ref<LuaError> LuaCoroutine::setRegistryValue(String name, Variant var) {
 // loads a string into the threads state
 Ref<LuaError> LuaCoroutine::loadString(String code) {
 	done = false;
-	int ret = luaL_loadstring(tState, code.ascii().get_data());
+	int ret = luaL_loadstring(tState, code.utf8().get_data());
 	if (ret != LUA_OK) {
 		return state.handleError(ret);
 	}
@@ -124,7 +124,7 @@ Ref<LuaError> LuaCoroutine::loadFile(String fileName) {
 #endif
 
 	String path = file->get_path_absolute();
-	int ret = luaL_loadfile(tState, path.ascii().get_data());
+	int ret = luaL_loadfile(tState, path.utf8().get_data());
 	if (ret != LUA_OK) {
 		return state.handleError(ret);
 	}
