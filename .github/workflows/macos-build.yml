@@ -32,7 +32,7 @@ jobs:
             artifact-name: macos-editor-bins
             build-options: "target=editor arch=x86_64"
             should-run: true
-          
+
           - name: macOS Editor (target=editor,arch=arm64)
             cache-name: macos-editor-arm64
             artifact-name: macos-editor-bins
@@ -74,6 +74,44 @@ jobs:
             artifact-name: macos-templates
             build-options: "arch=arm64 target=template_release"
             should-run: ${{ inputs.fullbuild }}
+
+          - name: macOS Editor Mono (target=editor,module_mono_enabled=yes,arch=x86_64)
+            cache-name: macos-editor-mono-x86
+            artifact-name: macos-editor-mono-bins
+            build-options: "target=editor module_mono_enabled=yes arch=x86_64"
+            should-run: ${{ inputs.fullbuild }}
+
+          - name: macOS Editor Mono (target=editor,module_mono_enabled=yes,arch=arm64)
+            cache-name: macos-editor-mono-arm64
+            artifact-name: macos-editor-mono-bins
+            build-options: "target=editor module_mono_enabled=yes arch=arm64"
+            should-run: ${{ inputs.fullbuild }}
+
+          - name: macOS Template Mono (target=template_debug,module_mono_enabled=yes,arch=x86_64)
+            cache-name: macos-template-debug-mono-x86
+            artifact-name: macos-templates-mono
+            build-options: "arch=x86_64 module_mono_enabled=yes target=template_debug"
+            should-run: ${{ inputs.fullbuild }}
+          
+          - name: macOS Template Mono (target=template_debug,module_mono_enabled=yes,arch=arm64)
+            cache-name: macos-template-debug-mono-arm
+            artifact-name: macos-templates-mono
+            build-options: "arch=arm64 module_mono_enabled=yes target=template_debug"
+            should-run: ${{ inputs.fullbuild }}
+          
+          - name: macOS Template Mono (target=template_release,module_mono_enabled=yes,arch=x86_64)
+            cache-name: macos-template-release-mono-x86
+            artifact-name: macos-templates-mono
+            build-options: "arch=x86_64 module_mono_enabled=yes target=template_release"
+            should-run: ${{ inputs.fullbuild }}
+          
+          - name: macOS Template Mono (target=template_release,module_mono_enabled=yes,arch=arm64)
+            cache-name: macos-template-release-mono-arm
+            artifact-name: macos-templates-mono
+            build-options: "arch=arm64 module_mono_enabled=yes target=template_release"
+            should-run: ${{ inputs.fullbuild }}
+
+
         exclude:
           - {opts: {should-run: false}}
 
@@ -85,6 +123,12 @@ jobs:
       - name: Setup Vulkan SDK
         run: |
           sh scripts/install_vulkan_sdk_macos.sh
+      
+      - name: Install .NET SDK 6.0 (Mono)
+        if: ${{ contains(matrix.opts.build-options, 'module_mono_enabled=yes') }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Load .scons_cache directory
         uses: actions/cache@v2

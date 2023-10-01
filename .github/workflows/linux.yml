@@ -62,6 +62,37 @@ jobs:
             artifact-name: export-templates
             build-options: "target=template_debug arch=x86_32"
             should-run: ${{ inputs.fullbuild }}
+
+          - name: Linux Editor Mono (target=editor,module_mono_enabled=yes)
+            cache-name: linux-editor-mono
+            artifact-name: linux-editor-mono
+            build-options: "target=editor module_mono_enabled=yes arch=x86_64"
+            should-run: true # verify mono builds
+          
+          - name: Linux Template Mono (target=template_release,module_mono_enabled=yes,arch=x86_64)
+            cache-name: linux-template-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_release module_mono_enabled=yes arch=x86_64"
+            should-run: ${{ inputs.fullbuild }}
+
+          - name: Linux Template Debug Mono (target=template_debug,module_mono_enabled=yes,arch=x86_64)
+            cache-name: linux-template-debug-mono
+            artifact-name: export-templates
+            build-options: "target=template_debug module_mono_enabled=yes arch=x86_64"
+            should-run: ${{ inputs.fullbuild }}
+          
+          - name: Linux Template Mono (target=template_release,module_mono_enabled=yes,arch=x86_32)
+            cache-name: linux-template-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_release module_mono_enabled=yes arch=x86_32"
+            should-run: ${{ inputs.fullbuild }}
+
+          - name: Linux Template Debug Mono (target=template_debug,module_mono_enabled=yes,arch=x86_32)
+            cache-name: linux-template-debug-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_debug module_mono_enabled=yes arch=x86_32"
+            should-run: ${{ inputs.fullbuild }}
+
         exclude:
           - {opts: {should-run: false}}
 
@@ -98,6 +129,12 @@ jobs:
           cd buildroot
           ./relocate-sdk.sh
 
+      - name: Install .NET SDK 6.0 (Mono)
+        if: ${{ contains(matrix.opts.build-options, 'module_mono_enabled=yes') }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Load .scons_cache directory
         uses: actions/cache@v2
         with:
@@ -133,6 +170,12 @@ jobs:
           strip scripts/godot/bin/godot.*
           chmod +x scripts/godot/bin/godot.*
 
+      - name: Generate Mono Glue
+        if: ${{ matrix.opts.cache-name == 'linux-editor-mono' }}
+        run: |
+          cd scripts/godot
+          bin/godot.linuxbsd.editor.x86_64.luaAPI.mono --headless --generate-mono-glue bin
+
       - name: Prepare templates
         if: matrix.opts.artifact-name == 'export-templates'
         run: |
@@ -143,6 +186,10 @@ jobs:
           mv scripts/godot/bin/godot.linuxbsd.template_release.x86_32.luaAPI scripts/godot/templates/linux_release.x32_64 || true
           mv scripts/godot/bin/godot.linuxbsd.template_debug.x86_32.luaAPI scripts/godot/templates/linux_debug.x86_32 || true
 
+          mv scripts/godot/bin/godot.linuxbsd.template_release.x86_64.luaAPI.mono scripts/godot/templates/linux_release.x86_64 || true
+          mv scripts/godot/bin/godot.linuxbsd.template_debug.x86_64.luaAPI.mono scripts/godot/templates/linux_debug.x86_64 || true
+          mv scripts/godot/bin/godot.linuxbsd.template_release.x86_32.luaAPI.mono scripts/godot/templates/linux_release.x32_64 || true
+          mv scripts/godot/bin/godot.linuxbsd.template_debug.x86_32.luaAPI.mono scripts/godot/templates/linux_debug.x86_32  || true
           
           rm -rf scripts/godot/bin/*
           mv scripts/godot/templates scripts/godot/bin/

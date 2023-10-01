@@ -127,8 +127,16 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/bin/templates
           echo ${{ env.GODOT_VERSION }}.stable > ${{ github.workspace }}/bin/templates/version.txt
+
+          mkdir -p ${{ github.workspace }}/bin-mono/templates
+          echo ${{ env.GODOT_VERSION }}.stable.mono > ${{ github.workspace }}/bin-mono/templates/version.txt
       - name: Upload version file
         uses: actions/upload-artifact@v2
         with:
           name: export-templates
           path: ${{ github.workspace }}/bin/*
+      - name: Upload Mono version file
+        uses: actions/upload-artifact@v2
+        with:
+          name: export-templates-mono
+          path: ${{ github.workspace }}/bin-mono/*

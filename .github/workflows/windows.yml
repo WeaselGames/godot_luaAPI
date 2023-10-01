@@ -67,6 +67,42 @@ jobs:
             build-options: "target=template_debug arch=x86_32"
             runner: "ubuntu-20.04"
             should-run: ${{ inputs.fullbuild }}
+
+          - name: Windows Editor Mono (target=editor,module_mono_enabled=yes)
+            cache-name: windows-editor-mono
+            artifact-name: windows-editor-mono
+            build-options: "target=editor module_mono_enabled=yes"
+            runner: "ubuntu-20.04"
+            should-run: ${{ inputs.fullbuild }}
+
+          - name: Windows Template Mono (target=template_release,module_mono_enabled=yes,arch=x86_64)
+            cache-name: windows-template-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_release module_mono_enabled=yes arch=x86_64"
+            runner: "ubuntu-20.04"
+            should-run: ${{ inputs.fullbuild }}
+          
+          - name: Windows Template Debug Mono (target=template_debug,module_mono_enabled=yes,arch=x86_64)
+            cache-name: windows-template-debug-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_debug module_mono_enabled=yes arch=x86_64"
+            runner: "ubuntu-20.04"
+            should-run: ${{ inputs.fullbuild }}
+
+          - name: Windows Template Mono (target=template_release,module_mono_enabled=yes,arch=x86_32)
+            cache-name: windows-template-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_release module_mono_enabled=yes arch=x86_32"
+            runner: "ubuntu-20.04"
+            should-run: ${{ inputs.fullbuild }}
+          
+          - name: Windows Template Debug Mono (target=template_debug,module_mono_enabled=yes,arch=x86_32)
+            cache-name: windows-template-debug-mono
+            artifact-name: export-templates-mono
+            build-options: "target=template_debug module_mono_enabled=yes arch=x86_32"
+            runner: "ubuntu-20.04"
+            should-run: ${{ inputs.fullbuild }}
+
         exclude:
           - {opts: {should-run: false}}
 
@@ -99,6 +135,22 @@ jobs:
           sudo update-alternatives --set i686-w64-mingw32-gcc /usr/bin/i686-w64-mingw32-gcc-posix
           sudo update-alternatives --set i686-w64-mingw32-g++ /usr/bin/i686-w64-mingw32-g++-posix
 
+      - name: Install .NET SDK 6.0 (Mono)
+        if: ${{ contains(matrix.opts.build-options, 'module_mono_enabled=yes') }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      
+      - name: Install Wine (Mono)
+        if: matrix.opts.artifact-name == 'windows-editor-mono'
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install wine
+
+          wine --version
+          
+
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
@@ -120,7 +172,6 @@ jobs:
           python -m pip install scons
           python --version
           scons --version
-
       
       - name: Compilation
         working-directory: ./scripts
@@ -128,7 +179,7 @@ jobs:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
           scons platform=windows ${{ matrix.opts.build-options }} ${{ env.SCONSFLAGS }}
-          
+        
       - name: Prepare artifact (Windows)
         if: matrix.opts.runner == 'windows-latest'
         shell: bash
@@ -142,8 +193,15 @@ jobs:
           rm -rf scripts/godot/bin/{*.exp,*.lib,*.pdb}
           strip scripts/godot/bin/*.exe
 
+      - name: Generate Mono Glue
+        if: matrix.opts.artifact-name == 'windows-editor-mono'
+        shell: bash
+        run: |
+          cd scripts/godot=
+          wine bin/godot.windows.editor.x86_64.luaAPI.mono.exe --headless --generate-mono-glue bin
+
       - name: Prepare templates
-        if: matrix.opts.artifact-name == 'export-templates'
+        if: ${{ contains(matrix.opts.artifact-name, 'export-templates') }}
         shell: bash
         run: |
           mkdir -p scripts/godot/templates
@@ -157,6 +215,16 @@ jobs:
           mv scripts/godot/bin/godot.windows.template_debug.x86_64.luaAPI.console.exe scripts/godot/templates/windows_debug_x86_64_console.exe || true
           mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.console.exe scripts/godot/templates/windows_release_x86_32_console.exe || true
           mv scripts/godot/bin/godot.windows.template_debug.x86_32.luaAPI.console.exe scripts/godot/templates/windows_debug_x86_32_console.exe || true
+
+          mv scripts/godot/bin/godot.windows.template_release.x86_64.luaAPI.mono.exe scripts/godot/templates/windows_release_x86_64.exe || true
+          mv scripts/godot/bin/godot.windows.template_debug.x86_64.luaAPI.mono.exe scripts/godot/templates/windows_debug_x86_64.exe || true
+          mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.mono.exe scripts/godot/templates/windows_release_x86_32.exe || true
+          mv scripts/godot/bin/godot.windows.template_debug.x86_32.luaAPI.mono.exe scripts/godot/templates/windows_debug_x86_32.exe || true
+          
+          mv scripts/godot/bin/godot.windows.template_release.x86_64.luaAPI.mono.console.exe scripts/godot/templates/windows_release_x86_64_console.exe || true
+          mv scripts/godot/bin/godot.windows.template_debug.x86_64.luaAPI.mono.console.exe scripts/godot/templates/windows_debug_x86_64_console.exe || true
+          mv scripts/godot/bin/godot.windows.template_release.x86_32.luaAPI.mono.console.exe scripts/godot/templates/windows_release_x86_32_console.exe || true
+          mv scripts/godot/bin/godot.windows.template_debug.x86_32.luaAPI.mono.console.exe scripts/godot/templates/windows_debug_x86_32_console.exe || true
 
           
           rm -rf scripts/godot/bin/*
