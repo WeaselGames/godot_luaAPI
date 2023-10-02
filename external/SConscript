@@ -52,7 +52,16 @@ def build_luajit():
 
     elif env['platform']=='macos':
         run("make clean MACOSX_DEPLOYMENT_TARGET=10.12")
-        run('make CC="%s" TARGET_FLAGS="-arch %s" MACOSX_DEPLOYMENT_TARGET=10.12' % (env['CC'], env['arch']))
+        arch = env['arch']
+        if arch == "universal":
+            run('make CC="%s" TARGET_FLAGS="-arch x86_64" MACOSX_DEPLOYMENT_TARGET=10.12' % (env['CC']))
+            run('mv src/libluajit.a src/libluajit64.a')
+            run('make clean MACOSX_DEPLOYMENT_TARGET=10.12')
+            run('make CC="%s" TARGET_FLAGS="-arch arm64" MACOSX_DEPLOYMENT_TARGET=10.12' % (env['CC']))
+            run('lipo -create src/libluajit.a src/libluajit64.a -output src/libluajit.a')
+            run('rm src/libluajit64.a')
+        else:
+            run('make CC="%s" TARGET_FLAGS="-arch %s" MACOSX_DEPLOYMENT_TARGET=10.12' % (env['CC'], arch))
 
     elif env['platform']=='linux':
         host_arch = platform.machine()

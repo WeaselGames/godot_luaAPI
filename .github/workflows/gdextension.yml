@@ -419,7 +419,7 @@ jobs:
         if: "!startsWith(matrix.opts.identifier, 'linux-')"
         shell: sh
         run: |
-         scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' luaappi_luaver=jit -j2
+         scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' luaapi_luaver=jit -j2
          ls -l project/addons/luaAPI/bin/
       - name: Compile extension (Linux)
         if: "startsWith(matrix.opts.identifier, 'linux-')"
