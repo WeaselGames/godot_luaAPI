@@ -28,7 +28,7 @@ Lua::Lua(){
 	state = luaL_newstate();
     // threaded is false by default
 	threaded = false;
-	
+
 	// loading base libs
     luaL_requiref(state, "", luaopen_base, 1);
    	lua_pop(state, 1);
@@ -38,7 +38,7 @@ Lua::Lua(){
     lua_pop(state, 1);
     luaL_requiref(state, LUA_MATHLIBNAME, luaopen_math, 1);
     lua_pop(state, 1);
-	
+
 	lua_sethook(state, &LineHook, LUA_MASKLINE, 0);
 	lua_register(state, "print", luaPrint);
 
@@ -54,7 +54,7 @@ Lua::Lua(){
 
 	// Exposing basic types constructors
 	exposeConstructors();
-	
+
 }
 
 Lua::~Lua(){
@@ -62,7 +62,7 @@ Lua::~Lua(){
     if (executing){
         print_line("WARNING! Lua object is being destroyed while code is currently being executed.");
     }
-    
+
     // Destroying lua state instance
     lua_close(state);
 }
@@ -83,12 +83,14 @@ void Lua::_bind_methods(){
 
 // expose a GDScript function to lua
 void Lua::exposeFunction(Object *instance, String function, String name){
-  
+
   // Createing lamda function so we can capture the object instanse and call the GDScript method. Or in theory other scripting languages?
   auto f = [](lua_State* L) -> int{
     const Object *instance2 = (const Object*) lua_topointer(L, lua_upvalueindex(1));
     class Lua *obj = (class Lua*) lua_topointer(L, lua_upvalueindex(2));
-    const char *function2 = lua_tostring(L, lua_upvalueindex(3));
+
+	String function2;
+	function2.parse_utf8(lua_tostring(L, lua_upvalueindex(3)));
 
     Variant arg1 = obj->getVariant(1);
     Variant arg2 = obj->getVariant(2);
@@ -112,13 +114,13 @@ void Lua::exposeFunction(Object *instance, String function, String name){
   lua_pushlightuserdata(state, this);
 
   // Pushing the script function name string to the stack to br retrived when called
-  lua_pushstring(state, function.ascii().get_data());
+  lua_pushstring(state, function.utf8().get_data());
 
   // Pushing the actual lambda function to the stack
   lua_pushcclosure(state, f, 3);
   // Setting the global name for the function in lua
-  lua_setglobal(state, name.ascii().get_data());
-  
+  lua_setglobal(state, name.utf8().get_data());
+
 }
 
 // call a Lua function from GDScript
@@ -126,7 +128,7 @@ Variant Lua::callFunction( String function_name, Array args , bool protected_cal
     Variant toReturn;
     int stack_size = lua_gettop(state);
     // put global function name on stack
-    lua_getglobal(state, function_name.ascii().get_data() );
+    lua_getglobal(state, function_name.utf8().get_data() );
 
     // push args
     for (int i = 0; i < args.size(); ++i) {
@@ -141,12 +143,14 @@ Variant Lua::callFunction( String function_name, Array args , bool protected_cal
             if( callback_caller == nullptr || callback == String() ){
                 print_error( vformat("Error during \"Lua::callFunction\" on Lua function \"%s\": ",function_name) );
                 handleError( state , ret );
-            } 
-            
+            }
+
             // Custom error handling:
             else {
                 ScriptInstance *scriptInstance = callback_caller->get_script_instance();
-                scriptInstance->call(callback, String(lua_tostring(state,-1)) );
+				String errorHandler;
+				errorHandler.parse_utf8(lua_tostring(state,-1));
+                scriptInstance->call(callback, errorHandler);
             }
         }
         toReturn = getVariant(1);
@@ -161,7 +165,7 @@ Variant Lua::callFunction( String function_name, Array args , bool protected_cal
 }
 
 bool Lua::luaFunctionExists(String function_name){
-    int type = lua_getglobal( state , function_name.ascii().get_data() );
+    int type = lua_getglobal( state , function_name.utf8().get_data() );
     lua_pop(state,1);
     return type == LUA_TFUNCTION;
 }
@@ -196,38 +200,40 @@ void Lua::LineHook(lua_State *L, lua_Debug *ar){
 }
 
 // Run lua string in a thread if threading is enabled
-void Lua::doString( String code, bool protected_call , Object* callback_caller , String callback ){
+void Lua::doString(String code, bool protected_call, Object* callback_caller, String callback){
     if(threaded){
-        std::thread(runLua, state , code , protected_call , callback_caller , callback , &executing ).detach();
+        std::thread(runLua, state, code, protected_call, callback_caller, callback, &executing).detach();
     }else{
-        runLua( state , code , protected_call , callback_caller , callback , &executing );
+        runLua(state, code, protected_call, callback_caller, callback, &executing);
     }
 }
 
 // Execute a lua script string and , if protected_call, call the passed callBack function with the error as the aurgument if an error occurees
-void Lua::runLua( lua_State *L , String code, bool protected_call , Object* callback_caller , String callback, bool *executing ){
+void Lua::runLua(lua_State *L, String code, bool protected_call, Object* callback_caller, String callback, bool *executing){
     *executing = true;
     if( protected_call ){
-        
-        int ret = luaL_dostring( L , code.ascii().get_data() );
+
+        int ret = luaL_dostring(L , code.utf8().get_data());
         if( ret != LUA_OK ){
 
             // Default error handling:
             if( callback_caller == nullptr || callback == String() ){
                 handleError( L , ret );
-            } 
-            
+            }
+
             // Custom error handling:
             else {
                 ScriptInstance *scriptInstance = callback_caller->get_script_instance();
-                scriptInstance->call(callback, String(lua_tostring(L,-1)) );
+				String errorHandler;
+				errorHandler.parse_utf8(lua_tostring(L,-1));
+                scriptInstance->call(callback, errorHandler);
             }
         }
-    } 
+    }
 
     // Call not protected (crashes and exit the program if error!)
     else {
-        luaL_loadstring(L, code.ascii().get_data() ) ;
+        luaL_loadstring(L, code.utf8().get_data() ) ;
         lua_call(L, 0 /* nargs */ , 0 /* nresults */ ) ;
     }
 
@@ -244,8 +250,7 @@ bool Lua::pushVariant(Variant var) {
             lua_pushnil(state);
             break;
         case Variant::Type::STRING:
-            str = (var.operator String().c_str());
-            lua_pushstring(state, std::string( str.begin(), str.end() ).c_str());
+            lua_pushstring(state, (var.operator String()).utf8().get_data());
             break;
         case Variant::Type::INT:
             lua_pushinteger(state, (int64_t)var);
@@ -262,7 +267,7 @@ bool Lua::pushVariant(Variant var) {
         case Variant::Type::POOL_REAL_ARRAY:
         case Variant::Type::POOL_VECTOR2_ARRAY:
         case Variant::Type::POOL_VECTOR3_ARRAY:
-        case Variant::Type::POOL_COLOR_ARRAY:            
+        case Variant::Type::POOL_COLOR_ARRAY:
         case Variant::Type::ARRAY: {
             Array array = var.operator Array();
             lua_newtable(state);
@@ -289,19 +294,19 @@ bool Lua::pushVariant(Variant var) {
             void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
             memcpy( userdata , (void*)&var , sizeof(Variant) );
             luaL_setmetatable(state,"mt_Vector2");
-            break;     
-        }     
+            break;
+        }
         case Variant::Type::VECTOR3: {
             void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
             memcpy( userdata , (void*)&var , sizeof(Variant) );
             luaL_setmetatable(state,"mt_Vector3");
-            break;     
+            break;
         }
         case Variant::Type::COLOR: {
             void* userdata = (Variant*)lua_newuserdata( state , sizeof(Variant) );
             memcpy( userdata , (void*)&var , sizeof(Variant) );
             luaL_setmetatable(state,"mt_Color");
-            break;    
+            break;
         }
         default:
             print_error( vformat("Can't pass Variants of type \"%s\" to Lua." , Variant::get_type_name( var.get_type() ) ) );
@@ -314,8 +319,7 @@ bool Lua::pushVariant(Variant var) {
 // Call pushVariant() and set it to a global name
 bool Lua::pushGlobalVariant(Variant var, String name) {
     if (pushVariant(var)) {
-       std::wstring str = name.c_str();
-        lua_setglobal(state,std::string( str.begin(), str.end() ).c_str());
+        lua_setglobal(state, name.utf8().get_data());
         return true;
     }
     return false;
@@ -323,7 +327,7 @@ bool Lua::pushGlobalVariant(Variant var, String name) {
 
 // Pull a global variant from Lua to GDScript
 Variant Lua::pullVariant(String name){
-    int type = lua_getglobal(state, name.ascii().get_data());
+    int type = lua_getglobal(state, name.utf8().get_data());
     Variant val = getVariant(1);
     lua_pop(state, 1);
     return val;
@@ -333,9 +337,12 @@ Variant Lua::getVariant(int index) {
     Variant result;
     int type = lua_type(state, index);
     switch (type) {
-        case LUA_TSTRING:
-            result = lua_tostring(state, index);
+        case LUA_TSTRING:{
+			String utf8_str;
+			utf8_str.parse_utf8(lua_tostring(state, index));
+			result = utf8_str;
             break;
+		}
         case LUA_TNUMBER:
             result = lua_tonumber(state, index);
             break;
@@ -365,8 +372,8 @@ Variant Lua::getVariant(int index) {
 }
 
 
-void Lua::exposeConstructors( ){
-	
+void Lua::exposeConstructors(){
+
 	lua_pushcfunction(state,LUA_LAMBDA_TEMPLATE({
         int argc = lua_gettop(inner_state);
         if( argc == 0 ){
@@ -416,7 +423,7 @@ void Lua::createVector2Metatable( ){
 		// We can't use arg1 here because we need to reference the userdata
 		((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
 		return 0;
-	});	
+	});
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__add" , {
 		lua->pushVariant( arg1.operator Vector2() + arg2.operator Vector2() );
@@ -473,7 +480,7 @@ void Lua::createVector3Metatable( ){
 		// We can't use arg1 here because we need to reference the userdata
 		((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
 		return 0;
-	});	
+	});
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__add" , {
 		lua->pushVariant( arg1.operator Vector3() + arg2.operator Vector3() );
@@ -530,7 +537,7 @@ void Lua::createColorMetatable( ){
 		// We can't use arg1 here because we need to reference the userdata
 		((Variant*)lua_touserdata(inner_state,1))->set( arg2 , arg3 );
 		return 0;
-	});	
+	});
 
 	LUA_METAMETHOD_TEMPLATE( state , -1 , "__add" , {
 		lua->pushVariant( arg1.operator Color() + arg2.operator Color() );
@@ -574,7 +581,7 @@ void Lua::createColorMetatable( ){
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
-void Lua::handleError( lua_State* L , int lua_error ){
+void Lua::handleError(lua_State* L, int lua_error){
     String msg;
     switch( lua_error ){
         case LUA_ERRRUN:
@@ -588,9 +595,11 @@ void Lua::handleError( lua_State* L , int lua_error ){
             break;
         default: break;
     }
-    msg += lua_tostring(L,-1);
-    print_error( msg );
-    lua_pop(L,1);
+	String utf8_str;
+	utf8_str.parse_utf8(lua_tostring(L, -1));
+    msg += utf8_str;
+    print_error(msg);
+    lua_pop(L, 1);
 }
 
 // Lua functions
@@ -598,26 +607,32 @@ void Lua::handleError( lua_State* L , int lua_error ){
 int Lua::luaPrint(lua_State* state)
 {
 
-  int args = lua_gettop(state);
-	String final_string;
-  for ( int n=1; n<=args; ++n) {
+  	int args = lua_gettop(state);
+  	String final_string;
+  	for (int n = 1; n <= args; ++n) {
 		String it_string;
-		
-		switch( lua_type(state,n) ){
+
+		switch(lua_type(state, n)){
 			case LUA_TUSERDATA:{
 				Variant var = *(Variant*) lua_touserdata(state,n);
 				it_string = var.operator String();
 				break;
 			}
+			case LUA_TBOOLEAN: {
+				it_string = lua_toboolean(state, n) ? "true" : "false";
+				break;
+			}
 			default:{
-				it_string = lua_tostring(state, n);
+				it_string.parse_utf8(lua_tostring(state, n));
 				break;
 			}
 		}
 
 		final_string += it_string;
-		if( n < args ) final_string += ", ";
-  }
+		if (n < args) {
+			final_string += ", ";
+		}
+  	}
 
 	print_line( final_string );
 
