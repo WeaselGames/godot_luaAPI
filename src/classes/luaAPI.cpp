@@ -177,7 +177,7 @@ Ref<LuaError> LuaAPI::doFile(String fileName) {
 		path = file->get_path_absolute();
 	}
 
-	int ret = luaL_loadfile(lState, path.ascii().get_data());
+	int ret = luaL_loadfile(lState, path.utf8().get_data());
 	if (ret != LUA_OK) {
 		return state.handleError(ret);
 	}
@@ -192,7 +192,7 @@ Ref<LuaError> LuaAPI::doFile(String fileName) {
 Ref<LuaError> LuaAPI::doString(String code) {
 	// push the error handler onto the stack
 	lua_pushcfunction(lState, LuaState::luaErrorHandler);
-	int ret = luaL_loadstring(lState, code.ascii().get_data());
+	int ret = luaL_loadstring(lState, code.utf8().get_data());
 	if (ret != LUA_OK) {
 		return state.handleError(ret);
 	}

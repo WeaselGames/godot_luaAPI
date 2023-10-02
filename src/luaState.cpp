@@ -123,6 +123,10 @@ void LuaState::bindLibraries(Array libs) {
 			lua_pushcfunction(L, luaopen_package);
 			lua_pushstring(L, LUA_LOADLIBNAME);
 			lua_call(L, 1, 0);
+		} else if (lib == "ffi") {
+			lua_pushcfunction(L, luaopen_ffi);
+			lua_pushstring(L, LUA_FFILIBNAME);
+			lua_call(L, 1, 0);
 		}
 	}
 }
@@ -153,7 +157,7 @@ void LuaState::indexForReading(String name) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, -1, str.ascii().get_data());
+		lua_getfield(L, -1, str.utf8().get_data());
 		lua_remove(L, -2);
 	}
 }
@@ -172,7 +176,7 @@ String LuaState::indexForWriting(String name) {
 			lua_pushnil(L);
 			break;
 		}
-		lua_getfield(L, -1, str.ascii().get_data());
+		lua_getfield(L, -1, str.utf8().get_data());
 		lua_remove(L, -2);
 	}
 	return last;
@@ -226,7 +230,7 @@ Ref<LuaError> LuaState::setRegistryValue(String name, Variant var) {
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setfield(L, -2, field.ascii().get_data());
+		lua_setfield(L, -2, field.utf8().get_data());
 		lua_pop(L, 1);
 		return nullptr;
 	}
@@ -279,7 +283,7 @@ Ref<LuaError> LuaState::pushGlobalVariant(String name, Variant var) {
 	}
 	Ref<LuaError> err = pushVariant(var);
 	if (err.is_null()) {
-		lua_setfield(L, -2, field.ascii().get_data());
+		lua_setfield(L, -2, field.utf8().get_data());
 		lua_pop(L, 1);
 		return nullptr;
 	}
@@ -311,7 +315,7 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 			lua_pushnil(state);
 			break;
 		case Variant::Type::STRING:
-			lua_pushstring(state, (var.operator String()).ascii().get_data());
+			lua_pushstring(state, (var.operator String()).utf8().get_data());
 			break;
 		case Variant::Type::INT:
 			lua_pushinteger(state, (int64_t)var);
@@ -425,7 +429,7 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 			// blame this on https://github.com/godotengine/godot-cpp/issues/995
 			if (Ref<LuaError> err = dynamic_cast<LuaError *>(var.operator Object *()); !err.is_null()) {
 #endif
-				lua_pushstring(state, err->getMessage().ascii().get_data());
+				lua_pushstring(state, err->getMessage().utf8().get_data());
 				lua_error(state);
 				break;
 			}
@@ -526,9 +530,12 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 
 	int type = lua_type(state, index);
 	switch (type) {
-		case LUA_TSTRING:
-			result = lua_tostring(state, index);
+		case LUA_TSTRING: {
+			String utf8_str;
+			utf8_str.parse_utf8(lua_tostring(state, index));
+			result = utf8_str;
 			break;
+		}
 		case LUA_TNUMBER:
 			result = lua_tonumber(state, index);
 			break;
@@ -603,15 +610,19 @@ Ref<LuaError> LuaState::handleError(lua_State *state, int lua_error) {
 	String msg;
 	switch (lua_error) {
 		case LUA_ERRRUN: {
+			String utf8_str;
+			utf8_str.parse_utf8(lua_tostring(state, -1));
 			msg += "[LUA_ERRRUN - runtime error ]\n";
-			msg += lua_tostring(state, -1);
+			msg += utf8_str;
 			msg += "\n";
 			lua_pop(state, 1);
 			break;
 		}
 		case LUA_ERRSYNTAX: {
+			String utf8_str;
+			utf8_str.parse_utf8(lua_tostring(state, -1));
 			msg += "[LUA_ERRSYNTAX - syntax error ]\n";
-			msg += lua_tostring(state, -1);
+			msg += utf8_str;
 			msg += "\n";
 			lua_pop(state, 1);
 			break;
@@ -759,7 +770,7 @@ int LuaState::luaPrint(lua_State *state) {
 				break;
 			}
 			default: {
-				it_string = lua_tostring(state, n);
+				it_string.parse_utf8(lua_tostring(state, n));
 				break;
 			}
 		}
@@ -795,7 +806,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 		args[i] = LuaState::getVariant(state, index++);
 		if (args[i].get_type() != Variant::Type::OBJECT) {
 			if (Ref<LuaError> err = Object::cast_to<LuaError>(args[i].operator Object *()); !err.is_null()) {
-				lua_pushstring(state, err->getMessage().ascii().get_data());
+				lua_pushstring(state, err->getMessage().utf8().get_data());
 				lua_error(state);
 				return 0;
 			}
@@ -811,7 +822,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 	callable.callp(p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
 		Ref<LuaError> err = LuaState::handleError(callable.get_method(), error, p_args, argc);
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 		return 0;
 	}
@@ -823,7 +834,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 
 	Ref<LuaError> err = LuaState::pushVariant(state, returned);
 	if (!err.is_null()) {
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 		return 0;
 	}
@@ -850,7 +861,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 		Variant var = LuaState::getVariant(state, index++);
 		if (var.get_type() == Variant::Type::OBJECT) {
 			if (Ref<LuaError> err = dynamic_cast<LuaError *>(var.operator Object *()); !err.is_null()) {
-				lua_pushstring(state, err->getMessage().ascii().get_data());
+				lua_pushstring(state, err->getMessage().utf8().get_data());
 				lua_error(state);
 				return 0;
 			}
@@ -867,7 +878,7 @@ int LuaState::luaCallableCall(lua_State *state) {
 
 	Ref<LuaError> err = LuaState::pushVariant(state, returned);
 	if (!err.is_null()) {
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 		return 0;
 	}
@@ -902,19 +913,19 @@ int LuaState::luaUserdataFuncCall(lua_State *state) {
 	Variant returned;
 #ifndef LAPI_GDEXTENSION
 	Callable::CallError error;
-	obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
+	obj->callp(fName.utf8().get_data(), p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
 		Ref<LuaError> err = LuaState::handleError(fName, error, p_args, argc);
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 		return 0;
 	}
 #else
 	GDExtensionCallError error;
-	obj->callp(fName.ascii().get_data(), p_args, argc, returned, error);
+	obj->callp(fName.utf8().get_data(), p_args, argc, returned, error);
 	if (error.error != GDEXTENSION_CALL_OK) {
 		Ref<LuaError> err = LuaState::handleError(fName, error, p_args, argc);
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 		return 0;
 	}
@@ -963,7 +974,7 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 	hook.callp(p_args, argc, returned, error);
 	if (error.error != error.CALL_OK) {
 		Ref<LuaError> err = LuaState::handleError(hook.get_method(), error, p_args, argc);
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 		return;
 	}
@@ -977,7 +988,7 @@ void LuaState::luaHook(lua_State *state, lua_Debug *ar) {
 
 	Ref<LuaError> err = LuaState::pushVariant(state, returned);
 	if (!err.is_null()) {
-		lua_pushstring(state, err->getMessage().ascii().get_data());
+		lua_pushstring(state, err->getMessage().utf8().get_data());
 		lua_error(state);
 	}
 }
