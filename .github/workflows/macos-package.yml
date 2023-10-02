@@ -85,7 +85,7 @@ jobs:
           mkdir Godot.app/Contents/MacOS
           mv bin/godot.macos.editor.universal.luaAPI Godot.app/Contents/MacOS/Godot
           chmod +x Godot.app/Contents/MacOS/Godot
-          mv Godot.app bun/
+          mv Godot.app bin/
           cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/scripts/godot/bin/
       
       - name: Make universal binaries and bundle (mono editor)
