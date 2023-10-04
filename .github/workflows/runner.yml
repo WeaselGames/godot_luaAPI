@@ -53,6 +53,7 @@ jobs:
     uses: ./.github/workflows/macos-package.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
+      godot_version: 4.1
   
   android-build:
     name: 🤖 Android
