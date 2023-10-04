@@ -174,7 +174,8 @@ jobs:
         if: ${{ matrix.opts.cache-name == 'linux-editor-mono' }}
         run: |
           cd scripts/godot
-          bin/godot.linuxbsd.editor.x86_64.luaAPI.mono --headless --generate-mono-glue bin
+          bin/godot.linuxbsd.editor.x86_64.luaAPI.mono --headless --generate-mono-glue modules/mono/glue
+          ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin
 
       - name: Prepare templates
         if: ${{ contains(matrix.opts.artifact-name, 'export-templates') }}
