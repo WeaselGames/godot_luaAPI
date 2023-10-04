@@ -98,7 +98,9 @@ jobs:
           chmod +x bin/godot.macos.editor.universal.luaAPI.mono
 
           bin/godot.macos.editor.universal.luaAPI.mono --headless --generate-mono-glue modules/mono/glue
-          ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin
+          mkdir bin/nuget_packages
+          ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --push-nupkgs-local ./bin/nuget_packages
+          cp ../mono_instructions.txt bin/
 
           cp -r misc/dist/macos_tools.app Godot.app
           mkdir Godot.app/Contents/MacOS
