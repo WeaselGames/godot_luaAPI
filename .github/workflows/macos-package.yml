@@ -13,9 +13,6 @@ on:
         required: true
         type: string
 
-env:
-  GODOT_VERSION: ${{ inputs.godot_version }}-stable
-
 jobs:
   macos-package:
     runs-on: "macos-latest"
@@ -67,7 +64,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: godotengine/godot
-          ref: ${{ env.godot_version }}
+          ref: ${{ inputs.godot_version }}-stable
           path: scripts/godot
 
       - name: Download Artifact
