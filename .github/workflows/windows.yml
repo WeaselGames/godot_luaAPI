@@ -198,7 +198,10 @@ jobs:
         shell: bash
         run: |
           cd scripts/godot
-          wine bin/godot.windows.editor.x86_64.luaAPI.mono.exe --headless --generate-mono-glue bin
+          wine bin/godot.windows.editor.x86_64.luaAPI.mono.exe --headless --generate-mono-glue modules/mono/glue
+          mkdir bin/nuget_packages
+          ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --push-nupkgs-local ./bin/nuget_packages
+          cp ../mono_instructions.txt bin/
 
       - name: Prepare templates
         if: ${{ contains(matrix.opts.artifact-name, 'export-templates') }}

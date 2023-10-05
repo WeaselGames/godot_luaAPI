@@ -7,6 +7,11 @@ on:
         required: true
         type: boolean
         default: false
+      
+      godot_version:
+        description: "Version of godot to be used"
+        required: true
+        type: string
 
 jobs:
   macos-package:
@@ -59,7 +64,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: godotengine/godot
-          ref: master
+          ref: ${{ inputs.godot_version }}-stable
           path: scripts/godot
 
       - name: Download Artifact
@@ -97,7 +102,10 @@ jobs:
           rm -rf bin/godot.macos.editor.x86_64.luaAPI.mono bin/godot.macos.editor.arm64.luaAPI.mono
           chmod +x bin/godot.macos.editor.universal.luaAPI.mono
 
-          bin/godot.macos.editor.universal.luaAPI.mono --headless --generate-mono-glue bin
+          bin/godot.macos.editor.universal.luaAPI.mono --headless --generate-mono-glue modules/mono/glue
+          mkdir bin/nuget_packages
+          ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --push-nupkgs-local ./bin/nuget_packages
+          cp ../mono_instructions.txt bin/
 
           cp -r misc/dist/macos_tools.app Godot.app
           mkdir Godot.app/Contents/MacOS
