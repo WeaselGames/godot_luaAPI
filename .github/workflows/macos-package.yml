@@ -13,6 +13,9 @@ on:
         required: true
         type: string
 
+env:
+  GODOT_VERSION: ${{ inputs.godot_version }}-stable
+
 jobs:
   macos-package:
     runs-on: "macos-latest"
