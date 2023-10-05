@@ -78,6 +78,12 @@ Getting Started
 ------------
 If you are looking for more in depth information please refer to our [wiki](https://luaapi.weaselgames.info/latest).
 
+Pro Tip: Be sure to download the Export Templates! The Export Templates that come with Godot will not work with this 
+Editor/Add-on. Please see [Installing Export Templates](EXPORT.MD) for more information. 
+
+Dotnet users will also want to refer to [DOTNET.md](DOTNET.md) For additional information and steps that are needed to 
+make the Editor/Add-on work.
+
 **Running Lua for you first time:**
 ```gdscript
 extends Node
