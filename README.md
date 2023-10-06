@@ -122,7 +122,7 @@ func _ready() -> void:
 	print(message)
 ```
 
-Dotnet (mono) users see this [example redone in C#](csexamples%2FEXAMPLE1.md)
+Dotnet (mono) users see example redone in C# in [DOTNET.md](DOTNET.md).
 
 Contributing And Feature Requests
 ---------------
