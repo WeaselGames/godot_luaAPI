@@ -22,7 +22,7 @@ public partial class Node2D : Godot.Node2D {
 		GD.Print(message);
 	}
 
-	public void _Ready() {
+	public override void _Ready() {
 		GD.Print("Starting Node2D.cs.");
 
 		// All builtin libraries are available to bind with. Use OS and IO at your own risk.
