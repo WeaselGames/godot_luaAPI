@@ -5,7 +5,7 @@ Godot Lua API DotNet Notes
 * [Godot Lua API DotNet Notes](#godot-lua-api-dotnet-notes)
   * [Introduction](#introduction)
   * [Commands](#commands)
-  * [Example Notes](#example-notes)
+  * [Getting Started Example (In C#)](#getting-started-example-in-c)
 <!-- TOC -->
 
 Introduction
@@ -26,7 +26,6 @@ dotnet nuget locals all --clear
 
 To add the local nuget source, please run the following command:
 dotnet nuget add source /path/to/nuget_packages/ --name LuaAPINugetSource
-
 ```
 
 What this is saying is that you will want to open up a command prompt and do the following steps to install the correct 
@@ -37,6 +36,9 @@ Likewise, if you extracted the editor to `/home/username/Godot/` you would want 
 
 Make sure to enclose directories with spaces with either a `"` or `'` so that the path resolves correctly.
 
+Additionally, you will most likely want to execute a `dotnet restore` command to install the correct nuget packages. See 
+Commands below for an example on how to do this.
+
 Commands
 -------
 
@@ -46,41 +48,100 @@ In your command prompt, execute these commands in the following order.
 
 `dotnet nuget add source /path/to/nuget_packages/ --name LuaAPINugetSource`
 
+`dotnet restore '/pathtoproject/example_project.csproj' -f -s  LuaAPINugetSource`
+
 This will set up the proper packages to work with the Editor / Add-on. Note: you may have to select the correct nuget 
-source within your IDE. If so, please use the `LuaAPINugetSource` option.
+source within your IDE. If so, please use the `LuaAPINugetSource` option. Note that in the third command, we are using 
+the specific location (`-s <source>`) and we are forcing (`-f`) the restore. This is done to specifically use the custom 
+nuget packages.
 
 Once you have done this, you will need to rebuild your project. You can do so either through your IDE or inside of the 
 Godot Editor.
 
-Example Notes
+Getting Started Example (In C#)
 -------
 
-As you can expect, the method names in the LuaAPI class are in Dotnet style. So, something like `LuaAPI.push_variant` 
+As you can expect, the method names in the LuaAPI class are in Dotnet style. So, something like `LuaAPI.push_variant`
 would be `LuaAPI.PushVariant`
 
-Starter Example:
+In this example, we recreate the main GDScript example from the README.md file. I have fully commented this
+example, to explain what each part does. Specific differences and a special note on this example: In C# you
+cannot assign a Method to a `Variant` for use with `LuaAPI.PushVariant`. So, to get around that, and make the
+example work, we will first wrap our called function in a `Callable` variable (wrapper). Please note the line
+`Callable print = new Callable(this, MethodName.LuaPrint);` in the example below.
+
 ```csharp
 using Godot;
-using System;
 
-public partial class Node2D : Godot.Node2D
-{
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-		GD.Print("Hello from C#");
-		LuaApi lua = new LuaApi();
-		lua.DoString("print(\"Hello from Lua\")");
+public partial class Node2D : Godot.Node2D {
+	private LuaApi lua = new LuaApi();
+
+	public void LuaPrint(string message) {
+		GD.Print(message);
+	}
+
+	public override void _Ready() {
+		GD.Print("Starting Node2D.cs.");
+
+		// All builtin libraries are available to bind with. Use OS and IO at your own risk.
+		// BindLibraries requires a "Godot Array" so, let's build one.
+		Godot.Collections.Array libraries = new Godot.Collections.Array();
+		libraries.Add("base");   // Base Lua commands
+		libraries.Add("table");  // Table functionality.
+		libraries.Add("string"); // String Specific functionality.
+
+		lua.BindLibraries(libraries); // Assign the specified libraries to the LuaAPI object.
+
+		// In C#, .PushVariant does not work with Methods, so we use Callable to wrap our function.
+		Callable print = new Callable(this, MethodName.LuaPrint);
+		// Assign the Callable, so that the API can call our function.
+		// Note, the lua function "cs_print" is now callable within Lua script.
+		lua.PushVariant("cs_print", print);
+		// Assign a Lua Variable named "message" and give it a value.
+		lua.PushVariant("message", "Hello lua!");
+
+		// Use .DoString() to execute our Lua code.
+		LuaError error = lua.DoString("cs_print(message)");
+		// Check for errors, and if there are any, Print them to the Godot Console.
+		if (error != null && error.Message != "") {
+			GD.Print("An error occurred calling DoString.");
+			GD.Print("ERROR %d: %s", error.Type, error.Message);
+		}
+
+		error = lua.DoString(@"
+                                  for i=1,10,1 do
+                                  	cs_print(message)
+                                  end
+                                  function get_message()
+                                  	return ""This message was sent from 'get_message()'""
+                                  end
+                                  ");
+
+		// Check for errors, and if there are any, Print them to the Godot Console.
+		if (error != null && error.Message != "") {
+			GD.Print("An error occurred calling DoString.");
+			GD.Print("ERROR %d: %s", error.Type, error.Message);
+		}
+
+		var val = lua.PullVariant("get_message");
+
+		// Check to see if it returned an error, or a value.
+		if (val.GetType() == typeof(LuaError)) {
+			GD.Print("ERROR %d: %s", error.Type, error.Message);
+			return;
+		}
+
+		// LuaAPI.CallFunction requires a Godot.Collections.Array as the container
+		// for the parameters passed in, for the lua function. 
+		Godot.Collections.Array Params = new Godot.Collections.Array();
+
+		// We use .CallFunction to actually call the lua function within the Lua State.
+		var message = lua.CallFunction("get_message", Params);
+		// And, finally, we log the output of the function to Godot Output Console.
+		GD.Print(message);
 	}
 }
 ```
 Note that `lua.DoString()` is the dotnet version of `lua.do_string()`.
 
-The above starter example will produce its output into the Godot Output window in the Godot Editor. Here is the exact 
-output it produces.
-```
-Hello from C#
-Hello from Lua
-```
-
-More examples will be included very soon.
+More examples will be included very soon (see Wiki).
