@@ -89,4 +89,4 @@ Hello from C#
 Hello from Lua
 ```
 
-More [examples](csexamples%2Fexample1.md) will be included very soon.
+More [examples](csexamples%2FEXAMPLE1.md) will be included very soon (see Wiki).

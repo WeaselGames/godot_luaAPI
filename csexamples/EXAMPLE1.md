@@ -1,9 +1,9 @@
 Godot Lua API C# Examples
 ===============
 
+All future examples will be in the [Wiki](https://luaapi.weaselgames.info/latest).
 
-
-Example 1
+Getting Started Example (In C#)
 -------
 
 In this example, we recreate the main GDScript example from the README.md file. I have fully commented this 
