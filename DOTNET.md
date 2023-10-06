@@ -26,7 +26,6 @@ dotnet nuget locals all --clear
 
 To add the local nuget source, please run the following command:
 dotnet nuget add source /path/to/nuget_packages/ --name LuaAPINugetSource
-
 ```
 
 What this is saying is that you will want to open up a command prompt and do the following steps to install the correct 
@@ -37,6 +36,9 @@ Likewise, if you extracted the editor to `/home/username/Godot/` you would want 
 
 Make sure to enclose directories with spaces with either a `"` or `'` so that the path resolves correctly.
 
+Additionally, you will most likely want to execute a `dotnet restore` command to install the correct nuget packages. See 
+Commands below for an example on how to do this.
+
 Commands
 -------
 
@@ -46,8 +48,12 @@ In your command prompt, execute these commands in the following order.
 
 `dotnet nuget add source /path/to/nuget_packages/ --name LuaAPINugetSource`
 
+`dotnet restore '/pathtoproject/example_project.csproj' -f -s  LuaAPINugetSource`
+
 This will set up the proper packages to work with the Editor / Add-on. Note: you may have to select the correct nuget 
-source within your IDE. If so, please use the `LuaAPINugetSource` option.
+source within your IDE. If so, please use the `LuaAPINugetSource` option. Note that in the third command, we are using 
+the specific location (`-s <source>`) and we are forcing (`-f`) the restore. This is done to specifically use the custom 
+nuget packages.
 
 Once you have done this, you will need to rebuild your project. You can do so either through your IDE or inside of the 
 Godot Editor.
@@ -83,4 +89,4 @@ Hello from C#
 Hello from Lua
 ```
 
-More examples will be included very soon.
+More [examples](csexamples%2Fexample1.md) will be included very soon.

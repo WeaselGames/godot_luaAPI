@@ -121,6 +121,9 @@ func _ready() -> void:
 	var message = val.call([])
 	print(message)
 ```
+
+Dotnet (mono) users see this [example redone in C#](csexamples%2Fexample1.md)
+
 Contributing And Feature Requests
 ---------------
 All contributions are welcome, if you would like to contribute submit a PR.
