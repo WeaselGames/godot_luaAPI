@@ -10,7 +10,7 @@
 	</tutorials>
 	<members>
 		<member name="tuple" type="bool" setter="set_tuple" getter="get_tuple" default="false">
-			Weather or not the last argument is a tuple.
+			Whether or not the last argument is a tuple.
 		</member>
 		<member name="wants_ref" type="bool" setter="set_wants_ref" getter="get_wants_ref" default="false">
 			Whether or not the function wants a reference to the LuaAPI object.

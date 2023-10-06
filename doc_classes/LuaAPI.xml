@@ -5,6 +5,7 @@
 	</brief_description>
 	<description>
 		This class represents a lua state and allows you to interact with lua at runtime. You can load files and strings code. Push Callable's as lua functions. And push any Variant as a lua variable.
+	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
@@ -22,9 +23,10 @@
 		</method>
 		<method name="bind_libraries">
 			<return type="void" />
-			<param index="0" name="Array" type="Array" />
+			<param index="0" name="Array" type="Godot.Collections.Array" />
 			<description>
-				Bind lua libraries.
+				Bind lua libraries to the LuaAPI Object. 
+				Note: in C#, the param Array must be a [code]Godot.Collections.Array[/code] and not a [code]System.Array[/code] class.
 			</description>
 		</method>
 		<method name="do_file">
@@ -32,6 +34,7 @@
 			<param index="0" name="FilePath" type="String" />
 			<description>
 				Loads a file with luaL_loadfile() passing its absolute path.
+				Similar to [code].DoString()[/code], this function loads a lua file into the LuaAPI Object and executes it as Lua. [code]FilePath[/code] must be an absolute path, and must exist or an error is reutrned.
 			</description>
 		</method>
 		<method name="do_string">
@@ -39,6 +42,7 @@
 			<param index="0" name="Code" type="String" />
 			<description>
 				Loads a string with luaL_loadstring() and executes the top of the stack. Returns any errors.
+				Use [code].DoString()[/code] to execute a lua script or snippet stored within a string variable or a string literal.
 			</description>
 		</method>
 		<method name="function_exists">
@@ -78,6 +82,7 @@
 			<param index="1" name="var" type="Variant" />
 			<description>
 				Will push a copy of a Variant to lua as a global. Returns a error if the type is not supported.
+				Using [code].PushVariant[/code] in C# to push a function requires wrapping the Method in a [code]Callable[/code] first. In GDScript the wrapper is not needed. 
 			</description>
 		</method>
 		<method name="get_registry_value">
