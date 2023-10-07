@@ -6,6 +6,10 @@
 #include <classes/luaCoroutine.h>
 #include <classes/luaTuple.h>
 
+#ifndef LAPI_GDXTENSION
+#include <classes/luaCallable.h>
+#endif
+
 #include <util.h>
 
 void LuaState::setState(lua_State *state, LuaAPI *api, bool bindAPI) {
@@ -489,9 +493,17 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				// If the type being pushed is a lua function ref, push the ref instead.
 #ifndef LAPI_GDEXTENSION
 				Ref<LuaAPI> callObj = Object::cast_to<LuaAPI>(callable.get_object());
+				CallableCustom *custom = callable.get_custom();
+				LuaCallable *luaCallable = dynamic_cast<LuaCallable *>(custom);
+				if (luaCallable != nullptr) {
+					lua_rawgeti(state, LUA_REGISTRYINDEX, luaCallable->getFuncRef());
+					if (luaCallable->getLuaState() != state) {
+						lua_xmove(luaCallable->getLuaState(), state, 1);
+					}
+					break;
+				}
 #else
 				Ref<LuaAPI> callObj = dynamic_cast<LuaAPI *>(callable.get_object());
-#endif
 				if (callObj.is_valid() && (String)callable.get_method() == "call_function_ref") {
 					Array argBinds = callable.get_bound_arguments();
 					if (argBinds.size() == 1) {
@@ -503,6 +515,7 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 						break;
 					}
 				}
+#endif
 
 				// A work around to preserve ref count of CallableCustoms
 				Ref<LuaCallableExtra> callableCustom;
@@ -582,10 +595,16 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 			break;
 		}
 		case LUA_TFUNCTION: {
+			// Put function on the top of the stack and get a ref to it. This will create a copy of the function.
 			lua_pushvalue(state, index);
+#ifndef LAPI_GDEXTENSION
+			LuaCallable *callable = memnew(LuaCallable(Ref<LuaAPI>(getAPI(state)), luaL_ref(state, LUA_REGISTRYINDEX), state));
+			result = Callable(callable);
+#else
 			Array binds;
 			binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
 			result = Callable(getAPI(state), "call_function_ref").bindv(binds);
+#endif
 			break;
 		}
 		case LUA_TTHREAD: {
