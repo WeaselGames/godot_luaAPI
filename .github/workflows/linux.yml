@@ -77,7 +77,7 @@ jobs:
 
           - name: Linux Template Debug Mono (target=template_debug,module_mono_enabled=yes,arch=x86_64)
             cache-name: linux-template-debug-mono
-            artifact-name: export-templates
+            artifact-name: export-templates-mono
             build-options: "target=template_debug module_mono_enabled=yes arch=x86_64"
             should-run: ${{ inputs.fullbuild }}
           
