@@ -46,7 +46,9 @@ public:
 
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
+#ifdef LAPI_GDEXTENSION
 	Variant callFunctionRef(Array args, int funcRef);
+#endif
 
 	Variant getRegistryValue(String name);
 	Ref<LuaError> setRegistryValue(String name, Variant var);
