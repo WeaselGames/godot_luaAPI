@@ -10,6 +10,10 @@
 
 #include <lua/lua.hpp>
 
+#ifdef LAPI_GDEXTENSION
+using namespace godot;
+#endif
+
 class LuaFunctionRef : public RefCounted {
 	GDCLASS(LuaFunctionRef, RefCounted);
 
