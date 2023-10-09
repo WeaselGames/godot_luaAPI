@@ -45,12 +45,16 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 	ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
 
+	ClassDB::bind_method(D_METHOD("set_use_callables", "value"), &LuaAPI::setUseCallables);
+	ClassDB::bind_method(D_METHOD("get_use_callables"), &LuaAPI::getUseCallables);
+
 	ClassDB::bind_method(D_METHOD("set_object_metatable", "value"), &LuaAPI::setObjectMetatable);
 	ClassDB::bind_method(D_METHOD("get_object_metatable"), &LuaAPI::getObjectMetatable);
 
 	ClassDB::bind_method(D_METHOD("set_memory_limit", "limit"), &LuaAPI::setMemoryLimit);
 	ClassDB::bind_method(D_METHOD("get_memory_limit"), &LuaAPI::getMemoryLimit);
 
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_callables"), "set_use_callables", "get_use_callables");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "object_metatable"), "set_object_metatable", "get_object_metatable");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "memory_limit"), "set_memory_limit", "get_memory_limit");
 
@@ -80,6 +84,14 @@ void LuaAPI::setHook(Callable hook, int mask, int count) {
 
 int LuaAPI::configureGC(int what, int data) {
 	return lua_gc(lState, what, data);
+}
+
+void LuaAPI::setUseCallables(bool value) {
+	useCallables = value;
+}
+
+bool LuaAPI::getUseCallables() const {
+	return useCallables;
 }
 
 void LuaAPI::setObjectMetatable(Ref<LuaObjectMetatable> value) {

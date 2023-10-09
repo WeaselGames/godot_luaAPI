@@ -33,6 +33,9 @@ public:
 	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
+	void setUseCallables(bool value);
+	bool getUseCallables() const;
+
 	void setObjectMetatable(Ref<LuaObjectMetatable> value);
 	Ref<LuaObjectMetatable> getObjectMetatable() const;
 
@@ -82,6 +85,8 @@ public:
 	};
 
 private:
+	bool useCallables = true;
+
 	LuaState state;
 	lua_State *lState = nullptr;
 
