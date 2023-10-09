@@ -7,7 +7,7 @@
 		This class represents a lua state and allows you to interact with lua at runtime. You can load files and strings code. Push Callable's as lua functions. And push any Variant as a lua variable.
 	</description>
 	<tutorials>
-	</tutorials>w
+	</tutorials>
 	<methods>
 		<method name="new_coroutine">
 			<return type="LuaCoroutine" />
@@ -131,6 +131,9 @@
 		<member name="memory_limit" type="int" setter="set_memory_limit" getter="get_memory_limit" default="0">
 			Sets the memory limit for the state in bytes. If the limit is 0, there is no limit.
 		</member>
+		<member name="use_callables" type="bool" setter="set_use_callables" getter="get_use_callables" default="true">
+			When true, Lua functions passed to Godot will use the LuaCallable type. This type is a CallableCustom which has issues currently with GDExtension and C#
+			When false, Lua functions passed to Godot will use the LuaFunctionRef type. This type is a RefCounted which behaves the same as a LuaCallable. But uses Inoke instead of Call.
 	</members>
 	<constants>
 		<constant name="GC_STOP" value="1" enum="HookMask">

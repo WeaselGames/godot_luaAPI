@@ -4,6 +4,7 @@
 #include <classes/luaAPI.h>
 #include <classes/luaCallableExtra.h>
 #include <classes/luaCoroutine.h>
+#include <classes/luaFunctionRef.h>
 #include <classes/luaTuple.h>
 
 #ifndef LAPI_GDXTENSION
@@ -463,6 +464,20 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				break;
 			}
 
+			// If the type being pushed is a thread, push a LUA_TTHREAD state.
+#ifndef LAPI_GDEXTENSION
+			if (Ref<LuaFunctionRef> funcRef = Object::cast_to<LuaFunctionRef>(var.operator Object *()); funcRef.is_valid()) {
+#else
+			// blame this on https://github.com/godotengine/godot-cpp/issues/995
+			if (Ref<LuaFunctionRef> funcRef = dynamic_cast<LuaFunctionRef *>(var.operator Object *()); funcRef.is_valid()) {
+#endif
+				lua_rawgeti(state, LUA_REGISTRYINDEX, funcRef->getRef());
+				if (funcRef->getLuaState() != state) {
+					lua_xmove(funcRef->getLuaState(), state, 1);
+				}
+				break;
+			}
+
 			// If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
 #ifndef LAPI_GDEXTENSION
 			if (Ref<LuaCallableExtra> func = Object::cast_to<LuaCallableExtra>(var.operator Object *()); func.is_valid()) {
@@ -595,16 +610,25 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 			break;
 		}
 		case LUA_TFUNCTION: {
+			Ref<LuaAPI> api = getAPI(state);
 			// Put function on the top of the stack and get a ref to it. This will create a copy of the function.
 			lua_pushvalue(state, index);
+			if (api->getUseCallables()) {
 #ifndef LAPI_GDEXTENSION
-			LuaCallable *callable = memnew(LuaCallable(Ref<LuaAPI>(getAPI(state)), luaL_ref(state, LUA_REGISTRYINDEX), state));
-			result = Callable(callable);
+				LuaCallable *callable = memnew(LuaCallable(api, luaL_ref(state, LUA_REGISTRYINDEX), state));
+				result = Callable(callable);
 #else
-			Array binds;
-			binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
-			result = Callable(getAPI(state), "call_function_ref").bindv(binds);
+				Array binds;
+				binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
+				result = Callable(getAPI(state), "call_function_ref").bindv(binds);
 #endif
+			} else {
+				Ref<LuaFunctionRef> funcRef;
+				funcRef.instantiate();
+				funcRef->setRef(luaL_ref(state, LUA_REGISTRYINDEX));
+				funcRef->setLuaState(state);
+				result = funcRef;
+			}
 			break;
 		}
 		case LUA_TTHREAD: {
