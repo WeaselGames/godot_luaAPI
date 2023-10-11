@@ -37,11 +37,16 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaAPI::getRegistryValue);
 	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaAPI::setRegistryValue);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
+#ifdef LAPI_GDEXTENSION
 	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
+#endif
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
 
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
 	ClassDB::bind_method(D_METHOD("get_running_coroutine"), &LuaAPI::getRunningCoroutine);
+
+	ClassDB::bind_method(D_METHOD("set_use_callables", "value"), &LuaAPI::setUseCallables);
+	ClassDB::bind_method(D_METHOD("get_use_callables"), &LuaAPI::getUseCallables);
 
 	ClassDB::bind_method(D_METHOD("set_object_metatable", "value"), &LuaAPI::setObjectMetatable);
 	ClassDB::bind_method(D_METHOD("get_object_metatable"), &LuaAPI::getObjectMetatable);
@@ -49,6 +54,7 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_memory_limit", "limit"), &LuaAPI::setMemoryLimit);
 	ClassDB::bind_method(D_METHOD("get_memory_limit"), &LuaAPI::getMemoryLimit);
 
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_callables"), "set_use_callables", "get_use_callables");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "object_metatable"), "set_object_metatable", "get_object_metatable");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "memory_limit"), "set_memory_limit", "get_memory_limit");
 
@@ -78,6 +84,14 @@ void LuaAPI::setHook(Callable hook, int mask, int count) {
 
 int LuaAPI::configureGC(int what, int data) {
 	return lua_gc(lState, what, data);
+}
+
+void LuaAPI::setUseCallables(bool value) {
+	useCallables = value;
+}
+
+bool LuaAPI::getUseCallables() const {
+	return useCallables;
 }
 
 void LuaAPI::setObjectMetatable(Ref<LuaObjectMetatable> value) {
@@ -123,6 +137,7 @@ Variant LuaAPI::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
 }
 
+#ifdef LAPI_GDEXTENSION
 // Invokes the passed lua reference
 Variant LuaAPI::callFunctionRef(Array args, int funcRef) {
 	lua_pushcfunction(lState, LuaState::luaErrorHandler);
@@ -147,6 +162,7 @@ Variant LuaAPI::callFunctionRef(Array args, int funcRef) {
 	lua_pop(lState, 1);
 	return toReturn;
 }
+#endif
 
 // Calls LuaState::pushGlobalVariant()
 Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {

@@ -26,6 +26,7 @@ def get_doc_classes():
         "LuaError",
         "LuaTuple",
         "LuaCallableExtra",
+        "LuaFunctionRef",
         "LuaObjectMetatable",
         "LuaDefaultObjectMetatable",
     ]

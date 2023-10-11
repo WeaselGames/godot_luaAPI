@@ -59,11 +59,15 @@ Release Builds
 - [⚙️ GDExtension LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/gdextension-LuaJIT.zip)
 - [🐧 Linux Editor](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/linux-editor.zip)
 - [🐧 Linux Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/linux-editor-luajit.zip)
+- [🐧 Linux Editor Mono](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/linux-editor.zip)
 - [🎨 Windows Editor](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/windows-editor.zip)
 - [🎨 Windows Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/windows-editor-luajit.zip)
+- [🎨 Windows Editor Mono](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/windows-editor-mono.zip)
 - [🍎 MacOS Editor](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/macos-editor.zip)
 - [🍎 MacOS Editor LuaJIT](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/macos-editor-luajit.zip)
-- [🗜️ Export Templates](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/export-templates.tpz)
+- [🍎 MacOS Editor Mono](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/macos-editor-mono.zip)
+- [🗜️ Export Templates](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/export-templates.zip)
+- [🗜️ Mono Export Templates](https://github.com/WeaselGames/godot_luaAPI/releases/latest/download/export-templates-mono.zip)
 - For previous versions see [releases](https://github.com/WeaselGames/godot_luaAPI/releases)
 
 Compiling
@@ -121,6 +125,9 @@ func _ready() -> void:
 	var message = val.call([])
 	print(message)
 ```
+
+Dotnet (mono) users see example redone in C# in [DOTNET.md](DOTNET.md).
+
 Contributing And Feature Requests
 ---------------
 All contributions are welcome, if you would like to contribute submit a PR.

@@ -110,6 +110,7 @@ jobs:
           cp -r misc/dist/macos_tools.app Godot.app
           mkdir Godot.app/Contents/MacOS
           mv bin/godot.macos.editor.universal.luaAPI.mono Godot.app/Contents/MacOS/Godot
+          mv bin/GodotSharp Godot.app/Contents/Resources/
           mv Godot.app bin/
           cp -n '${{ github.workspace }}/README.md' '${{ github.workspace }}/LICENSE' ${{ github.workspace }}/scripts/godot/bin/
 

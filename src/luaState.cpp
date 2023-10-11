@@ -4,7 +4,12 @@
 #include <classes/luaAPI.h>
 #include <classes/luaCallableExtra.h>
 #include <classes/luaCoroutine.h>
+#include <classes/luaFunctionRef.h>
 #include <classes/luaTuple.h>
+
+#ifndef LAPI_GDXTENSION
+#include <classes/luaCallable.h>
+#endif
 
 #include <util.h>
 
@@ -459,6 +464,20 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				break;
 			}
 
+			// If the type being pushed is a thread, push a LUA_TTHREAD state.
+#ifndef LAPI_GDEXTENSION
+			if (Ref<LuaFunctionRef> funcRef = Object::cast_to<LuaFunctionRef>(var.operator Object *()); funcRef.is_valid()) {
+#else
+			// blame this on https://github.com/godotengine/godot-cpp/issues/995
+			if (Ref<LuaFunctionRef> funcRef = dynamic_cast<LuaFunctionRef *>(var.operator Object *()); funcRef.is_valid()) {
+#endif
+				lua_rawgeti(state, LUA_REGISTRYINDEX, funcRef->getRef());
+				if (funcRef->getLuaState() != state) {
+					lua_xmove(funcRef->getLuaState(), state, 1);
+				}
+				break;
+			}
+
 			// If the type being pushed is a LuaCallableExtra. use mt_CallableExtra instead
 #ifndef LAPI_GDEXTENSION
 			if (Ref<LuaCallableExtra> func = Object::cast_to<LuaCallableExtra>(var.operator Object *()); func.is_valid()) {
@@ -489,9 +508,17 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				// If the type being pushed is a lua function ref, push the ref instead.
 #ifndef LAPI_GDEXTENSION
 				Ref<LuaAPI> callObj = Object::cast_to<LuaAPI>(callable.get_object());
+				CallableCustom *custom = callable.get_custom();
+				LuaCallable *luaCallable = dynamic_cast<LuaCallable *>(custom);
+				if (luaCallable != nullptr) {
+					lua_rawgeti(state, LUA_REGISTRYINDEX, luaCallable->getFuncRef());
+					if (luaCallable->getLuaState() != state) {
+						lua_xmove(luaCallable->getLuaState(), state, 1);
+					}
+					break;
+				}
 #else
 				Ref<LuaAPI> callObj = dynamic_cast<LuaAPI *>(callable.get_object());
-#endif
 				if (callObj.is_valid() && (String)callable.get_method() == "call_function_ref") {
 					Array argBinds = callable.get_bound_arguments();
 					if (argBinds.size() == 1) {
@@ -503,6 +530,7 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 						break;
 					}
 				}
+#endif
 
 				// A work around to preserve ref count of CallableCustoms
 				Ref<LuaCallableExtra> callableCustom;
@@ -582,10 +610,25 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 			break;
 		}
 		case LUA_TFUNCTION: {
+			Ref<LuaAPI> api = getAPI(state);
+			// Put function on the top of the stack and get a ref to it. This will create a copy of the function.
 			lua_pushvalue(state, index);
-			Array binds;
-			binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
-			result = Callable(getAPI(state), "call_function_ref").bindv(binds);
+			if (api->getUseCallables()) {
+#ifndef LAPI_GDEXTENSION
+				LuaCallable *callable = memnew(LuaCallable(api, luaL_ref(state, LUA_REGISTRYINDEX), state));
+				result = Callable(callable);
+#else
+				Array binds;
+				binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
+				result = Callable(getAPI(state), "call_function_ref").bindv(binds);
+#endif
+			} else {
+				Ref<LuaFunctionRef> funcRef;
+				funcRef.instantiate();
+				funcRef->setRef(luaL_ref(state, LUA_REGISTRYINDEX));
+				funcRef->setLuaState(state);
+				result = funcRef;
+			}
 			break;
 		}
 		case LUA_TTHREAD: {
