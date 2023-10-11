@@ -61,14 +61,22 @@ Godot Editor.
 Getting Started Example (In C#)
 -------
 
-As you can expect, the method names in the LuaAPI class are in Dotnet style. So, something like `LuaAPI.push_variant`
-would be `LuaAPI.PushVariant`
+As you can expect, the method names in the LuaAPI class are in Dotnet style (Camel Case). So, something like 
+`LuaAPI.push_variant` would be `LuaAPI.PushVariant`
 
 In this example, we recreate the main GDScript example from the README.md file. I have fully commented this
 example, to explain what each part does. Specific differences and a special note on this example: In C# you
 cannot assign a Method to a `Variant` for use with `LuaAPI.PushVariant`. So, to get around that, and make the
 example work, we will first wrap our called function in a `Callable` variable (wrapper). Please note the line
 `Callable print = new Callable(this, MethodName.LuaPrint);` in the example below.
+
+This example also shows how to use the newly added `LuaFunctionRef` class to `invoke` a lua function. This allows 
+for creating a call back function to respond to things like events. Note how we use `.As<LuaFunctionRef>()` to cast 
+the Variant `val` into a `LuaFunctionRef` variable (`get_message`). Additionally, we do not need to use the nullable 
+invoke style common to most event firing, as the `get_message` variable is not null. The `.Invoke()` method takes a 
+`Godot.Collections.Array` as its only parameter. In this example, we make use of the shorthand to create a `new` object 
+for the Godot Array class. This shorthand is only possible because of the way that Godot defines the `Array` class, and 
+is not a normal C# `new Object()` creation style.
 
 ```csharp
 using Godot;
@@ -85,11 +93,11 @@ public partial class Node2D : Godot.Node2D {
 
 		// All builtin libraries are available to bind with. Use OS and IO at your own risk.
 		// BindLibraries requires a "Godot Array" so, let's build one.
-		Godot.Collections.Array libraries = new Godot.Collections.Array();
-		libraries.Add("base");   // Base Lua commands
-		libraries.Add("table");  // Table functionality.
-		libraries.Add("string"); // String Specific functionality.
-
+		Godot.Collections.Array libraries = new() {
+			"base",  // Base Lua commands
+			"table", // Table functionality.
+			"string" // String Specific functionality.
+		};
 		lua.BindLibraries(libraries); // Assign the specified libraries to the LuaAPI object.
 
 		// In C#, .PushVariant does not work with Methods, so we use Callable to wrap our function.
@@ -122,23 +130,30 @@ public partial class Node2D : Godot.Node2D {
 			GD.Print("An error occurred calling DoString.");
 			GD.Print("ERROR %d: %s", error.Type, error.Message);
 		}
-
+		
+		// Let's pull our lua function from the lua code.
 		var val = lua.PullVariant("get_message");
-
 		// Check to see if it returned an error, or a value.
 		if (val.GetType() == typeof(LuaError)) {
 			GD.Print("ERROR %d: %s", error.Type, error.Message);
 			return;
 		}
 
-		// LuaAPI.CallFunction requires a Godot.Collections.Array as the container
-		// for the parameters passed in, for the lua function. 
-		Godot.Collections.Array Params = new Godot.Collections.Array();
+		// We create a LuaFunctionRef as our reference to the Lua code's function,
+		// then we use .As<LuaFunctionRef>() to cast it as a LuaFunctionRef.
+		LuaFunctionRef get_message = val.As<LuaFunctionRef>();
+		if (get_message == null) {
+			GD.Print("ERROR: get_message is null.");
+			return;
+		}
 
-		// We use .CallFunction to actually call the lua function within the Lua State.
-		var message = lua.CallFunction("get_message", Params);
+		// Calling Lua (code) functions requires a Godot.Collections.Array as the container
+		// for the parameters passed in. 
+		Godot.Collections.Array Params = new();
+		// We use .Invoke to actually call the lua function within the Lua State. 
 		// And, finally, we log the output of the function to Godot Output Console.
-		GD.Print(message);
+		GD.Print(get_message.Invoke(Params));
+
 	}
 }
 ```
