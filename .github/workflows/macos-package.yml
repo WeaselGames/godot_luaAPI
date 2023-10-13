@@ -124,10 +124,10 @@ jobs:
           strip bin/godot.*
           cp -r misc/dist/macos_template.app macos_template.app
           mkdir macos_template.app/Contents/MacOS
-          cp bin/godot.macos.template_debug.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_debug.universal.luaAPI
-          cp bin/godot.macos.template_release.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_release.universal.luaAPI
-          chmod +x macos_template.app/Contents/MacOS/godot_macos_debug.universal.luaAPI
-          chmod +x macos_template.app/Contents/MacOS/godot_macos_release.universal.luaAPI
+          cp bin/godot.macos.template_debug.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_debug.universal
+          cp bin/godot.macos.template_release.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_release.universal
+          chmod +x macos_template.app/Contents/MacOS/godot_macos_debug.universal
+          chmod +x macos_template.app/Contents/MacOS/godot_macos_release.universal
           zip -r macos.zip macos_template.app
           rm -rf bin/*
           mkdir bin/templates
@@ -143,10 +143,10 @@ jobs:
           strip bin/godot.*
           cp -r misc/dist/macos_template.app macos_template.app
           mkdir macos_template.app/Contents/MacOS
-          cp bin/godot.macos.template_debug.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_debug.universal.luaAPI
-          cp bin/godot.macos.template_release.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_release.universal.luaAPI
-          chmod +x macos_template.app/Contents/MacOS/godot_macos_debug.universal.luaAPI
-          chmod +x macos_template.app/Contents/MacOS/godot_macos_release.universal.luaAPI
+          cp bin/godot.macos.template_debug.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_debug.universal
+          cp bin/godot.macos.template_release.universal.luaAPI macos_template.app/Contents/MacOS/godot_macos_release.universal
+          chmod +x macos_template.app/Contents/MacOS/godot_macos_debug.universal
+          chmod +x macos_template.app/Contents/MacOS/godot_macos_release.universal
           zip -r macos.zip macos_template.app
           rm -rf bin/*
           mkdir bin/templates

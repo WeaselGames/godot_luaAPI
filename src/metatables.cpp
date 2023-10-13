@@ -458,7 +458,7 @@ void LuaState::createObjectMetatable() {
 
 		// We need to manually uncount the ref
 		if (Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1); ref.is_valid()) {
-			ref->~RefCounted();
+			ref->unreference();
 		}
 
 		return 0;
@@ -804,7 +804,7 @@ void LuaState::createCallableExtraMetatable() {
 	LUA_METAMETHOD_TEMPLATE(L, -1, "__gc", {
 		// We need to manually uncount the ref
 		if (Ref<RefCounted> ref = Object::cast_to<RefCounted>(arg1); ref.is_valid()) {
-			ref->~RefCounted();
+			ref->unreference();
 		}
 
 		return 0;

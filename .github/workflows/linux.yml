@@ -186,7 +186,7 @@ jobs:
 
           mv scripts/godot/bin/godot.linuxbsd.template_release.x86_64.luaAPI scripts/godot/templates/linux_release.x86_64 || true
           mv scripts/godot/bin/godot.linuxbsd.template_debug.x86_64.luaAPI scripts/godot/templates/linux_debug.x86_64 || true
-          mv scripts/godot/bin/godot.linuxbsd.template_release.x86_32.luaAPI scripts/godot/templates/linux_release.x32_64 || true
+          mv scripts/godot/bin/godot.linuxbsd.template_release.x86_32.luaAPI scripts/godot/templates/linux_release.x86_32 || true
           mv scripts/godot/bin/godot.linuxbsd.template_debug.x86_32.luaAPI scripts/godot/templates/linux_debug.x86_32 || true
 
           mv scripts/godot/bin/godot.linuxbsd.template_release.x86_64.luaAPI.mono scripts/godot/templates/linux_release.x86_64 || true

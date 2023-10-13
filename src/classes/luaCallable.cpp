@@ -14,7 +14,6 @@ LuaCallable::LuaCallable(Ref<LuaAPI> p_obj, int ref, lua_State *p_state) {
 }
 
 LuaCallable::~LuaCallable() {
-	print_line("LuaCallable::~LuaCallable()");
 	luaL_unref(state, LUA_REGISTRYINDEX, funcRef);
 }
 
@@ -43,7 +42,7 @@ ObjectID LuaCallable::get_object() const {
 String LuaCallable::get_as_text() const {
 	// I dont know of a way to get a useful name from the function
 	// For now we are just using the callables hash.
-	return vformat("luaCallable 0x%X", h);
+	return vformat("LuaCallable 0x%X", h);
 }
 
 lua_State *LuaCallable::getLuaState() const {
