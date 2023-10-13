@@ -56,7 +56,14 @@ the specific location (`-s <source>`) and we are forcing (`-f`) the restore. Thi
 nuget packages.
 
 Once you have done this, you will need to rebuild your project. You can do so either through your IDE or inside of the 
-Godot Editor.
+Godot Editor. I highly recommend keeping this section handy, as you will need to use these for each new project 
+that you create. If you can, it's advisable to change the nuget sources so that the local source is first in the 
+list. This will make life easier. And then, with new projects, run the clear command, then restore the project in 
+your IDE, or simply build the project in Godot. (Godot will perform a restore in the build process.) By having the 
+local sources first in the list, this will ensure that they are put in, and that your project will work.
+
+A note on the LuaAPI specific nuget packages: They are included in the Mono (DotNet) builds from the `Releases` tab on 
+the Github page.
 
 Getting Started Example (In C#)
 -------
@@ -138,6 +145,11 @@ public partial class Node2D : Godot.Node2D {
 			GD.Print("ERROR %d: %s", error.Type, error.Message);
 			return;
 		}
+
+		// To use LuaFunctionRefs we need to change the system to use it. We do this by changing
+		// the .UseCallables flag to 'false'. (If your LuaFunctionRef variable is null, you didn't
+		// set this flag. 
+		lua.UseCallables = false;
 
 		// We create a LuaFunctionRef as our reference to the Lua code's function,
 		// then we use .As<LuaFunctionRef>() to cast it as a LuaFunctionRef.
