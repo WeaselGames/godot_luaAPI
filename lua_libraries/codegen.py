@@ -58,8 +58,26 @@ def code_gen(luaJIT=False):
         luaLibraries_gen_cpp += "\t{ \"%s\", luaopen_%s },\n" % (library, library)
 
     luaLibraries_gen_cpp += "};\n"
-
-    luaLibraries_gen_cpp += """
+    if luaJIT:
+        luaLibraries_gen_cpp += """
+bool loadLuaLibrary(lua_State *L, String libraryName) {
+	const char *lib_c_str = libraryName.ascii().get_data();
+	if (luaLibraries[lib_c_str] == nullptr) {
+		return false;
+	}
+	
+    lua_pushcfunction(L, luaLibraries[lib_c_str]);
+    if (libraryName == "base") {
+        lua_pushstring(L, "");
+    } else {
+	    lua_pushstring(L, lib_c_str);
+    }
+	lua_call(L, 1, 0);
+	return true;
+}
+"""
+    else:
+        luaLibraries_gen_cpp += """
 bool loadLuaLibrary(lua_State *L, String libraryName) {
 	const char *lib_c_str = libraryName.ascii().get_data();
 	if (luaLibraries[lib_c_str] == nullptr) {

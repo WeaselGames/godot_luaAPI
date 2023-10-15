@@ -54,6 +54,9 @@ Ref<LuaError> LuaState::bindLibraries(TypedArray<String> libs) {
 		if (!loadLuaLibrary(L, libs[i])) {
 			return LuaError::newError(vformat("Library \"%s\" does not exist.", libs[i]), LuaError::ERR_RUNTIME);
 		}
+		if (libs[i] == "base") {
+			lua_register(L, "print", luaPrint);
+		}
 	}
 	return nullptr;
 }
