@@ -157,6 +157,21 @@ jobs:
             platform: ios
             arch: universal
             should-build: ${{ inputs.fullbuild }}
+          
+          - identifier: web-release (wasm32)
+            name: Javascript (wasm32) - template_release
+            runner: ubuntu-20.04
+            target: template_release
+            platform: javascript
+            arch: wasm32
+            should-build: ${{ inputs.fullbuild }}
+          - identifier: web-debug (universal)
+            name: Javascript (wasm32) - template_debug
+            runner: ubuntu-20.04
+            target: template_debug
+            platform: javascript
+            arch: wasm32
+            should-build: true
         exclude:
           - {opts: {should-build: false}}
 
