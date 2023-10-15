@@ -257,16 +257,27 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{env.BASE_BRANCH}}
+  
       - name: Compile extension
+        if: matrix.opts.platform != 'javascript'
         shell: sh
         run: |
           PATH=/opt/buildroot/bin:$PATH scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' ${{ matrix.opts.args }}
           ls -l project/addons/luaAPI/bin/
+      
+      - name: Compile extension (Web)
+        if: matrix.opts.platform == 'javascript'
+        shell: sh
+        run: |
+          scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' ${{ matrix.opts.args }}
+          ls -l project/addons/luaAPI/bin/
+
       - name: Strip bins
         if: "!startsWith(matrix.opts.identifier, 'windows-') && startsWith(matrix.opts.arch, 'x86_')"
         shell: sh
         run: |
           strip project/addons/luaAPI/bin/*
+      
       - name: Prepare artifact
         shell: sh
         env:
