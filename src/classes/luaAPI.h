@@ -30,7 +30,6 @@ public:
 	LuaAPI();
 	~LuaAPI();
 
-	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
 	void setUseCallables(bool value);
@@ -54,8 +53,9 @@ public:
 #endif
 
 	Variant getRegistryValue(String name);
-	Ref<LuaError> setRegistryValue(String name, Variant var);
 
+	Ref<LuaError> setRegistryValue(String name, Variant var);
+	Ref<LuaError> bindLibraries(TypedArray<String> libs);
 	Ref<LuaError> doFile(String fileName);
 	Ref<LuaError> doString(String code);
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);

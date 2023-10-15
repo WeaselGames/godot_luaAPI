@@ -18,6 +18,7 @@ if env["luaapi_luaver"] == "jit" and env['platform']=='javascript':
 
 Export('env_lua')
 SConscript('external/SCsub')
+SConscript('lua_libraries/SCsub')
 
 if env["luaapi_luaver"] == 'jit':
     env_lua.Append(CPPDEFINES=['LAPI_LUAJIT'])

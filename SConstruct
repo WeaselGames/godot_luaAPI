@@ -9,9 +9,14 @@ env.tools=['mingw']
 env.Append(CPPDEFINES = ['LAPI_GDEXTENSION'])
 env.Append(CPPPATH 	  = [Dir('src').abspath, Dir('external').abspath])
 
+env['sources'] = []
+Export('env')
+SConscript("lua_libraries/SConscript")
+
 sources = Glob('*.cpp')
 sources.append(Glob('src/*.cpp'))
 sources.append(Glob('src/classes/*.cpp'))
+sources.append(env['sources'])
 
 if env["luaapi_luaver"] == 'jit':
     env.Append(CPPDEFINES=['LAPI_LUAJIT'])

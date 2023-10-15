@@ -74,8 +74,8 @@ void LuaAPI::_bind_methods() {
 }
 
 // Calls LuaState::bindLibs()
-void LuaAPI::bindLibraries(Array libs) {
-	state.bindLibraries(libs);
+Ref<LuaError> LuaAPI::bindLibraries(TypedArray<String> libs) {
+	return state.bindLibraries(libs);
 }
 
 void LuaAPI::setHook(Callable hook, int mask, int count) {

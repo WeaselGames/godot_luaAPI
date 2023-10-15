@@ -22,10 +22,11 @@
 			</description>
 		</method>
 		<method name="bind_libraries">
-			<return type="void" />
+			<return type="LuaError" />
 			<param index="0" name="Array" type="Array" />
 			<description>
 				Bind lua libraries to the LuaAPI Object. 
+				Returns an error if a library fails to bind.
 				Note: in C#, the param Array must be a [code]Godot.Collections.Array[/code] and not a [code]System.Array[/code] class.
 			</description>
 		</method>
