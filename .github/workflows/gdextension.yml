@@ -236,7 +236,7 @@ jobs:
         if: matrix.opts.platform == 'javascript'
         uses: mymindstorm/setup-emsdk@v12
         with:
-          version: '3.1.18'
+          version: 3.1.45
 
       - name: Set up Python
         uses: actions/setup-python@v2
