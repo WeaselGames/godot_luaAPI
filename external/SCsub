@@ -1,4 +1,3 @@
-
 Import('env')
 Import('env_lua')
 
@@ -74,6 +73,7 @@ if luaver == "jit":
     else:
         env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
         env.Append(LIBS=['libluajit'])
+    env_lua.Append(CPPPATH=[Dir('luaJIT/src').abspath])
 
 elif luaver == "5.1":
     env_lua.Append(CPPDEFINES='MAKE_LIB')
@@ -87,7 +87,8 @@ elif luaver == "5.1":
         env_lua['CFLAGS'].remove('-std=gnu11')
         env_lua.Append(CFLAGS=['-std=c99'])
 
-    env_lua.add_source_files(env.modules_sources,'lua/*.c')
+    env_lua.Append(CPPPATH=[Dir('lua51').abspath])
+    env_lua.add_source_files(env.modules_sources,'lua51/*.c')
 
 else:
     env_lua.Append(CPPDEFINES='MAKE_LIB')
@@ -101,5 +102,6 @@ else:
         env_lua['CFLAGS'].remove('-std=gnu11')
         env_lua.Append(CFLAGS=['-std=c99'])
 
-    env_lua.add_source_files(env.modules_sources,'lua/onelua.c')
+    env_lua.Append(CPPPATH=[Dir('lua').abspath])
+    env_lua.add_source_files(env.modules_sources, 'lua/onelua.c')
 

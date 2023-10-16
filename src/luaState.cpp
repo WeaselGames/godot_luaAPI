@@ -7,6 +7,8 @@
 #include <classes/luaFunctionRef.h>
 #include <classes/luaTuple.h>
 
+#include <lua_libraries.h>
+
 #ifndef LAPI_GDXTENSION
 #include <classes/luaCallable.h>
 #endif
@@ -46,97 +48,18 @@ lua_State *LuaState::getState() const {
 	return L;
 }
 
-#ifndef LAPI_LUAJIT
-
 // Binds lua libraries with the lua state
-void LuaState::bindLibraries(Array libs) {
+Ref<LuaError> LuaState::bindLibraries(TypedArray<String> libs) {
 	for (int i = 0; i < libs.size(); i++) {
-		String lib = ((String)libs[i]).to_lower();
-		if (lib == "base") {
-			luaL_requiref(L, "", luaopen_base, 1);
-			lua_pop(L, 1);
-			// base will override print, so we take it back. User can still override them self
+		if (!loadLuaLibrary(L, libs[i])) {
+			return LuaError::newError(vformat("Library \"%s\" does not exist.", libs[i]), LuaError::ERR_RUNTIME);
+		}
+		if (libs[i] == "base") {
 			lua_register(L, "print", luaPrint);
-		} else if (lib == "table") {
-			luaL_requiref(L, LUA_TABLIBNAME, luaopen_table, 1);
-			lua_pop(L, 1);
-		} else if (lib == "string") {
-			luaL_requiref(L, LUA_STRLIBNAME, luaopen_string, 1);
-			lua_pop(L, 1);
-		} else if (lib == "math") {
-			luaL_requiref(L, LUA_MATHLIBNAME, luaopen_math, 1);
-			lua_pop(L, 1);
-		} else if (lib == "os") {
-			luaL_requiref(L, LUA_OSLIBNAME, luaopen_os, 1);
-			lua_pop(L, 1);
-		} else if (lib == "io") {
-			luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);
-			lua_pop(L, 1);
-		} else if (lib == "coroutine") {
-			luaL_requiref(L, LUA_COLIBNAME, luaopen_coroutine, 1);
-			lua_pop(L, 1);
-		} else if (lib == "debug") {
-			luaL_requiref(L, LUA_DBLIBNAME, luaopen_debug, 1);
-			lua_pop(L, 1);
-		} else if (lib == "package") {
-			luaL_requiref(L, LUA_LOADLIBNAME, luaopen_package, 1);
-			lua_pop(L, 1);
-		} else if (lib == "utf8") {
-			luaL_requiref(L, LUA_UTF8LIBNAME, luaopen_utf8, 1);
-			lua_pop(L, 1);
 		}
 	}
+	return nullptr;
 }
-
-#else
-
-// Binds lua libraries with the lua state
-void LuaState::bindLibraries(Array libs) {
-	for (int i = 0; i < libs.size(); i++) {
-		String lib = ((String)libs[i]).to_lower();
-		if (lib == "base") {
-			lua_pushcfunction(L, luaopen_base);
-			lua_pushstring(L, "");
-			lua_call(L, 1, 0);
-
-			lua_register(L, "print", luaPrint);
-		} else if (lib == "table") {
-			lua_pushcfunction(L, luaopen_table);
-			lua_pushstring(L, LUA_TABLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "string") {
-			lua_pushcfunction(L, luaopen_string);
-			lua_pushstring(L, LUA_STRLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "math") {
-			lua_pushcfunction(L, luaopen_math);
-			lua_pushstring(L, LUA_MATHLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "os") {
-			lua_pushcfunction(L, luaopen_os);
-			lua_pushstring(L, LUA_OSLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "io") {
-			lua_pushcfunction(L, luaopen_io);
-			lua_pushstring(L, LUA_IOLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "debug") {
-			lua_pushcfunction(L, luaopen_debug);
-			lua_pushstring(L, LUA_DBLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "package") {
-			lua_pushcfunction(L, luaopen_package);
-			lua_pushstring(L, LUA_LOADLIBNAME);
-			lua_call(L, 1, 0);
-		} else if (lib == "ffi") {
-			lua_pushcfunction(L, luaopen_ffi);
-			lua_pushstring(L, LUA_FFILIBNAME);
-			lua_call(L, 1, 0);
-		}
-	}
-}
-
-#endif
 
 void LuaState::setHook(Callable hook, int mask, int count) {
 	if (hook.is_null()) {
