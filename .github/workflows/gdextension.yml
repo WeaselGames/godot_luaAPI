@@ -15,7 +15,7 @@ on:
 
 env:
   BASE_BRANCH: main
-  GODOT_VERSION: ${{ inputs.godot_version }}-stable
+  GODOT_VERSION: ${{ inputs.godot_version }}
 
 jobs:
   gdextension:
