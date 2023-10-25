@@ -3,8 +3,11 @@ import os
 import sys
 import fnmatch
 
+from config import configure
+
+Export('configure')
 env = SConscript("external/SConscript")
-env.tools=['mingw']
+env.Tool('compilation_db')
 
 env.Append(CPPDEFINES = ['LAPI_GDEXTENSION'])
 env.Append(CPPPATH 	  = [Dir('src').abspath, Dir('external').abspath])
@@ -22,6 +25,9 @@ if env["luaapi_luaver"] == 'jit':
     env.Append(CPPDEFINES=['LAPI_LUAJIT'])
 elif env["luaapi_luaver"] == '5.1':
     env.Append(CPPDEFINES=['LAPI_51'])
+
+cdb = env.CompilationDatabase('compile_commands.json')
+Alias('cdb', cdb)
 
 library = env.SharedLibrary(
     "project/addons/luaAPI/bin/libluaapi{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
