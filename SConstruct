@@ -6,8 +6,17 @@ import fnmatch
 from config import configure
 
 Export('configure')
+
 env = SConscript("external/SConscript")
 env.Tool('compilation_db')
+
+if os.name == 'posix':
+    if os.environ.get('CXX', None) != None and env['CXX'] != os.environ['CXX']:
+        print("Using system CXX: {}".format(os.environ['CXX']))
+        env['CXX'] = os.environ['CXX']
+    if os.environ.get('CC', None) != None and env['CC'] != os.environ['CC']:
+        print("Using system CC: {}".format(os.environ['CC']))
+        env['CC'] = os.environ['CC']
 
 env.Append(CPPDEFINES = ['LAPI_GDEXTENSION'])
 env.Append(CPPPATH 	  = [Dir('src').abspath, Dir('external').abspath])
