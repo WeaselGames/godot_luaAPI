@@ -162,6 +162,10 @@ void LuaState::createVector2Metatable() {
 		return 1;
 	});
 
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
+
 	lua_pop(L, 1); // Stack is now unmodified
 }
 
@@ -230,6 +234,10 @@ void LuaState::createVector3Metatable() {
 		return 1;
 	});
 
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
+
 	lua_pop(L, 1); // Stack is now unmodified
 }
 
@@ -260,6 +268,10 @@ void LuaState::createRect2Metatable() {
 		return 1;
 	});
 
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
+
 	lua_pop(L, 1); // Stack is now unmodified
 }
 
@@ -289,6 +301,10 @@ void LuaState::createPlaneMetatable() {
 		LuaState::pushVariant(inner_state, arg1.operator Plane() == arg2.operator Plane());
 		return 1;
 	});
+
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
 }
@@ -358,6 +374,10 @@ void LuaState::createColorMetatable() {
 		return 1;
 	});
 
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
+
 	lua_pop(L, 1); // Stack is now unmodified
 }
 
@@ -376,6 +396,10 @@ void LuaState::createSignalMetatable() {
 		LuaState::pushVariant(inner_state, arg1.get(arg2));
 		return 1;
 	});
+
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
 }
@@ -794,6 +818,10 @@ void LuaState::createCallableMetatable() {
 	lua_pushcfunction(L, luaCallableCall);
 	lua_settable(L, -3);
 
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
+	lua_settable(L, -3);
+
 	lua_pop(L, 1);
 }
 
@@ -812,6 +840,10 @@ void LuaState::createCallableExtraMetatable() {
 
 	lua_pushstring(L, "__call");
 	lua_pushcfunction(L, LuaCallableExtra::call);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "This metatable is protected.");
 	lua_settable(L, -3);
 
 	lua_pop(L, 1);
