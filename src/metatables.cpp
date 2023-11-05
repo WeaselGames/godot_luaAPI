@@ -163,7 +163,7 @@ void LuaState::createVector2Metatable() {
 	});
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
@@ -235,7 +235,7 @@ void LuaState::createVector3Metatable() {
 	});
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
@@ -269,7 +269,7 @@ void LuaState::createRect2Metatable() {
 	});
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
@@ -303,7 +303,7 @@ void LuaState::createPlaneMetatable() {
 	});
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
@@ -375,7 +375,7 @@ void LuaState::createColorMetatable() {
 	});
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
@@ -398,7 +398,7 @@ void LuaState::createSignalMetatable() {
 	});
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1); // Stack is now unmodified
@@ -497,21 +497,6 @@ void LuaState::createObjectMetatable() {
 
 		if (mt.is_valid()) {
 			LuaState::pushVariant(inner_state, mt->__tostring(arg1, api));
-			return 1;
-		}
-
-		return 0;
-	});
-
-	LUA_METAMETHOD_TEMPLATE(L, -1, "__metatable", {
-		Ref<LuaAPI> api = getAPI(inner_state);
-		Ref<LuaObjectMetatable> mt = arg1.get("lua_metatable");
-		if (!mt.is_valid()) {
-			mt = api->getObjectMetatable();
-		}
-
-		if (mt.is_valid()) {
-			LuaState::pushVariant(inner_state, mt->__metatable(arg1, api));
 			return 1;
 		}
 
@@ -807,6 +792,10 @@ void LuaState::createObjectMetatable() {
 		return 0;
 	});
 
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
+	lua_settable(L, -3);
+
 	lua_pop(L, 1);
 }
 
@@ -819,7 +808,7 @@ void LuaState::createCallableMetatable() {
 	lua_settable(L, -3);
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1);
@@ -843,7 +832,7 @@ void LuaState::createCallableExtraMetatable() {
 	lua_settable(L, -3);
 
 	lua_pushliteral(L, "__metatable");
-	lua_pushliteral(L, "This metatable is protected.");
+	lua_pushliteral(L, METATABLE_DISCLAIMER);
 	lua_settable(L, -3);
 
 	lua_pop(L, 1);
