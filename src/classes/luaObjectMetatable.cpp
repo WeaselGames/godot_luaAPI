@@ -13,7 +13,6 @@ void LuaObjectMetatable::_bind_methods() {
 	GDVIRTUAL_BIND(__call, "obj", "lua", "args");
 	GDVIRTUAL_BIND(__gc, "obj", "lua");
 	GDVIRTUAL_BIND(__tostring, "obj", "lua");
-	GDVIRTUAL_BIND(__metatable, "obj", "lua");
 	GDVIRTUAL_BIND(__len, "obj", "lua");
 	GDVIRTUAL_BIND(__unm, "obj", "lua");
 	GDVIRTUAL_BIND(__add, "obj", "lua", "other");
@@ -62,12 +61,6 @@ Ref<LuaError> LuaObjectMetatable::__gc(Object *obj, Ref<LuaAPI> api) {
 String LuaObjectMetatable::__tostring(Object *obj, Ref<LuaAPI> api) {
 	String ret;
 	VIRTUAL_CALL(__tostring, ret, obj, api);
-	return ret;
-}
-
-Variant LuaObjectMetatable::__metatable(Object *obj, Ref<LuaAPI> api) {
-	Variant ret;
-	VIRTUAL_CALL(__metatable, ret, obj, api);
 	return ret;
 }
 
@@ -272,14 +265,6 @@ String LuaDefaultObjectMetatable::__tostring(Object *obj, Ref<LuaAPI> api) {
 	}
 
 	return String();
-}
-
-Variant LuaDefaultObjectMetatable::__metatable(Object *obj, Ref<LuaAPI> api) {
-	if (obj->has_method("__metatable")) {
-		return obj->call("__metatable", api);
-	}
-
-	return Variant();
 }
 
 Variant LuaDefaultObjectMetatable::__unm(Object *obj, Ref<LuaAPI> api) {

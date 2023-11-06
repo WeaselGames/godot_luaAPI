@@ -13,6 +13,8 @@
 #include <classes/luaError.h>
 #include <lua/lua.hpp>
 
+#define METATABLE_DISCLAIMER "This metatable is protected."
+
 class LuaAPI;
 
 class LuaState {

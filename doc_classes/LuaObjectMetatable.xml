@@ -140,14 +140,6 @@
                 The less than (<) operation. Behavior similar to the addition operation, except that Lua will try a metamethod only when the values being compared are neither both numbers nor both strings. Moreover, the result of the call is always converted to a boolean. 
 			</description>
 		</method>
-		<method name="__metatable" qualifiers="virtual">
-			<return type="Variant" />
-			<param index="0" name="obj" type="Object" />
-			<param index="1" name="lua" type="LuaAPI" />
-			<description>
-                If object does not have a metatable, returns nil. Otherwise, if the object's metatable has a __metatable field, returns the associated value. Otherwise, returns the metatable of the given object. 
-			</description>
-		</method>
 		<method name="__mod" qualifiers="virtual">
 			<return type="Variant" />
 			<param index="0" name="obj" type="Object" />
