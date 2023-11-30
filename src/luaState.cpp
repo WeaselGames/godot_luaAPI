@@ -2,16 +2,13 @@
 #include "lua/lua.h"
 
 #include <classes/luaAPI.h>
+#include <classes/luaCallable.h>
 #include <classes/luaCallableExtra.h>
 #include <classes/luaCoroutine.h>
 #include <classes/luaFunctionRef.h>
 #include <classes/luaTuple.h>
 
 #include <lua_libraries.h>
-
-#ifndef LAPI_GDXTENSION
-#include <classes/luaCallable.h>
-#endif
 
 #include <util.h>
 
@@ -427,10 +424,8 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				break;
 			}
 
-			if (callable.is_custom()) {
-				// If the type being pushed is a lua function ref, push the ref instead.
 #ifndef LAPI_GDEXTENSION
-				Ref<LuaAPI> callObj = Object::cast_to<LuaAPI>(callable.get_object());
+			if (callable.is_custom()) {
 				CallableCustom *custom = callable.get_custom();
 				LuaCallable *luaCallable = dynamic_cast<LuaCallable *>(custom);
 				if (luaCallable != nullptr) {
@@ -440,20 +435,6 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 					}
 					break;
 				}
-#else
-				Ref<LuaAPI> callObj = dynamic_cast<LuaAPI *>(callable.get_object());
-				if (callObj.is_valid() && (String)callable.get_method() == "call_function_ref") {
-					Array argBinds = callable.get_bound_arguments();
-					if (argBinds.size() == 1) {
-						lua_State *refState = callObj->getState();
-						lua_rawgeti(refState, LUA_REGISTRYINDEX, (int)argBinds[0]);
-						if (refState != state) {
-							lua_xmove(refState, state, 1);
-						}
-						break;
-					}
-				}
-#endif
 
 				// A work around to preserve ref count of CallableCustoms
 				Ref<LuaCallableExtra> callableCustom;
@@ -462,6 +443,7 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 				LuaState::pushVariant(state, callableCustom);
 				break;
 			}
+#endif
 
 			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
 			memnew_placement(userdata, Variant(var));
@@ -537,14 +519,8 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 			// Put function on the top of the stack and get a ref to it. This will create a copy of the function.
 			lua_pushvalue(state, index);
 			if (api->getUseCallables()) {
-#ifndef LAPI_GDEXTENSION
 				LuaCallable *callable = memnew(LuaCallable(api, luaL_ref(state, LUA_REGISTRYINDEX), state));
 				result = Callable(callable);
-#else
-				Array binds;
-				binds.push_back(luaL_ref(state, LUA_REGISTRYINDEX));
-				result = Callable(getAPI(state), "call_function_ref").bindv(binds);
-#endif
 			} else {
 				Ref<LuaFunctionRef> funcRef;
 				funcRef.instantiate();

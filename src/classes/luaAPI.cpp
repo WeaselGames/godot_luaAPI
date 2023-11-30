@@ -37,9 +37,6 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaAPI::getRegistryValue);
 	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaAPI::setRegistryValue);
 	ClassDB::bind_method(D_METHOD("call_function", "LuaFunctionName", "Args"), &LuaAPI::callFunction);
-#ifdef LAPI_GDEXTENSION
-	ClassDB::bind_method(D_METHOD("call_function_ref", "Args", "LuaFunctionRef"), &LuaAPI::callFunctionRef);
-#endif
 	ClassDB::bind_method(D_METHOD("function_exists", "LuaFunctionName"), &LuaAPI::luaFunctionExists);
 
 	ClassDB::bind_method(D_METHOD("new_coroutine"), &LuaAPI::newCoroutine);
@@ -136,33 +133,6 @@ Variant LuaAPI::pullVariant(String name) {
 Variant LuaAPI::callFunction(String functionName, Array args) {
 	return state.callFunction(functionName, args);
 }
-
-#ifdef LAPI_GDEXTENSION
-// Invokes the passed lua reference
-Variant LuaAPI::callFunctionRef(Array args, int funcRef) {
-	lua_pushcfunction(lState, LuaState::luaErrorHandler);
-
-	// Getting the lua function via the reference stored in funcRef
-	lua_rawgeti(lState, LUA_REGISTRYINDEX, funcRef);
-
-	// Push all the argument on to the stack
-	for (int i = 0; i < args.size(); i++) {
-		LuaState::pushVariant(lState, args[i]);
-	}
-
-	Variant toReturn;
-	// execute the function using a protected call.
-	int ret = lua_pcall(lState, args.size(), 1, -2 - args.size());
-	if (ret != LUA_OK) {
-		toReturn = LuaState::handleError(lState, ret);
-	} else {
-		toReturn = LuaState::getVariant(lState, -1);
-	}
-
-	lua_pop(lState, 1);
-	return toReturn;
-}
-#endif
 
 // Calls LuaState::pushGlobalVariant()
 Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {
