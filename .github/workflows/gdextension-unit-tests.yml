@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download godot ${{ inputs.godot_version }}
-        run: wget -O godot.zip https://github.com/godotengine/godot-builds/releases/download/4.2-rc1/Godot_v4.2-rc1_linux.x86_64.zip
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ inputs.godot_version }}/Godot_v${{ inputs.godot_version }}-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download godot ${{ inputs.godot_version }}
-        run: wget -O godot.zip https://github.com/godotengine/godot-builds/releases/download/4.2-rc1/Godot_v4.2-rc1_linux.x86_64.zip
+        run: wget -O godot.zip https://downloads.tuxfamily.org/godotengine/${{ inputs.godot_version }}/Godot_v${{ inputs.godot_version }}-stable_linux.x86_64.zip
       - name: Extract godot
         run: |
           7z x godot.zip

@@ -16,7 +16,7 @@ env:
   BASE_BRANCH: main
   SCONSFLAGS: "production=yes extra_suffix=luaAPI"
   SCONS_CACHE_LIMIT: 7168
-  GODOT_VERSION: ${{ inputs.godot_version }}
+  GODOT_VERSION: ${{ inputs.godot_version }}-stable
 
 jobs:
   windows-builds:
