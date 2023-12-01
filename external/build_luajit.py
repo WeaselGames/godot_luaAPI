@@ -14,8 +14,8 @@ def run(cmd):
         print("Error: return code: " + str(code))
         sys.exit(code)
 
-def build_luajit(env):
-    if not env.msvc:
+def build_luajit(env, extension=False):
+    if extension or not env.msvc:
         os.chdir("luaJIT")
         
         # cross compile posix->windows

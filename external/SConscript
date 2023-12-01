@@ -11,7 +11,7 @@ luaver = env["luaapi_luaver"]
 
 if luaver == "jit":
     if env["luaapi_luajit_build"]:
-        build_luajit(env)
+        build_luajit(env, True)
 
     env.Append(LIBPATH=[Dir("luaJIT/src").abspath])
     env.Append(LIBS=['libluajit'])
