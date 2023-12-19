@@ -46,7 +46,7 @@ In your command prompt, execute these commands in the following order.
 
 `dotnet nuget locals all --clear`
 
-`dotnet nuget add source /path/to/nuget_packages/ --name LuaAPINugetSource`
+`dotnet nuget add source /path/to/nuget_packages --name LuaAPINugetSource`
 
 `dotnet restore '/pathtoproject/example_project.csproj' -f -s  LuaAPINugetSource`
 
@@ -64,6 +64,33 @@ local sources first in the list, this will ensure that they are put in, and that
 
 A note on the LuaAPI specific nuget packages: They are included in the Mono (DotNet) builds from the `Releases` tab on 
 the Github page.
+
+Additional help with the Nuget Packages installation:
+In some cases the packages will fail to restore, and if that happens to you, this is something that you can do to try 
+to make it work. You will need to remove the existing `LuaAPINugetSource` that you made above, and then put this file 
+in your project directory. As it uses an absolute path, others will need to change it to their location, if they are 
+part of your team. (Like an open source project, or if they are compiling the code themselves.)
+* Create a nuget.config file in the root of your project or solution (if it doesn't already exist).
+* Open or create the nuget.config file, and add the following:
+
+```xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <configuration>
+      <packageSources>
+        <add key="LuaAPINugetSource" value="/path/to/editor/editor-mono/nuget_packages" />
+        <!-- Add other package sources if needed -->
+      </packageSources>
+    </configuration>
+```
+
+* Replace `/path/to/editor/editor-mono/nuget_packages` with the correct path to your local NuGet source. Note the 
+lack of a trailing slash. 
+* Save the nuget.config file.
+
+With this configuration, the NuGet restore process will automatically consider the sources listed in the nuget.config. 
+Note that windows users may have other issues with dotnet, files being marked unsafe because they originated from other 
+computers, not being done as an administrator, etc. Sadly, those are on the user to fix as it is beyond the scope of a 
+getting started file.
 
 Getting Started Example (In C#)
 -------
