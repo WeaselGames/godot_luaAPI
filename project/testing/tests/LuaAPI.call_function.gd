@@ -54,7 +54,7 @@ func _process(delta):
 		errors.append(LuaError.new_error("testCallable is not Callable but is '%d'" % typeof(testCallable), LuaError.ERR_TYPE))
 		return fail()
 
-	var cret = testCallable.call([5])
+	var cret = testCallable.call(5)
 	if cret is LuaError:
 		errors.append(cret)
 		return fail()

@@ -1,10 +1,13 @@
-#ifndef LAPI_GDEXTENSION
-
 #ifndef LUACALLABLE_H
 #define LUACALLABLE_H
 
+#ifndef LAPI_GDEXTENSION
 #include "core/object/ref_counted.h"
 #include "core/variant/callable.h"
+#else
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/variant/callable_custom.hpp>
+#endif
 
 #include <classes/luaAPI.h>
 
@@ -12,32 +15,37 @@
 
 #ifdef LAPI_GDEXTENSION
 using namespace godot;
+#define LAPI_CALL_ERROR GDExtensionCallError
+#else
+#define LAPI_CALL_ERROR Callable::CallError
 #endif
 
 class LuaCallable : public CallableCustom {
-	static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);
-	static bool compare_less(const CallableCustom *p_a, const CallableCustom *p_b);
-	uint32_t h;
-
 public:
-	uint32_t hash() const override;
-	String get_as_text() const override;
-	CompareEqualFunc get_compare_equal_func() const override;
-	CompareLessFunc get_compare_less_func() const override;
-	ObjectID get_object() const override;
-	lua_State *getLuaState() const;
-	void call(const Variant **p_argument, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override;
+	LuaCallable(Ref<LuaAPI> obj, int ref, lua_State *p_state);
+	virtual ~LuaCallable() override;
+
+	virtual uint32_t hash() const override;
+	virtual String get_as_text() const override;
+	virtual CompareEqualFunc get_compare_equal_func() const override;
+	virtual CompareLessFunc get_compare_less_func() const override;
+
+	virtual ObjectID get_object() const override;
+
+	virtual void call(const Variant **p_argument, int p_argcount, Variant &r_return_value, LAPI_CALL_ERROR &r_call_error) const override;
+	virtual bool is_valid() const override;
 
 	int getFuncRef();
-
-	LuaCallable(Ref<LuaAPI> obj, int ref, lua_State *p_state);
-	~LuaCallable() override;
+	lua_State *getLuaState() const;
 
 private:
 	int funcRef;
-	Ref<LuaAPI> obj;
+	ObjectID objectID;
 	lua_State *state = nullptr;
+	uint32_t h;
+
+	static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);
+	static bool compare_less(const CallableCustom *p_a, const CallableCustom *p_b);
 };
 
-#endif
 #endif

@@ -83,34 +83,34 @@ jobs:
             arch: x86_32
             should-build: ${{ inputs.fullbuild }}
 
-          - identifier: android-release (x86_64)
-            name: Android (x86_64) - template_release
-            runner: ubuntu-20.04
-            target: template_release
-            platform: android
-            arch: x86_64
-            should-build: ${{ inputs.fullbuild }}
-          - identifier: android-debug (x86_64)
-            name: Android (x86_64) - template_debug
-            runner: ubuntu-20.04
-            target: template_debug
-            platform: android
-            arch: x86_64
-            should-build: ${{ inputs.fullbuild }}
-          - identifier: android-release (arm64)
-            name: Android (arm64) - template_release
-            runner: ubuntu-20.04
-            target: template_release
-            platform: android
-            arch: arm64
-            should-build: ${{ inputs.fullbuild }}
-          - identifier: android-debug (arm64)
-            name: Android (arm64) - template_debug
-            runner: ubuntu-20.04
-            target: template_debug
-            platform: android
-            arch: arm64
-            should-build: ${{ inputs.fullbuild }}
+          # - identifier: android-release (x86_64)
+          #   name: Android (x86_64) - template_release
+          #   runner: ubuntu-20.04
+          #   target: template_release
+          #   platform: android
+          #   arch: x86_64
+          #   should-build: ${{ inputs.fullbuild }}
+          # - identifier: android-debug (x86_64)
+          #   name: Android (x86_64) - template_debug
+          #   runner: ubuntu-20.04
+          #   target: template_debug
+          #   platform: android
+          #   arch: x86_64
+          #   should-build: ${{ inputs.fullbuild }}
+          # - identifier: android-release (arm64)
+          #   name: Android (arm64) - template_release
+          #   runner: ubuntu-20.04
+          #   target: template_release
+          #   platform: android
+          #   arch: arm64
+          #   should-build: ${{ inputs.fullbuild }}
+          # - identifier: android-debug (arm64)
+          #   name: Android (arm64) - template_debug
+          #   runner: ubuntu-20.04
+          #   target: template_debug
+          #   platform: android
+          #   arch: arm64
+          #   should-build: ${{ inputs.fullbuild }}
 
           - identifier: macos-release (universal)
             name: MacOS (universal) - template_release

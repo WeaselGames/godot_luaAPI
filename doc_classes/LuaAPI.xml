@@ -22,10 +22,11 @@
 			</description>
 		</method>
 		<method name="bind_libraries">
-			<return type="void" />
+			<return type="LuaError" />
 			<param index="0" name="Array" type="Array" />
 			<description>
 				Bind lua libraries to the LuaAPI Object. 
+				Returns an error if a library fails to bind.
 				Note: in C#, the param Array must be a [code]Godot.Collections.Array[/code] and not a [code]System.Array[/code] class.
 			</description>
 		</method>
@@ -58,15 +59,6 @@
 			<param index="1" name="Args" type="Array" />
 			<description>
 				Calls a function inside current Lua state. This can be either a exposed function or a function defined with with Lua. You may want to check if the function actually exists with [code]function_exists(LuaFunctionName)[/code]. This function supports 1 return value from lua. It will be returned as a variant and if Lua returns no value it will be null. If an error occurs while calling this function, a LuaError object will be returned.
-			</description>
-		</method>
-		<method name="call_function_ref">
-			<return type="Variant" />
-			<param index="0" name="Args" type="Array" />
-			<param index="1" name="LuaFunctionRef" type="int" />
-			<description>
-				This method is used to create a Callable when pulling a lua function from the stack. It is not intended to be called directly.
-				When returning a Callable, the function ref is bound to the Callable. You must only supply the arguments.
 			</description>
 		</method>
 		<method name="pull_variant">
