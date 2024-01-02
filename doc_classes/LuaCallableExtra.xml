@@ -4,7 +4,7 @@
 		A tuple.
 	</brief_description>
 	<description>
-		This is a simple wrapper class to let LuaAPI know you want a little extra info. It is used to request references to the LuaAPI object as an argument and specifie your last argument is a tuple.
+		This is a simple wrapper class to let LuaAPI know you want a little extra info. It is used to request references to the LuaAPI object as an argument and specify your last argument is a tuple.
 	</description>
 	<tutorials>
 	</tutorials>
