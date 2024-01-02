@@ -35,7 +35,7 @@
 			<param index="0" name="FilePath" type="String" />
 			<description>
 				Loads a file with luaL_loadfile() passing its absolute path.
-				Similar to [code].DoString()[/code], this function loads a lua file into the LuaAPI Object and executes it as Lua. [code]FilePath[/code] must be an absolute path, and must exist or an error is reutrned.
+				Similar to [code].DoString()[/code], this function loads a lua file into the LuaAPI Object and executes it as Lua. [code]FilePath[/code] must be an absolute path, and must exist or an error is returned.
 			</description>
 		</method>
 		<method name="do_string">
@@ -125,7 +125,7 @@
 		</member>
 		<member name="use_callables" type="bool" setter="set_use_callables" getter="get_use_callables" default="true">
 			When true, Lua functions passed to Godot will use the LuaCallable type. This type is a CallableCustom which has issues currently with GDExtension and C#
-			When false, Lua functions passed to Godot will use the LuaFunctionRef type. This type is a RefCounted which behaves the same as a LuaCallable. But uses Inoke instead of Call.
+			When false, Lua functions passed to Godot will use the LuaFunctionRef type. This type is a RefCounted which behaves the same as a LuaCallable. But uses Invoke instead of Call.
 	</members>
 	<constants>
 		<constant name="GC_STOP" value="1" enum="HookMask">
