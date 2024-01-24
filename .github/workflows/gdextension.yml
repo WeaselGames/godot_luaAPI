@@ -157,6 +157,21 @@ jobs:
             platform: ios
             arch: universal
             should-build: ${{ inputs.fullbuild }}
+          
+          - identifier: web-release (wasm32)
+            name: Javascript (wasm32) - template_release
+            runner: ubuntu-20.04
+            target: template_release
+            platform: javascript
+            arch: wasm32
+            should-build: ${{ inputs.fullbuild }}
+          - identifier: web-debug (universal)
+            name: Javascript (wasm32) - template_debug
+            runner: ubuntu-20.04
+            target: template_debug
+            platform: javascript
+            arch: wasm32
+            should-build: true
         exclude:
           - {opts: {should-build: false}}
 
@@ -217,6 +232,12 @@ jobs:
           cd buildroot
           ./relocate-sdk.sh
 
+      - name: (Web) Install emscripten
+        if: matrix.opts.platform == 'javascript'
+        uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: 3.1.45
+
       - name: Set up Python
         uses: actions/setup-python@v2
 
@@ -236,16 +257,27 @@ jobs:
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{github.ref}}
             ${{github.job}}-${{env.BASE_BRANCH}}-${{env.BASE_BRANCH}}
+  
       - name: Compile extension
+        if: matrix.opts.platform != 'javascript'
         shell: sh
         run: |
           PATH=/opt/buildroot/bin:$PATH scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' ${{ matrix.opts.args }}
           ls -l project/addons/luaAPI/bin/
+      
+      - name: Compile extension (Web)
+        if: matrix.opts.platform == 'javascript'
+        shell: sh
+        run: |
+          scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' ${{ matrix.opts.args }}
+          ls -l project/addons/luaAPI/bin/
+
       - name: Strip bins
         if: "!startsWith(matrix.opts.identifier, 'windows-') && startsWith(matrix.opts.arch, 'x86_')"
         shell: sh
         run: |
           strip project/addons/luaAPI/bin/*
+      
       - name: Prepare artifact
         shell: sh
         env:

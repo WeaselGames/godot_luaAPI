@@ -25,3 +25,6 @@ ios.debug.arm64 = "bin/libluaapi.ios.template_debug.arm64.dylib"
 ios.release.arm64 = "bin/libluaapi.ios.template_release.arm64.dylib"
 ios.debug.simulator = "bin/libluaapi.ios.template_debug.universal.simulator.dylib"
 ios.release.simulator = "bin/libluaapi.ios.template_release.universal.simulator.dylib"
+
+web.debug.wasm32 = "res://bin/libluaapi.javascript.template_debug.wasm32.wasm"
+web.release.wasm32 = "res://bin/libluaapi.javascript.template_release.wasm32.wasm"
