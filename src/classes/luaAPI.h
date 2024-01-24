@@ -48,13 +48,12 @@ public:
 
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
-
+	Variant doFile(String fileName, Array args);
+	Variant doString(String code, Array args);
 	Variant getRegistryValue(String name);
 
 	Ref<LuaError> setRegistryValue(String name, Variant var);
 	Ref<LuaError> bindLibraries(TypedArray<String> libs);
-	Ref<LuaError> doFile(String fileName);
-	Ref<LuaError> doString(String code);
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
 
 	Ref<LuaCoroutine> newCoroutine();
@@ -98,7 +97,7 @@ private:
 
 	LuaAllocData luaAllocData;
 
-	Ref<LuaError> execute(int handlerIndex);
+	Variant execute(int argc, int handlerIndex);
 };
 
 VARIANT_ENUM_CAST(LuaAPI::HookMask)
