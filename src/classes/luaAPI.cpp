@@ -25,8 +25,8 @@ LuaAPI::~LuaAPI() {
 
 // Bind C++ functions to GDScript
 void LuaAPI::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("do_file", "FilePath"), &LuaAPI::doFile);
-	ClassDB::bind_method(D_METHOD("do_string", "Code"), &LuaAPI::doString);
+	ClassDB::bind_method(D_METHOD("do_file", "FilePath", "Args"), &LuaAPI::doFile, DEFVAL(Array()));
+	ClassDB::bind_method(D_METHOD("do_string", "Code", "Args"), &LuaAPI::doString, DEFVAL(Array()));
 
 	ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
 	ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaAPI::setHook);
@@ -140,7 +140,7 @@ Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {
 }
 
 // addFile() calls luaL_loadfille with the absolute file path
-Ref<LuaError> LuaAPI::doFile(String fileName) {
+Variant LuaAPI::doFile(String fileName, Array args) {
 	// push the error handler onto the stack
 	lua_pushcfunction(lState, LuaState::luaErrorHandler);
 
@@ -163,39 +163,55 @@ Ref<LuaError> LuaAPI::doFile(String fileName) {
 		path = file->get_path_absolute();
 	}
 
-	int ret = luaL_loadfile(lState, path.utf8().get_data());
-	if (ret != LUA_OK) {
-		return state.handleError(ret);
+	int err = luaL_loadfile(lState, path.utf8().get_data());
+	if (err != LUA_OK) {
+		return state.handleError(err);
 	}
 
-	Ref<LuaError> err = execute(-2);
+	int argc = args.size();
+	for (int i = 0; i < argc; i++) {
+		state.pushVariant(args[i]);
+	}
+
+	int handlerIndex = -2 - argc;
+
+	Variant ret = execute(argc, handlerIndex);
 	// pop the error handler from the stack
 	lua_pop(lState, 1);
-	return err;
+	return ret;
 }
 
 // Loads string into lua state and executes the top of the stack
-Ref<LuaError> LuaAPI::doString(String code) {
+Variant LuaAPI::doString(String code, Array args) {
 	// push the error handler onto the stack
 	lua_pushcfunction(lState, LuaState::luaErrorHandler);
-	int ret = luaL_loadstring(lState, code.utf8().get_data());
-	if (ret != LUA_OK) {
-		return state.handleError(ret);
+
+	int err = luaL_loadstring(lState, code.utf8().get_data());
+	if (err != LUA_OK) {
+		return state.handleError(err);
 	}
 
-	Ref<LuaError> err = execute(-2);
+	int argc = args.size();
+	for (int i = 0; i < argc; i++) {
+		state.pushVariant(args[i]);
+	}
+
+	int handlerIndex = -2 - argc;
+
+	Variant ret = execute(argc, handlerIndex);
 	// pop the error handler from the stack
 	lua_pop(lState, 1);
-	return err;
+	return ret;
 }
 
 // Execute the current lua stack, return error as string if one occurs, otherwise return String()
-Ref<LuaError> LuaAPI::execute(int handlerIndex) {
-	int ret = lua_pcall(lState, 0, 0, handlerIndex);
-	if (ret != LUA_OK) {
-		return state.handleError(ret);
+Variant LuaAPI::execute(int argc, int handlerIndex) {
+	int err = lua_pcall(lState, argc, 1, handlerIndex);
+	if (err != LUA_OK) {
+		return state.handleError(err);
 	}
-	return nullptr;
+
+	return state.getVar();
 }
 
 Ref<LuaCoroutine> LuaAPI::newCoroutine() {
