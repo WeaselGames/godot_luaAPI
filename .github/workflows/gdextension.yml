@@ -425,7 +425,7 @@ jobs:
         if: "startsWith(matrix.opts.identifier, 'linux-')"
         shell: sh
         run: |
-         PATH=/opt/buildroot/bin:$PATH scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' luaappi_luaver=jit -j2
+         PATH=/opt/buildroot/bin:$PATH scons target='${{ matrix.opts.target }}' platform='${{ matrix.opts.platform }}' arch='${{ matrix.opts.arch }}' luaapi_luaver=jit -j2
          ls -l project/addons/luaAPI/bin/
       - name: Strip bins
         if: "!startsWith(matrix.opts.identifier, 'windows-') && startsWith(matrix.opts.arch, 'x86_')"
