@@ -56,7 +56,6 @@ Ref<LuaError> LuaState::bindLibraries(Array libs) {
             lua_register(L, "print", luaPrint);
         }
     }
-    
     return nullptr;
 }
 
