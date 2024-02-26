@@ -52,11 +52,11 @@ Ref<LuaError> LuaState::bindLibraries(Array libs) {
 		if (!loadLuaLibrary(L, libs[i])) {
 			return LuaError::newError(vformat("Library \"%s\" does not exist.", libs[i]), LuaError::ERR_RUNTIME);
 		}
-		if (libs[i] == String("base") ) {
+		if (libs[i] == String("base")) {
 			lua_register(L, "print", luaPrint);
 		}
 	}
-	
+
 	return nullptr;
 }
 
