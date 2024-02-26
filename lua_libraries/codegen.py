@@ -45,23 +45,28 @@ def code_gen(luaJIT=False):
             if source_file.endswith(".cpp") or source_file.endswith(".c"):
                 lib_source_files.append(os.path.join(library, source_file))
 
-    luaLibraries_gen_cpp = "#include \"lua_libraries.h\"\n#include <map>\n#include <string>\n\n"
+    luaLibraries_gen_cpp = "#include \"lua_libraries.h\"\n#include <map>\n#include <string>\n#include <iostream>\n\n"
     
     if len(lib_source_files) > 0:
         for source_file in lib_source_files:
             luaLibraries_gen_cpp += "#include \"%s\"\n" % source_file
         luaLibraries_gen_cpp += "\n"
     
-    luaLibraries_gen_cpp += "std::map<std::string, lua_CFunction> luaLibraries = {\n"
-
+    luaLibraries_gen_cpp += "std::map<String, lua_CFunction> luaLibraries = {\n"
     for library in libraries:
         luaLibraries_gen_cpp += "\t{ \"%s\", luaopen_%s },\n" % (library, library)
-
     luaLibraries_gen_cpp += "};\n"
+    
+    luaLibraries_gen_cpp += "std::map<String, const char*> luaLibraryName = {\n"
+    for library in libraries:
+        luaLibraries_gen_cpp += "\t{ \"%s\", \"%s\" },\n" % (library, library)
+    luaLibraries_gen_cpp += "};\n"
+    
     if luaJIT:
         luaLibraries_gen_cpp += """
 bool loadLuaLibrary(lua_State *L, String libraryName) {
 	const char *lib_c_str = libraryName.ascii().get_data();
+    std::string key = lib_c_str;
 	if (luaLibraries[lib_c_str] == nullptr) {
 		return false;
 	}
@@ -79,14 +84,18 @@ bool loadLuaLibrary(lua_State *L, String libraryName) {
     else:
         luaLibraries_gen_cpp += """
 bool loadLuaLibrary(lua_State *L, String libraryName) {
-	const char *lib_c_str = libraryName.ascii().get_data();
-	if (luaLibraries[lib_c_str] == nullptr) {
-		return false;
-	}
 
-	luaL_requiref(L, lib_c_str, luaLibraries[lib_c_str], 1);
-	lua_pop(L, 1);
-	return true;
+    std::map<String, lua_CFunction>::iterator lib = luaLibraries.find(libraryName);
+    if( lib ==  luaLibraries.end() )
+        return false;
+        
+    std::map<String, const char*>::iterator lib_name = luaLibraryName.find(libraryName);
+    if( lib_name ==  luaLibraryName.end() )
+        return false;
+
+    luaL_requiref(L, (*lib_name).second, (*lib).second, 1);
+    lua_pop(L, 1);
+    return true;
 }
 """
 

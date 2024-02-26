@@ -33,7 +33,7 @@ public:
 	Variant getRegistryValue(String name);
 
 	Ref<LuaError> setRegistryValue(String name, Variant var);
-	Ref<LuaError> bindLibraries(TypedArray<String> libs);
+	Ref<LuaError> bindLibraries(Array libs);
 	Ref<LuaError> pushVariant(Variant var) const;
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
 	Ref<LuaError> handleError(int lua_error) const;
