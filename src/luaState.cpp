@@ -44,18 +44,20 @@ void LuaState::setState(lua_State *state, LuaAPI *api, bool bindAPI) {
 lua_State *LuaState::getState() const {
 	return L;
 }
+#include <iostream>
 
 // Binds lua libraries with the lua state
-Ref<LuaError> LuaState::bindLibraries(TypedArray<String> libs) {
-	for (int i = 0; i < libs.size(); i++) {
-		if (!loadLuaLibrary(L, libs[i])) {
-			return LuaError::newError(vformat("Library \"%s\" does not exist.", libs[i]), LuaError::ERR_RUNTIME);
-		}
-		if (libs[i] == "base") {
-			lua_register(L, "print", luaPrint);
-		}
-	}
-	return nullptr;
+Ref<LuaError> LuaState::bindLibraries(Array libs) {
+    for (int i = 0; i < libs.size(); i++) {
+        if (!loadLuaLibrary(L, libs[i])) {
+            return LuaError::newError(vformat("Library \"%s\" does not exist.", libs[i]), LuaError::ERR_RUNTIME);
+        }
+        if (libs[i] == String("base") ) {
+            lua_register(L, "print", luaPrint);
+        }
+    }
+    
+    return nullptr;
 }
 
 void LuaState::setHook(Callable hook, int mask, int count) {
