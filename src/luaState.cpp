@@ -457,6 +457,45 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 	return nullptr;
 }
 
+// Push a GD Variant which is an array of arrays like [['function name', function]] to the lua stack and returns a error if the type is not right.
+Ref<LuaError> LuaState::pushModule(lua_State *state, Array arr) {
+	lua_createtable(state, 0, arr.size());
+	for (int i = 0; i < arr.size(); i++) {
+		Variant value = arr[i];
+
+		if (value.get_type() != Variant::Type::ARRAY) {
+			return LuaError::newError(("modules must be an array of array [[\"function_name\", function]]."), LuaError::ERR_RUNTIME);
+		}
+		Array function = value.operator Array();
+		Variant name = function[0];
+		Variant body = function[1];
+		if (name.get_type() != Variant::Type::STRING || body.get_type() != Variant::Type::CALLABLE) {
+			return LuaError::newError(("modules must be an array of array [[\"function_name\", function]]."), LuaError::ERR_RUNTIME);
+		}
+
+		Ref<LuaError> err = pushVariant(state, name);
+		if (!err.is_null()) {
+			return err;
+		}
+		err = pushVariant(state, body);
+		if (!err.is_null()) {
+			return err;
+		}
+		lua_settable(state, -3);
+	}
+	return nullptr;
+}
+
+// Call pushModule() and set it to a global name
+Ref<LuaError> LuaState::pushGlobalModule(String name, Array arr) {
+	Ref<LuaError> err = pushModule(L, arr);
+	if (err.is_null()) {
+		lua_setglobal(L, name.utf8());
+		return nullptr;
+	}
+	return err;
+}
+
 // gets a variant at a given index
 Variant LuaState::getVariant(lua_State *state, int index) {
 	Variant result;
