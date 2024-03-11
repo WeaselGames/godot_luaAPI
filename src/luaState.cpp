@@ -531,7 +531,17 @@ Ref<LuaError> LuaState::registerLibrary(String name, Array arr) {
 	// If no library have been registered for the current luaState.
 	if (idx == -1) {
 		gdLibraries.push_back(std::make_tuple(this, L, std::vector<std::pair<String, Array>>{ std::make_pair(name, arr) }));
-	} else {
+	}
+	// If there is already one or more library registered for the current state.
+	else {
+		for(int i = 0; i < std::get<2>(gdLibraries[idx]).size(); i++){
+			// If a library is existing with the same name.
+			if(std::get<2>(gdLibraries[idx])[i].first == name){
+				// Let's erase it.
+				std::get<2>(gdLibraries[idx]).erase(std::get<2>(gdLibraries[idx]).begin() + i);
+				break;
+			}
+		}
 		std::get<2>(gdLibraries[idx]).push_back(std::make_pair(name, arr));
 	}
 
