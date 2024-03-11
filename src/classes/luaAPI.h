@@ -55,7 +55,7 @@ public:
 	Ref<LuaError> setRegistryValue(String name, Variant var);
 	Ref<LuaError> bindLibraries(TypedArray<String> libs);
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
-	Ref<LuaError> pushGlobalModule(String name, Array arr);
+	Ref<LuaError> registerLibrary(String name, Array arr);
 
 	Ref<LuaCoroutine> newCoroutine();
 	Ref<LuaCoroutine> getRunningCoroutine();

@@ -12,6 +12,20 @@
 
 #include <util.h>
 
+std::vector<std::tuple<LuaState *, lua_State *, std::vector<std::pair<String, Array>>>> gdLibraries = std::vector<std::tuple<LuaState *, lua_State *, std::vector<std::pair<String, Array>>>>();
+
+// Destructor: meant to cleanup loaded libraries once the target instance reach EOLife.
+// Maybe move lua_close(lState) here?
+LuaState::~LuaState() {
+	for (int i = 0; i < gdLibraries.size(); i++) {
+		// First find the right luaState instance.
+		if (std::get<0>(gdLibraries[i]) == this) {
+			// Then remove all loaded libraries for the current instance.
+			gdLibraries.erase(gdLibraries.begin() + i);
+		}
+	}
+}
+
 void LuaState::setState(lua_State *state, LuaAPI *api, bool bindAPI) {
 	this->L = state;
 	if (!bindAPI) {
@@ -457,7 +471,6 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 	return nullptr;
 }
 
-// Push a GD Variant which is an array of arrays like [['function name', function]] to the lua stack and returns a error if the type is not right.
 Ref<LuaError> LuaState::pushModule(lua_State *state, Array arr) {
 	lua_createtable(state, 0, arr.size());
 	for (int i = 0; i < arr.size(); i++) {
@@ -486,14 +499,50 @@ Ref<LuaError> LuaState::pushModule(lua_State *state, Array arr) {
 	return nullptr;
 }
 
-// Call pushModule() and set it to a global name
-Ref<LuaError> LuaState::pushGlobalModule(String name, Array arr) {
-	Ref<LuaError> err = pushModule(L, arr);
-	if (err.is_null()) {
-		lua_setglobal(L, name.utf8());
-		return nullptr;
+// Function opening all godot made lua librearies.
+int open_gd_library(lua_State *L) {
+	const char *libname = luaL_checkstring(L, 1);
+	for (int i = 0; i < gdLibraries.size(); i++) {
+		// First find the right luaState instance.
+		if (std::get<1>(gdLibraries[i]) == L) {
+			// Then find a library having the same name.
+			for (int j = 0; j < std::get<2>(gdLibraries[i]).size(); j++) {
+				if (strcmp(std::get<2>(gdLibraries[i])[j].first.utf8().get_data(), libname) == 0) {
+					// Then push its methods.
+					std::get<0>(gdLibraries[i])->pushModule(L, std::get<2>(gdLibraries[i])[j].second);
+					return 1;
+				}
+			}
+		}
 	}
-	return err;
+	// If the library was not found, generate an error message with the library name.
+	return luaL_error(L, "Failed to open Lua library: \'%s\', not found.", libname);
+}
+
+// Register library into gdLibraries for the current instance of luaState.
+Ref<LuaError> LuaState::registerLibrary(String name, Array arr) {
+	int idx = -1;
+	for (int i = 0; i < gdLibraries.size(); i++) {
+		if (std::get<1>(gdLibraries[i]) == L) {
+			idx = i;
+			break;
+		}
+	}
+	// If no library have been registered for the current luaState.
+	if (idx == -1) {
+		gdLibraries.push_back(std::make_tuple(this, L, std::vector<std::pair<String, Array>>{ std::make_pair(name, arr) }));
+	} else {
+		std::get<2>(gdLibraries[idx]).push_back(std::make_pair(name, arr));
+	}
+
+	// I did not understand yet why but default require is disabled.
+	// So push my own which is sandboxed.
+	// Overwrite the previous one if existing with the same require()
+
+	//luaL_requiref(L, name.utf8().get_data(), open_gd_library, true);
+	lua_pushcfunction(L, open_gd_library);
+	lua_setglobal(L, "require");
+	return nullptr;
 }
 
 // gets a variant at a given index

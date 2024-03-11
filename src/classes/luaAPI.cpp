@@ -33,7 +33,7 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("configure_gc", "What", "Data"), &LuaAPI::configureGC);
 	ClassDB::bind_method(D_METHOD("get_memory_usage"), &LuaAPI::getMemoryUsage);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
-	ClassDB::bind_method(D_METHOD("push_module", "Name", "Module"), &LuaAPI::pushGlobalModule);
+	ClassDB::bind_method(D_METHOD("register_library", "Name", "Module"), &LuaAPI::registerLibrary);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
 	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaAPI::getRegistryValue);
 	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaAPI::setRegistryValue);
@@ -140,11 +140,10 @@ Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {
 	return state.pushGlobalVariant(name, var);
 }
 
-// Calls LuaState::pushGlobalModule()
-// arr must be an array of ['method name', 'method']
-Ref<LuaError> LuaAPI::pushGlobalModule(String name, Array arr) {
-
-	return state.pushGlobalModule(name, arr);
+// Calls LuaState::registerLibrary()
+// arr must be an array shaped as [['method name', 'method']]
+Ref<LuaError> LuaAPI::registerLibrary(String name, Array arr) {
+	return state.registerLibrary(name, arr);
 }
 
 // addFile() calls luaL_loadfille with the absolute file path

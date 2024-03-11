@@ -19,6 +19,8 @@ class LuaAPI;
 
 class LuaState {
 public:
+
+	~LuaState();
 	void setState(lua_State *state, LuaAPI *lua, bool bindAPI);
 	void setHook(Callable hook, int mask, int count);
 
@@ -36,7 +38,7 @@ public:
 	Ref<LuaError> bindLibraries(TypedArray<String> libs);
 	Ref<LuaError> pushVariant(Variant var) const;
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
-	Ref<LuaError> pushGlobalModule(String name, Array var);
+	Ref<LuaError> registerLibrary(String name, Array var);
 	Ref<LuaError> handleError(int lua_error) const;
 
 	static LuaAPI *getAPI(lua_State *state);
