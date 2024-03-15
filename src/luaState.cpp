@@ -460,7 +460,8 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 // gets a variant at a given index
 Variant LuaState::getVariant(lua_State *state, int index) {
 	Variant result;
-
+    
+    int start_top = lua_gettop(state);
 	int type = lua_type(state, index);
 	switch (type) {
 		case LUA_TSTRING: {
@@ -503,16 +504,42 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 				break;
 			}
 
-			lua_pushnil(state); /* first key */
-			Dictionary dict;
-			while (lua_next(state, (index < 0) ? (index - 1) : (index)) != 0) {
-				Variant key = getVariant(state, -2);
-				Variant value = getVariant(state, -1);
-				dict[key] = value;
-				lua_pop(state, 1);
-			}
-			result = dict;
-			break;
+            Dictionary dict;
+            
+            // call pairs to respect the __pairs metamethod (if present)
+            lua_getglobal(state, "pairs");
+            lua_pushvalue(state, index);
+            lua_call(state,1,3);
+            
+            // Insert copies of the 'next' function and 'table' returned from 'pairs', since we'll need them again
+            lua_pushvalue(state,-3);
+            lua_insert(state,-4);
+            lua_pushvalue(state,-2);
+            lua_insert(state,-4);
+
+            // stack is now
+            // -5 stored 'next'function return from 'pairs'
+            // -4 stored table to iterate returned from 'pairs'
+            // -3 next function return from 'pairs'
+            // -2  table to iterate returned from 'pairs'
+            // -1 nil (key)
+            lua_call(state, 2, 2);  // call next(table,nil)
+            while( 0 == lua_isnil(state,-1) ) {
+                Variant key = getVariant(state, -2);
+                Variant value = getVariant(state, -1);
+                dict[key] = value;
+                
+                // setup another call to 'next(table,prev_key)'
+                lua_pushvalue(state, -2); // push prev key
+                lua_copy(state,-5,-3);    // copy next func
+                lua_copy(state,-4,-2);    // copy table to iterate
+                lua_call(state,2,2);
+            }
+            
+            // Clean up!
+            lua_settop( state, start_top );
+            result = dict;
+            break;
 		}
 		case LUA_TFUNCTION: {
 			Ref<LuaAPI> api = getAPI(state);
