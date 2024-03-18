@@ -61,25 +61,35 @@ def code_gen(luaJIT=False):
     if luaJIT:
         luaLibraries_gen_cpp += """
 bool loadLuaLibrary(lua_State *L, String libraryName) {
-	const char *lib_c_str = libraryName.ascii().get_data();
+	char lib_c_str[libraryName.length() + 1];
+	lib_c_str[libraryName.length()] = 0;
+	for(int i = 0; i < libraryName.length(); i++){
+		lib_c_str[i] = libraryName[i];
+	}
+
 	if (luaLibraries[lib_c_str] == nullptr) {
 		return false;
 	}
-	
-    lua_pushcfunction(L, luaLibraries[lib_c_str]);
-    if (libraryName == "base") {
-        lua_pushstring(L, "");
-    } else {
-	    lua_pushstring(L, lib_c_str);
+
+	lua_pushcfunction(L, luaLibraries[lib_c_str]);
+	if (libraryName == "base") {
+		lua_pushstring(L, "");
+	} else {
+		lua_pushstring(L, lib_c_str);
     }
 	lua_call(L, 1, 0);
 	return true;
 }
 """
     else:
-        luaLibraries_gen_cpp += """
+	    luaLibraries_gen_cpp += """
 bool loadLuaLibrary(lua_State *L, String libraryName) {
-	const char *lib_c_str = libraryName.ascii().get_data();
+	char lib_c_str[libraryName.length() + 1];
+	lib_c_str[libraryName.length()] = 0;
+	for(int i = 0; i < libraryName.length(); i++){
+		lib_c_str[i] = libraryName[i];
+	}
+
 	if (luaLibraries[lib_c_str] == nullptr) {
 		return false;
 	}

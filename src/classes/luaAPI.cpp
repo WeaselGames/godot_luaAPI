@@ -29,6 +29,7 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("do_string", "Code", "Args"), &LuaAPI::doString, DEFVAL(Array()));
 
 	ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
+	ClassDB::bind_method(D_METHOD("bind_gd_library", "Name", "Module"), &LuaAPI::bindGDLibrary);
 	ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaAPI::setHook);
 	ClassDB::bind_method(D_METHOD("configure_gc", "What", "Data"), &LuaAPI::configureGC);
 	ClassDB::bind_method(D_METHOD("get_memory_usage"), &LuaAPI::getMemoryUsage);
@@ -137,6 +138,12 @@ Variant LuaAPI::callFunction(String functionName, Array args) {
 // Calls LuaState::pushGlobalVariant()
 Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {
 	return state.pushGlobalVariant(name, var);
+}
+
+// Calls LuaState::registerLibrary()
+// arr must be an array shaped as [['method name', 'method']]
+Ref<LuaError> LuaAPI::bindGDLibrary(String name, Array arr) {
+	return state.bindGDLibrary(name, arr);
 }
 
 // addFile() calls luaL_loadfille with the absolute file path
