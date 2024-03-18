@@ -29,11 +29,11 @@ void LuaAPI::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("do_string", "Code", "Args"), &LuaAPI::doString, DEFVAL(Array()));
 
 	ClassDB::bind_method(D_METHOD("bind_libraries", "Array"), &LuaAPI::bindLibraries);
+	ClassDB::bind_method(D_METHOD("bind_gd_library", "Name", "Module"), &LuaAPI::bindGDLibrary);
 	ClassDB::bind_method(D_METHOD("set_hook", "Hook", "HookMask", "Count"), &LuaAPI::setHook);
 	ClassDB::bind_method(D_METHOD("configure_gc", "What", "Data"), &LuaAPI::configureGC);
 	ClassDB::bind_method(D_METHOD("get_memory_usage"), &LuaAPI::getMemoryUsage);
 	ClassDB::bind_method(D_METHOD("push_variant", "Name", "var"), &LuaAPI::pushGlobalVariant);
-	ClassDB::bind_method(D_METHOD("register_library", "Name", "Module"), &LuaAPI::registerLibrary);
 	ClassDB::bind_method(D_METHOD("pull_variant", "Name"), &LuaAPI::pullVariant);
 	ClassDB::bind_method(D_METHOD("get_registry_value", "Name"), &LuaAPI::getRegistryValue);
 	ClassDB::bind_method(D_METHOD("set_registry_value", "Name", "var"), &LuaAPI::setRegistryValue);
@@ -142,8 +142,8 @@ Ref<LuaError> LuaAPI::pushGlobalVariant(String name, Variant var) {
 
 // Calls LuaState::registerLibrary()
 // arr must be an array shaped as [['method name', 'method']]
-Ref<LuaError> LuaAPI::registerLibrary(String name, Array arr) {
-	return state.registerLibrary(name, arr);
+Ref<LuaError> LuaAPI::bindGDLibrary(String name, Array arr) {
+	return state.bindGDLibrary(name, arr);
 }
 
 // addFile() calls luaL_loadfille with the absolute file path

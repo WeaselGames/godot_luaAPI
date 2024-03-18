@@ -499,7 +499,7 @@ Ref<LuaError> LuaState::pushModule(lua_State *state, Array arr) {
 	return nullptr;
 }
 
-// Function opening all godot made lua librearies.
+// Function opening all godot made lua libraries.
 int open_gd_library(lua_State *L) {
 	const char *libname = luaL_checkstring(L, 1);
 	for (int i = 0; i < gdLibraries.size(); i++) {
@@ -520,7 +520,7 @@ int open_gd_library(lua_State *L) {
 }
 
 // Register library into gdLibraries for the current instance of luaState.
-Ref<LuaError> LuaState::registerLibrary(String name, Array arr) {
+Ref<LuaError> LuaState::bindGDLibrary(String name, Array arr) {
 	int idx = -1;
 	for (int i = 0; i < gdLibraries.size(); i++) {
 		if (std::get<1>(gdLibraries[i]) == L) {
@@ -545,13 +545,8 @@ Ref<LuaError> LuaState::registerLibrary(String name, Array arr) {
 		std::get<2>(gdLibraries[idx]).push_back(std::make_pair(name, arr));
 	}
 
-	// I did not understand yet why but default require is disabled.
-	// So push my own which is sandboxed.
-	// Overwrite the previous one if existing with the same require()
-
-	//luaL_requiref(L, name.utf8().get_data(), open_gd_library, true);
-	lua_pushcfunction(L, open_gd_library);
-	lua_setglobal(L, "require");
+	// Reference our lib to be required.
+	luaL_requiref(L, name.utf8().get_data(), open_gd_library, true);
 	return nullptr;
 }
 

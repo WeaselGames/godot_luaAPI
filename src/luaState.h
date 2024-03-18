@@ -38,7 +38,7 @@ public:
 	Ref<LuaError> bindLibraries(TypedArray<String> libs);
 	Ref<LuaError> pushVariant(Variant var) const;
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
-	Ref<LuaError> registerLibrary(String name, Array var);
+	Ref<LuaError> bindGDLibrary(String name, Array var);
 	Ref<LuaError> handleError(int lua_error) const;
 
 	static LuaAPI *getAPI(lua_State *state);
