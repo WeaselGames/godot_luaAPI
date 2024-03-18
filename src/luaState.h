@@ -63,6 +63,8 @@ private:
 	// Helper functions for recursive indexing
 	void indexForReading(String name); // Puts the object on the stack
 	String indexForWriting(String name); // Puts the table on the stack and gives the last name. (Please make sure the table is not nil.)
+	static Variant getArrayVariant(lua_State *state, int len, int index);
+	static Variant getDictionaryVariant(lua_State *state, int index);
 
 	void exposeConstructors();
 	void createVector2Metatable();

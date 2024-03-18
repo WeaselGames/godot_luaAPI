@@ -457,27 +457,47 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 	return nullptr;
 }
 
+Variant LuaState::getArrayVariant(lua_State *state, int len, int index) {
+	Array array;
+	for (int i = 1; i <= len; i++) {
+#ifndef LAPI_LUAJIT
+		lua_geti(state, index, i);
+#else
+		lua_rawgeti(state, index, i);
+#endif
+		array.push_back(getVariant(state, -1));
+		lua_pop(state, 1);
+	}
+	return array;
+}
+
+Variant LuaState::getDictionaryVariant(lua_State *state, int index) {
+	lua_pushnil(state); /* first key */
+	Dictionary dict;
+	while (lua_next(state, (index < 0) ? (index - 1) : (index)) != 0) {
+		Variant key = getVariant(state, -2);
+		Variant value = getVariant(state, -1);
+		dict[key] = value;
+		lua_pop(state, 1);
+	}
+	return dict;
+}
+
 // gets a variant at a given index
 Variant LuaState::getVariant(lua_State *state, int index) {
-	Variant result;
-
 	int type = lua_type(state, index);
 	switch (type) {
 		case LUA_TSTRING: {
 			String utf8_str;
 			utf8_str.parse_utf8(lua_tostring(state, index));
-			result = utf8_str;
-			break;
+			return utf8_str;
 		}
 		case LUA_TNUMBER:
-			result = lua_tonumber(state, index);
-			break;
+			return lua_tonumber(state, index);
 		case LUA_TBOOLEAN:
-			result = (bool)lua_toboolean(state, index);
-			break;
+			return (bool)lua_toboolean(state, index);
 		case LUA_TUSERDATA:
-			result = *(Variant *)lua_touserdata(state, index);
-			break;
+			return *(Variant *)lua_touserdata(state, index);
 		case LUA_TTABLE: {
 #ifndef LAPI_LUAJIT
 			lua_len(state, index);
@@ -487,32 +507,7 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 
 			int len = lua_tointeger(state, -1);
 			lua_pop(state, 1);
-			// len should be 0 if the type is table and not a array
-			if (len) {
-				Array array;
-				for (int i = 1; i <= len; i++) {
-#ifndef LAPI_LUAJIT
-					lua_geti(state, index, i);
-#else
-					lua_rawgeti(state, index, i);
-#endif
-					array.push_back(getVariant(state, -1));
-					lua_pop(state, 1);
-				}
-				result = array;
-				break;
-			}
-
-			lua_pushnil(state); /* first key */
-			Dictionary dict;
-			while (lua_next(state, (index < 0) ? (index - 1) : (index)) != 0) {
-				Variant key = getVariant(state, -2);
-				Variant value = getVariant(state, -1);
-				dict[key] = value;
-				lua_pop(state, 1);
-			}
-			result = dict;
-			break;
+			return len ? getArrayVariant(state, len, index) : getDictionaryVariant(state, index);
 		}
 		case LUA_TFUNCTION: {
 			Ref<LuaAPI> api = getAPI(state);
@@ -520,31 +515,28 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 			lua_pushvalue(state, index);
 			if (api->getUseCallables()) {
 				LuaCallable *callable = memnew(LuaCallable(api, luaL_ref(state, LUA_REGISTRYINDEX), state));
-				result = Callable(callable);
+				return Callable(callable);
 			} else {
 				Ref<LuaFunctionRef> funcRef;
 				funcRef.instantiate();
 				funcRef->setRef(luaL_ref(state, LUA_REGISTRYINDEX));
 				funcRef->setLuaState(state);
-				result = funcRef;
+				return funcRef;
 			}
-			break;
 		}
 		case LUA_TTHREAD: {
 			lua_State *tState = lua_tothread(state, index);
 			Ref<LuaCoroutine> thread;
 			thread.instantiate();
 			thread->bindExisting(getAPI(state), tState);
-			result = thread;
-			break;
+			return thread;
 		}
 		case LUA_TNIL: {
-			break;
+			return {};
 		}
 		default:
-			result = LuaError::newError(vformat("Unsupported lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
+			return LuaError::newError(vformat("Unsupported lua type '%d' in LuaState::getVariant", type), LuaError::ERR_RUNTIME);
 	}
-	return result;
 }
 
 // Assumes there is a error in the top of the stack. Pops it.
