@@ -470,31 +470,65 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 	}
 	return nullptr;
 }
+Ref<LuaError> LuaState::pushMember(lua_State *state, String name, Variant var) {
+    Ref<LuaError> err = pushVariant(state, name);
+    if (!err.is_null()) {
+        return err;
+    }
+
+    bool pushed = false;
+    if (var.get_type() == Variant::Type::ARRAY) {
+        Array arr = var;
+        if (arr.size() == 2 && arr[0].get_type() == Variant::Type::STRING) {
+            /* If the variant is a 2-element array with the first element being a string
+			   Create a new Lua table and push it onto the stack */
+            lua_newtable(state);
+			/* Recursively push the nested member */
+            err = pushMember(state, arr[0], arr[1]);
+            if (!err.is_null()) {
+                return err;
+            }
+			/* Set the table as a named member. */
+            lua_settable(state, -3);
+            pushed = true;
+        }
+    }
+	/* If not a sub table (Array of Array of size 2 with name first), push as a standard named variant. */
+    if (!pushed) {
+        err = pushVariant(state, var);
+        if (!err.is_null()) {
+            return err;
+        }
+        lua_settable(state, -3);
+    }
+
+    return nullptr;
+}
 
 Ref<LuaError> LuaState::pushModule(lua_State *state, Array arr) {
-	lua_createtable(state, 0, arr.size());
+	lua_newtable(state);
 	for (int i = 0; i < arr.size(); i++) {
 		Variant value = arr[i];
 
 		if (value.get_type() != Variant::Type::ARRAY) {
-			return LuaError::newError(("modules must be an array of array [[\"function_name\", function]]."), LuaError::ERR_RUNTIME);
+			return LuaError::newError(("modules must be an array of array [[\"member_name\", member]]."), LuaError::ERR_RUNTIME);
 		}
-		Array function = value.operator Array();
-		Variant name = function[0];
-		Variant body = function[1];
-		if (name.get_type() != Variant::Type::STRING || body.get_type() != Variant::Type::CALLABLE) {
-			return LuaError::newError(("modules must be an array of array [[\"function_name\", function]]."), LuaError::ERR_RUNTIME);
-		}
+		Array member = value;
 
-		Ref<LuaError> err = pushVariant(state, name);
+		if (member.size() != 2) {
+			return LuaError::newError(("modules must be an array of array [[\"member_name\", member]]."), LuaError::ERR_RUNTIME);
+		}
+		Variant name = member[0];
+		Variant body = member[1];
+
+		/* Or it is any kind of variant. */
+		if (name.get_type() != Variant::Type::STRING) {
+			return LuaError::newError(("modules must be an array of array [[\"member_name\", member]]."), LuaError::ERR_RUNTIME);
+		}
+		Ref<LuaError> err = pushMember(state, name, body);
 		if (!err.is_null()) {
 			return err;
 		}
-		err = pushVariant(state, body);
-		if (!err.is_null()) {
-			return err;
-		}
-		lua_settable(state, -3);
 	}
 	return nullptr;
 }
@@ -534,9 +568,9 @@ Ref<LuaError> LuaState::bindGDLibrary(String name, Array arr) {
 	}
 	// If there is already one or more library registered for the current state.
 	else {
-		for(int i = 0; i < std::get<2>(gdLibraries[idx]).size(); i++){
+		for (int i = 0; i < std::get<2>(gdLibraries[idx]).size(); i++) {
 			// If a library is existing with the same name.
-			if(std::get<2>(gdLibraries[idx])[i].first == name){
+			if (std::get<2>(gdLibraries[idx])[i].first == name) {
 				// Let's erase it.
 				std::get<2>(gdLibraries[idx]).erase(std::get<2>(gdLibraries[idx]).begin() + i);
 				break;

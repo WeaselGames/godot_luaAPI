@@ -45,6 +45,7 @@ public:
 
 	static Ref<LuaError> pushVariant(lua_State *state, Variant var);
 	static Ref<LuaError> pushModule(lua_State *state, Array arr);
+	static Ref<LuaError> pushMember(lua_State *state,String name, Variant var);
 	static Ref<LuaError> handleError(lua_State *state, int lua_error);
 #ifndef LAPI_GDEXTENSION
 	static Ref<LuaError> handleError(const StringName &func, Callable::CallError error, const Variant **p_arguments, int argc);
