@@ -45,6 +45,27 @@ lua_State *LuaState::getState() const {
 	return L;
 }
 
+int luacfunc_create_userdata(lua_State *L) {
+#ifndef LAPI_LUAJIT
+	if (lua_gettop(L) != 1) {
+		lua_pushfstring(L, "expected 1 argument for debug.new_userdata, got %d instead.", lua_gettop(L));
+		lua_error(L);
+	}
+	if (!lua_isinteger(L, 1)) {
+		lua_pushfstring(L, "expected argument #1 to be of type integer, got %s instead.", lua_typename(L, lua_type(L, 1)));
+		lua_error(L);
+	}
+	lua_newuserdatauv(L, 0, lua_tointeger(L, 1));
+#else
+	if (lua_gettop(L) != 0) {
+		lua_pushfstring(L, "expected 0 arguments for debug.new_userdata, got %d instead.", lua_gettop(L));
+		lua_error(L);
+	}
+	lua_newuserdata(L, 0);
+#endif
+	return 1;
+}
+
 // Binds lua libraries with the lua state
 Ref<LuaError> LuaState::bindLibraries(TypedArray<String> libs) {
 	for (int i = 0; i < libs.size(); i++) {
@@ -53,6 +74,16 @@ Ref<LuaError> LuaState::bindLibraries(TypedArray<String> libs) {
 		}
 		if (libs[i] == "base") {
 			lua_register(L, "print", luaPrint);
+		} else if (libs[i] == "debug") {
+#ifndef LAPI_LUAJIT
+			lua_pushglobaltable(L);
+#else
+			lua_pushvalue(L, LUA_GLOBALSINDEX);
+#endif
+			lua_getfield(L, -1, "debug");
+			lua_pushcfunction(L, luacfunc_create_userdata);
+			lua_setfield(L, -2, "new_userdata");
+			lua_pop(L, 2);
 		}
 	}
 	return nullptr;
