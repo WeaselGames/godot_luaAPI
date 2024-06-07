@@ -67,9 +67,16 @@ private:
 	void exposeConstructors();
 	void createVector2Metatable();
 	void createVector3Metatable();
+	void createVector4Metatable();
 	void createColorMetatable();
 	void createRect2Metatable();
 	void createPlaneMetatable();
+	void createQuaternionMetatable();
+	void createBasisMetatable();
+	void createTransform2DMetatable();
+	void createTransform3DMetatable();
+	void createProjectionMetatable();
+	void createAABBMetatable();
 	void createSignalMetatable();
 	void createObjectMetatable();
 	void createCallableMetatable();

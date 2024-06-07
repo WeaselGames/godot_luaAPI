@@ -29,6 +29,7 @@ void LuaState::setState(lua_State *state, LuaAPI *api, bool bindAPI) {
 	// Creating basic types metatables and saving them in registry
 	createVector2Metatable(); // "mt_Vector2"
 	createVector3Metatable(); // "mt_Vector3"
+	createVector4Metatable(); // "mt_Vector4"
 	createColorMetatable(); // "mt_Color"
 	createRect2Metatable(); // "mt_Rect2"
 	createPlaneMetatable(); // "mt_Plane"
@@ -317,6 +318,12 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 			luaL_setmetatable(state, "mt_Vector3");
 			break;
 		}
+		case Variant::Type::VECTOR4: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_Vector4");
+			break;
+		}
 		case Variant::Type::COLOR: {
 			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
 			memnew_placement(userdata, Variant(var));
@@ -333,6 +340,42 @@ Ref<LuaError> LuaState::pushVariant(lua_State *state, Variant var) {
 			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
 			memnew_placement(userdata, Variant(var));
 			luaL_setmetatable(state, "mt_Plane");
+			break;
+		}
+		case Variant::Type::QUATERNION: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_Quaternion");
+			break;
+		}
+		case Variant::Type::BASIS: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_Basis");
+			break;
+		}
+		case Variant::Type::TRANSFORM2D: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_Transform2D");
+			break;
+		}
+		case Variant::Type::TRANSFORM3D: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_Transform3D");
+			break;
+		}
+		case Variant::Type::PROJECTION: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_Projection");
+			break;
+		}
+		case Variant::Type::AABB: {
+			Variant *userdata = (Variant *)lua_newuserdata(state, sizeof(Variant));
+			memnew_placement(userdata, Variant(var));
+			luaL_setmetatable(state, "mt_AABB");
 			break;
 		}
 		case Variant::Type::SIGNAL: {
