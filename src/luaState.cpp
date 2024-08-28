@@ -481,12 +481,13 @@ Variant LuaState::getVariant(lua_State *state, int index) {
 		case LUA_TTABLE: {
 #ifndef LAPI_LUAJIT
 			lua_len(state, index);
-#else
-			lua_objlen(state, index);
-#endif
 
 			int len = lua_tointeger(state, -1);
 			lua_pop(state, 1);
+#else
+			int len = lua_objlen(state, index);
+#endif
+
 			// len should be 0 if the type is table and not a array
 			if (len) {
 				Array array;
