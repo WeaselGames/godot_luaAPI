@@ -30,7 +30,6 @@ public:
 	LuaAPI();
 	~LuaAPI();
 
-	void bindLibraries(Array libs);
 	void setHook(Callable hook, int mask, int count);
 
 	void setUseCallables(bool value);
@@ -49,15 +48,12 @@ public:
 
 	Variant pullVariant(String name);
 	Variant callFunction(String functionName, Array args);
-#ifdef LAPI_GDEXTENSION
-	Variant callFunctionRef(Array args, int funcRef);
-#endif
-
+	Variant doFile(String fileName, Array args);
+	Variant doString(String code, Array args);
 	Variant getRegistryValue(String name);
-	Ref<LuaError> setRegistryValue(String name, Variant var);
 
-	Ref<LuaError> doFile(String fileName);
-	Ref<LuaError> doString(String code);
+	Ref<LuaError> setRegistryValue(String name, Variant var);
+	Ref<LuaError> bindLibraries(TypedArray<String> libs);
 	Ref<LuaError> pushGlobalVariant(String name, Variant var);
 
 	Ref<LuaCoroutine> newCoroutine();
@@ -101,7 +97,7 @@ private:
 
 	LuaAllocData luaAllocData;
 
-	Ref<LuaError> execute(int handlerIndex);
+	Variant execute(int argc, int handlerIndex);
 };
 
 VARIANT_ENUM_CAST(LuaAPI::HookMask)

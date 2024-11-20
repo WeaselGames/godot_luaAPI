@@ -24,7 +24,7 @@ on:
       - "project/demo/*"
 
 env:
-  GODOT_VERSION: 4.1.2
+  GODOT_VERSION: 4.2.1
 
 jobs:
   static-checks:
@@ -37,7 +37,7 @@ jobs:
     uses: ./.github/workflows/linux.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
 
   macos-build:
     name: 🍎 macOS
@@ -45,7 +45,7 @@ jobs:
     uses: ./.github/workflows/macos-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
   
   macos-package:
     name: 🍎 macOS Package
@@ -53,7 +53,7 @@ jobs:
     uses: ./.github/workflows/macos-package.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
   
   android-build:
     name: 🤖 Android
@@ -61,7 +61,7 @@ jobs:
     uses: ./.github/workflows/android-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
   
   android-package:
     name: 🤖 Android Package
@@ -75,7 +75,7 @@ jobs:
     uses: ./.github/workflows/ios-build.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
   
   ios-package:
     name: 🍎 IOS Package
@@ -89,7 +89,7 @@ jobs:
     uses: ./.github/workflows/web.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
 
   windows-build:
     name: 🎨 Windows
@@ -97,7 +97,7 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
   
   gdextension-build:
     name: ⚙️ GDExtension
@@ -105,7 +105,7 @@ jobs:
     uses: ./.github/workflows/gdextension.yml
     with:
       fullbuild: ${{ github.event_name == 'workflow_dispatch' }}
-      godot_version: 4.1.2
+      godot_version: 4.2.1
   
   module-unit-tests:
     name: ⚙️ Module Unit Tests
@@ -117,7 +117,7 @@ jobs:
     needs: gdextension-build
     uses: ./.github/workflows/gdextension-unit-tests.yml
     with:
-      godot_version: 4.1.2
+      godot_version: 4.2.1
 
   template-version-file:
     name: 📝 Create template version file

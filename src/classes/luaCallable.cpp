@@ -1,13 +1,16 @@
-#ifndef LAPI_GDEXTENSION
-
 #include "luaCallable.h"
 #include "luaAPI.h"
 
+#ifndef LAPI_GDEXTENSION
 #include "core/templates/hashfuncs.h"
+#else
+#include <gdextension_interface.h>
+#include <godot_cpp/templates/hashfuncs.hpp>
+#endif
 
 // I used "GDScriptLambdaCallable" as a template for this
-LuaCallable::LuaCallable(Ref<LuaAPI> p_obj, int ref, lua_State *p_state) {
-	obj = p_obj;
+LuaCallable::LuaCallable(Ref<LuaAPI> obj, int ref, lua_State *p_state) {
+	objectID = obj->get_instance_id();
 	funcRef = ref;
 	state = p_state;
 	h = (uint32_t)hash_djb2_one_64((uint64_t)this);
@@ -36,7 +39,7 @@ CallableCustom::CompareLessFunc LuaCallable::get_compare_less_func() const {
 }
 
 ObjectID LuaCallable::get_object() const {
-	return obj->get_instance_id();
+	return objectID;
 }
 
 String LuaCallable::get_as_text() const {
@@ -53,31 +56,20 @@ uint32_t LuaCallable::hash() const {
 	return h;
 }
 
-void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
+bool LuaCallable::is_valid() const {
+	return ObjectDB::get_instance(objectID);
+}
+
+void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, LAPI_CALL_ERROR &r_call_error) const {
 	lua_pushcfunction(state, LuaState::luaErrorHandler);
 
 	// Getting the lua function via the reference stored in funcRef
 	lua_rawgeti(state, LUA_REGISTRYINDEX, funcRef);
 
-	// ------------------
-	// This is a hack to match the API with the GDExtension Callable workaround
-	if (p_argcount != 1 || p_arguments[0]->get_type() != Variant::Type::ARRAY) {
-		r_return_value = LuaError::newError("LuaCallable arguments must be supplied with a Godot Array", LuaError::ERR_TYPE);
-		return;
-	}
-
-	Array args = p_arguments[0]->operator Array();
-	for (int i = 0; i < args.size(); i++) {
-		LuaState::pushVariant(state, args[i]);
-	}
-
-	p_argcount = args.size();
-	// ------------------
-
 	// Push all the argument on to the stack
-	// for (int i = 0; i < p_argcount; i++) {
-	// 	LuaState::pushVariant(state, *p_arguments[i]);
-	// }
+	for (int i = 0; i < p_argcount; i++) {
+		LuaState::pushVariant(state, *p_arguments[i]);
+	}
 
 	// execute the function using a protected call.
 	int ret = lua_pcall(state, p_argcount, 1, -2 - p_argcount);
@@ -88,9 +80,14 @@ void LuaCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_r
 	}
 
 	lua_pop(state, 1);
+// TODO: Tie the error handling systems together?
+#ifndef LAPI_GDEXTENSION
+	r_call_error.error = LAPI_CALL_ERROR::CALL_OK;
+#else
+	r_call_error.error = GDExtensionCallErrorType::GDEXTENSION_CALL_OK;
+#endif
 }
 
 int LuaCallable::getFuncRef() {
 	return funcRef;
 }
-#endif

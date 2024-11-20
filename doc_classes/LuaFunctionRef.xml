@@ -9,7 +9,7 @@
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="inoke">
+		<method name="invoke">
 			<return type="Variant" />
 			<param index="0" name="Arguments" type="Array" />
 			<description>
