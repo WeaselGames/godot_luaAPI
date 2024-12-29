@@ -1,3 +1,6 @@
+# Archived!
+***WARNING!*** this repository has been archived for the time being. I do not have the time. If intrested in maintaining please start with a fork and contact me.
+ 
  Godot Lua API
 ===============
 **Table of contents:**
